@@ -4,9 +4,9 @@ use rust_libretro::{
 use std::ffi::CString;
 use std::ffi::c_uint;
 
-const WIDTH: c_uint = 320;
+const WIDTH: c_uint = 360;
 const HEIGHT: c_uint = 240;
-const PIXEL_FORMAT: PixelFormat = PixelFormat::XRGB1555;
+const PIXEL_FORMAT: PixelFormat = PixelFormat::RGB565;
 
 const INPUT_DESCRIPTORS: &[retro_input_descriptor] = &input_descriptors!(
     { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP, "Up" },
@@ -150,7 +150,7 @@ impl Core for ExampleCore {
             return gctx.shutdown();
         }
 
-        if !ctx.can_dupe() || self.timer >= 1_000_000 || input.contains(JoypadState::A) {
+        if !ctx.can_dupe() || self.timer >= 5_000_000 || input.contains(JoypadState::A) {
             self.timer = 0;
             self.even = !self.even;
 
@@ -161,11 +161,11 @@ impl Core for ExampleCore {
             let color_b = if !self.even { color_xrgb1555(0xff, 0xbb, 0) } else { 0 };
 
             for (i, chunk) in self.pixels.chunks_exact_mut(PIXEL_FORMAT.bit_per_pixel()).enumerate() {
-                let x = (i % width as usize) as f64 / width as f64;
-                let y = (i / width as usize) as f64 / height as f64;
+                let x = i as u32 % width;
+                let y = i as u32 / width;
 
-                let total = (16f64 * x).floor() + (16f64 * y).floor();
-                let even = total as usize % 2 == 0;
+                let total = (x/16) + (y/16);
+                let even = total % 2 == 0;
 
                 let color = if even { color_a } else { color_b };
 
@@ -184,6 +184,6 @@ impl Core for ExampleCore {
     }
 }
 
-fn color_xrgb1555(red: u8, green: u8, blue: u8) -> u16 {
-    (((red >> 3) as u16) << 10) + (((green >> 3) as u16) << 5) + (blue >> 3) as u16
+fn color_xrgb565(red: u8, green: u8, blue: u8) -> u16 {
+    (((red >> 3) as u16) << 11) + (((green >> 2) as u16) << 5) + (blue >> 3) as u16
 }
