@@ -1,8 +1,11 @@
 use rust_libretro::{
     contexts::*, core::Core, env_version, input_descriptors, proc::*, retro_core, sys::*, types::*,
 };
-use std::ffi::CString;
 use std::ffi::c_uint;
+use std::ffi::CString;
+use std::io::Read;
+use std::slice;
+use tar::Archive;
 
 const WIDTH: c_uint = 360;
 const HEIGHT: c_uint = 240;
@@ -111,12 +114,24 @@ impl Core for ExampleCore {
 
     fn on_load_game(
         &mut self,
-        _info: Option<retro_game_info>,
+        info: Option<retro_game_info>,
         ctx: &mut LoadGameContext,
     ) -> Result<(), Box<dyn std::error::Error>> {
         ctx.set_pixel_format(PIXEL_FORMAT);
         ctx.set_performance_level(0);
         ctx.enable_frame_time_callback((1000000.0f64 / 60.0).round() as retro_usec_t);
+
+        let game_info = info.unwrap();
+        let data = unsafe { slice::from_raw_parts(game_info.data as *const u8, game_info.size) };
+        let mut archive = Archive::new(data);
+
+        for entry in archive.entries().unwrap() {
+            let unwrapped_entry = entry.unwrap();
+            let decoder = png::Decoder::new(unwrapped_entry);
+            let reader = decoder.read_info().unwrap();
+            let info = reader.info();
+            println!("Successfully read a PNG file: {:?}", info);
+        }
 
         let gctx: GenericContext = ctx.into();
         gctx.enable_audio_callback();
@@ -157,8 +172,8 @@ impl Core for ExampleCore {
             let width = WIDTH;
             let height = HEIGHT;
 
-            let color_a = if self.even { color_xrgb1555(0xff, 0xbb, 0) } else { 0 };
-            let color_b = if !self.even { color_xrgb1555(0xff, 0xbb, 0) } else { 0 };
+            let color_a = if self.even { color_xrgb565(0xff, 0xbb, 0) } else { 0 };
+            let color_b = if !self.even { color_xrgb565(0xff, 0xbb, 0) } else { 0 };
 
             for (i, chunk) in self.pixels.chunks_exact_mut(PIXEL_FORMAT.bit_per_pixel()).enumerate() {
                 let x = i as u32 % width;
