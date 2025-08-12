@@ -3,7 +3,6 @@ use rust_libretro::{
 };
 use std::ffi::c_uint;
 use std::ffi::CString;
-use std::io::Read;
 use std::slice;
 use tar::Archive;
 
@@ -57,18 +56,20 @@ struct ExampleCore {
     option_1: bool,
     option_2: bool,
 
+    sprite_sheet_height: u32,
+    sprite_sheet_width: u32,
+    sprite_sheet: Vec<u16>,
     pixels: Vec<u8>,
-    timer: i64,
-    even: bool,
 }
 
 retro_core!(ExampleCore {
     option_1: false,
     option_2: true,
 
-    pixels: vec![0; WIDTH as usize * HEIGHT as usize * PIXEL_FORMAT.bit_per_pixel()],
-    timer: 5_000_001,
-    even: true,
+    sprite_sheet_height: 0,
+    sprite_sheet_width: 0,
+    sprite_sheet: Vec::new(),
+    pixels: vec![0; WIDTH as usize * HEIGHT as usize * PIXEL_FORMAT.bit_per_pixel()]
 });
 
 impl Core for ExampleCore {
@@ -128,9 +129,34 @@ impl Core for ExampleCore {
         for entry in archive.entries().unwrap() {
             let unwrapped_entry = entry.unwrap();
             let decoder = png::Decoder::new(unwrapped_entry);
-            let reader = decoder.read_info().unwrap();
+            let mut reader = decoder.read_info().unwrap();
             let info = reader.info();
-            println!("Successfully read a PNG file: {:?}", info);
+            let mut palette: Vec<u16> = Vec::new();
+            if let Some(png_palette) = &info.palette {
+                for color in png_palette.chunks_exact(3) {
+                    palette.push(color_xrgb565(color[0], color[1], color[2]));
+                }
+                println!("Palette loaded");
+                println!("Info: {:?}", info);
+            }
+            let mut vec: Vec<u8> = vec![0; reader.output_buffer_size()];
+            match reader.next_frame(&mut vec) {
+                Ok(frame_info) => {
+                    println!("Frame found");
+                    for pixel in vec {
+                        self.sprite_sheet.push(palette[pixel as usize]);
+                    }
+                    self.sprite_sheet_width = frame_info.width;
+                    self.sprite_sheet_height = frame_info.height;
+                    println!(
+                        "Loaded a sprite sheet, with dimensions {}x{}",
+                        frame_info.width, frame_info.height
+                    );
+                }
+                Err(e) => {
+                    println!("Failed to get next frame: {}", e);
+                }
+            }
         }
 
         let gctx: GenericContext = ctx.into();
@@ -157,41 +183,42 @@ impl Core for ExampleCore {
     fn on_run(&mut self, ctx: &mut RunContext, delta_us: Option<i64>) {
         let gctx: GenericContext = ctx.into();
 
-        self.timer += delta_us.unwrap_or(16_666);
-
         let input = unsafe { ctx.get_joypad_bitmask(0, 0) };
 
         if input.contains(JoypadState::START) && input.contains(JoypadState::SELECT) {
             return gctx.shutdown();
         }
 
-        if !ctx.can_dupe() || self.timer >= 5_000_000 || input.contains(JoypadState::A) {
-            self.timer = 0;
-            self.even = !self.even;
+        self.pixels.fill(0);
 
-            let width = WIDTH;
-            let height = HEIGHT;
+        let frame_x = 24;
+        let frame_y = 12;
 
-            let color_a = if self.even { color_xrgb565(0xff, 0xbb, 0) } else { 0 };
-            let color_b = if !self.even { color_xrgb565(0xff, 0xbb, 0) } else { 0 };
+        let start_x = 100;
+        let start_y = 100;
 
-            for (i, chunk) in self.pixels.chunks_exact_mut(PIXEL_FORMAT.bit_per_pixel()).enumerate() {
-                let x = i as u32 % width;
-                let y = i as u32 / width;
+        let src = &self.sprite_sheet;
 
-                let total = (x/16) + (y/16);
-                let even = total % 2 == 0;
-
-                let color = if even { color_a } else { color_b };
-
-                chunk[0] = color as u8;
-                chunk[1] = (color >> 8) as u8;
+        for x in 0.. 12 {
+            for y in 0.. 12 {
+                let src_x = frame_x + x;
+                let src_y = frame_y + y;
+                let src_pixel = src_x + (src_y * self.sprite_sheet_width);
+                let dst_x = start_x + x;
+                let dst_y = start_y + y;
+                let dst_pixel = ((dst_x) + ((dst_y) * WIDTH)) * 2;
+                let src_pixel = src[src_pixel as usize];
+                self.pixels[dst_pixel as usize] = src_pixel as u8;
+                self.pixels[(dst_pixel + 1) as usize] = (src_pixel >> 8) as u8;
             }
-
-            ctx.draw_frame(self.pixels.as_ref(), width, height, width as usize * PIXEL_FORMAT.bit_per_pixel());
-        } else if ctx.can_dupe() {
-            ctx.dupe_frame();
         }
+
+        ctx.draw_frame(
+            self.pixels.as_ref(),
+            WIDTH,
+            HEIGHT,
+            WIDTH as usize * PIXEL_FORMAT.bit_per_pixel(),
+        );
     }
 
     fn on_write_audio(&mut self, ctx: &mut AudioContext) {
