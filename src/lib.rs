@@ -1,10 +1,15 @@
+mod renderer;
+
+use std::collections::HashMap;
 use rust_libretro::{
     contexts::*, core::Core, env_version, input_descriptors, proc::*, retro_core, sys::*, types::*,
 };
 use std::ffi::c_uint;
 use std::ffi::CString;
+use std::path::Path;
 use std::slice;
 use tar::Archive;
+use crate::renderer::tilesheet::{render, TileSheet};
 
 const WIDTH: c_uint = 360;
 const HEIGHT: c_uint = 240;
@@ -56,10 +61,7 @@ struct ExampleCore {
     option_1: bool,
     option_2: bool,
 
-    sprite_sheet_height: u32,
-    sprite_sheet_width: u32,
-    sprite_sheet: Vec<u8>,
-    palette: Vec<u16>,
+    tile_sheets: HashMap<String, TileSheet>,
     x: f64,
     y: f64,
     pixels: Vec<u16>,
@@ -69,10 +71,7 @@ retro_core!(ExampleCore {
     option_1: false,
     option_2: true,
 
-    sprite_sheet_height: 0,
-    sprite_sheet_width: 0,
-    sprite_sheet: Vec::new(),
-    palette: Vec::new(),
+    tile_sheets: HashMap::new(),
     x: 100.0,
     y: 100.0,
     pixels: vec![0; WIDTH as usize * HEIGHT as usize]
@@ -134,21 +133,11 @@ impl Core for ExampleCore {
 
         for entry in archive.entries().unwrap() {
             let unwrapped_entry = entry.unwrap();
-            let decoder = png::Decoder::new(unwrapped_entry);
-            let mut reader = decoder.read_info().unwrap();
-            let info = reader.info();
-            if let Some(png_palette) = &info.palette {
-                for color in png_palette.chunks_exact(3) {
-                    self.palette.push(color_xrgb565(color[0], color[1], color[2]));
-                }
-            }
-            let mut vec: Vec<u8> = vec![0; reader.output_buffer_size()];
-            if let Ok(frame_info) = reader.next_frame(&mut vec) {
-                for pixel in vec {
-                    self.sprite_sheet.push(pixel);
-                }
-                self.sprite_sheet_width = frame_info.width;
-                self.sprite_sheet_height = frame_info.height;
+            let path = unwrapped_entry.path().unwrap();
+            if (path.extension().map(|ext| ext.eq_ignore_ascii_case("png")).unwrap_or(false)) {
+                let filename = path.file_stem().map(|filename| filename.to_string_lossy().to_string()).unwrap_or_else(String::new);
+                let decoder = png::Decoder::new(unwrapped_entry);
+                self.tile_sheets.insert(filename, TileSheet::from_png(decoder, 12, 12));
             }
         }
 
@@ -198,27 +187,7 @@ impl Core for ExampleCore {
 
         self.pixels.fill(0);
 
-        let frame_x = 24;
-        let frame_y = 12;
-
-        let start_x = self.x as u32;
-        let start_y = self.y as u32;
-
-        let src = &self.sprite_sheet;
-        let palette = &self.palette;
-
-        let src_y = frame_y;
-        let dst_y = start_y;
-        for y in 0..12 {
-            let src_pixel = frame_x + ((src_y + y) * self.sprite_sheet_width);
-            let dst_pixel = start_x + ((dst_y + y) * WIDTH);
-            for x in 0..12 {
-                let pixel = src[(src_pixel + x) as usize];
-                if pixel != 0 {
-                    self.pixels[(dst_pixel + x) as usize] = palette[pixel as usize];
-                }
-            }
-        }
+        render(self.tile_sheets.get("spritesheet").unwrap(), &mut self.pixels, self.x as u32, self.y as u32, 1, 2, WIDTH);
 
         let pixels: &[u16] = self.pixels.as_ref();
         let content = unsafe { slice::from_raw_parts(pixels.as_ptr().cast::<u8>(), (WIDTH * HEIGHT * 2) as usize) };
@@ -233,8 +202,4 @@ impl Core for ExampleCore {
     fn on_write_audio(&mut self, ctx: &mut AudioContext) {
         ctx.queue_audio_sample(0, 0);
     }
-}
-
-fn color_xrgb565(red: u8, green: u8, blue: u8) -> u16 {
-    (((red >> 3) as u16) << 11) + (((green >> 2) as u16) << 5) + (blue >> 3) as u16
 }
