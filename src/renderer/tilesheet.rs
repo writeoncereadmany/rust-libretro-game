@@ -1,6 +1,6 @@
+use crate::renderer::texture::Texture;
 use png::Decoder;
 use tar::Entry;
-use crate::renderer::texture::Texture;
 
 pub struct TileSheet {
     palette: Vec<u16>,
@@ -58,30 +58,31 @@ impl TileSheet {
     }
 }
 
-pub fn render(sprite: &Sprite, dst: &mut Texture, x: u32, y: u32) {
-    let sheet = sprite.tile_sheet;
-    let frame_x = sprite.bounds.x;
-    let frame_y = sprite.bounds.y;
+impl <'a> Sprite<'a> {
+    pub fn draw_to(&'a self, dst: &mut Texture, x: u32, y: u32) {
+        let sheet = self.tile_sheet;
+        let frame_x = self.bounds.x;
+        let frame_y = self.bounds.y;
 
-    let start_x = x;
-    let start_y = y;
+        let start_x = x;
+        let start_y = y;
 
-    let src  = &sheet.tile_sheet;
-    let palette = &sheet.palette;
+        let src = &sheet.tile_sheet;
+        let palette = &sheet.palette;
 
-    let src_y = frame_y;
-    let dst_y = start_y;
-    for y in 0..sprite.bounds.height {
-        let src_pixel = frame_x + ((src_y + y) * sheet.width());
-        let dst_pixel = start_x + ((dst_y + y) * dst.width);
-        for x in 0..sprite.bounds.width {
-            let pixel = src[(src_pixel + x) as usize];
-            if pixel != 0 {
-                dst.texture[(dst_pixel + x) as usize] = palette[pixel as usize];
+        let src_y = frame_y;
+        let dst_y = start_y;
+        for y in 0..self.bounds.height {
+            let src_pixel = frame_x + ((src_y + y) * sheet.width());
+            let dst_pixel = start_x + ((dst_y + y) * dst.width);
+            for x in 0..self.bounds.width {
+                let pixel = src[(src_pixel + x) as usize];
+                if pixel != 0 {
+                    dst.texture[(dst_pixel + x) as usize] = palette[pixel as usize];
+                }
             }
         }
     }
-
 }
 
 fn color_xrgb565(red: u8, green: u8, blue: u8) -> u16 {

@@ -1,16 +1,15 @@
 mod renderer;
 
-use std::collections::HashMap;
+use crate::renderer::texture::Texture;
+use crate::renderer::tilesheet::TileSheet;
 use rust_libretro::{
     contexts::*, core::Core, env_version, input_descriptors, proc::*, retro_core, sys::*, types::*,
 };
+use std::collections::HashMap;
 use std::ffi::c_uint;
 use std::ffi::CString;
-use std::path::Path;
 use std::slice;
 use tar::Archive;
-use crate::renderer::texture::Texture;
-use crate::renderer::tilesheet::{render, TileSheet};
 
 const WIDTH: c_uint = 360;
 const HEIGHT: c_uint = 240;
@@ -139,10 +138,18 @@ impl Core for ExampleCore {
         for entry in archive.entries().unwrap() {
             let unwrapped_entry = entry.unwrap();
             let path = unwrapped_entry.path().unwrap();
-            if (path.extension().map(|ext| ext.eq_ignore_ascii_case("png")).unwrap_or(false)) {
-                let filename = path.file_stem().map(|filename| filename.to_string_lossy().to_string()).unwrap_or_else(String::new);
+            if path
+                .extension()
+                .map(|ext| ext.eq_ignore_ascii_case("png"))
+                .unwrap_or(false)
+            {
+                let filename = path
+                    .file_stem()
+                    .map(|filename| filename.to_string_lossy().to_string())
+                    .unwrap_or_else(String::new);
                 let decoder = png::Decoder::new(unwrapped_entry);
-                self.tile_sheets.insert(filename, TileSheet::from_png(decoder, 12, 12));
+                self.tile_sheets
+                    .insert(filename, TileSheet::from_png(decoder, 12, 12));
             }
         }
 
@@ -192,16 +199,13 @@ impl Core for ExampleCore {
 
         self.texture.texture.fill(0);
 
-        render(&self.tile_sheets.get("spritesheet").unwrap().sprite(2, 1), &mut self.texture, self.x as u32, self.y as u32);
+        self.tile_sheets
+            .get("spritesheet")
+            .unwrap()
+            .sprite(2, 1)
+            .draw_to(&mut self.texture, self.x as u32, self.y as u32);
 
-        let pixels: &[u16] = self.texture.texture.as_ref();
-        let content = unsafe { slice::from_raw_parts(pixels.as_ptr().cast::<u8>(), (WIDTH * HEIGHT * 2) as usize) };
-        ctx.draw_frame(
-            content,
-            WIDTH,
-            HEIGHT,
-            WIDTH as usize * PIXEL_FORMAT.bit_per_pixel(),
-        );
+        self.texture.render(ctx);
     }
 
     fn on_write_audio(&mut self, ctx: &mut AudioContext) {
