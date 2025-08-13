@@ -9,6 +9,7 @@ use std::ffi::CString;
 use std::path::Path;
 use std::slice;
 use tar::Archive;
+use crate::renderer::texture::Texture;
 use crate::renderer::tilesheet::{render, TileSheet};
 
 const WIDTH: c_uint = 360;
@@ -64,7 +65,7 @@ struct ExampleCore {
     tile_sheets: HashMap<String, TileSheet>,
     x: f64,
     y: f64,
-    pixels: Vec<u16>,
+    texture: Texture,
 }
 
 retro_core!(ExampleCore {
@@ -74,7 +75,11 @@ retro_core!(ExampleCore {
     tile_sheets: HashMap::new(),
     x: 100.0,
     y: 100.0,
-    pixels: vec![0; WIDTH as usize * HEIGHT as usize]
+    texture: Texture {
+        texture: vec![0; WIDTH as usize * HEIGHT as usize],
+        width: WIDTH,
+        height: HEIGHT
+    }
 });
 
 impl Core for ExampleCore {
@@ -185,11 +190,11 @@ impl Core for ExampleCore {
             self.x += delta_s * speed
         }
 
-        self.pixels.fill(0);
+        self.texture.texture.fill(0);
 
-        render(self.tile_sheets.get("spritesheet").unwrap(), &mut self.pixels, self.x as u32, self.y as u32, 1, 2, WIDTH);
+        render(&self.tile_sheets.get("spritesheet").unwrap().sprite(2, 1), &mut self.texture, self.x as u32, self.y as u32);
 
-        let pixels: &[u16] = self.pixels.as_ref();
+        let pixels: &[u16] = self.texture.texture.as_ref();
         let content = unsafe { slice::from_raw_parts(pixels.as_ptr().cast::<u8>(), (WIDTH * HEIGHT * 2) as usize) };
         ctx.draw_frame(
             content,

@@ -1,5 +1,6 @@
 use png::Decoder;
 use tar::Entry;
+use crate::renderer::texture::Texture;
 
 pub struct TileSheet {
     palette: Vec<u16>,
@@ -8,6 +9,18 @@ pub struct TileSheet {
     tile_height: u32,
     columns: u32,
     rows: u32,
+}
+
+pub struct Sprite<'a> {
+    tile_sheet: &'a TileSheet,
+    bounds: Bounds,
+}
+
+pub struct Bounds {
+    x: u32,
+    y: u32,
+    width: u32,
+    height: u32
 }
 
 impl TileSheet {
@@ -27,27 +40,44 @@ impl TileSheet {
 
         TileSheet { palette, tile_sheet, tile_width, tile_height, columns, rows }
     }
+
+    pub fn width(&self) -> u32 {
+        self.tile_width * self.columns
+    }
+
+    pub fn sprite(&self, column: u32, row: u32) -> Sprite {
+        Sprite {
+            tile_sheet: self,
+            bounds: Bounds {
+                x: column * self.tile_width,
+                y: row * self.tile_height,
+                width: self.tile_width,
+                height: self.tile_height
+            }
+        }
+    }
 }
 
-pub fn render(tile_sheet: &TileSheet, dst: &mut Vec<u16>, x: u32, y: u32, row: u32, col: u32, dst_width: u32) {
-    let frame_x = col * tile_sheet.tile_width;
-    let frame_y = row * tile_sheet.tile_height;
+pub fn render(sprite: &Sprite, dst: &mut Texture, x: u32, y: u32) {
+    let sheet = sprite.tile_sheet;
+    let frame_x = sprite.bounds.x;
+    let frame_y = sprite.bounds.y;
 
     let start_x = x;
     let start_y = y;
 
-    let src  = &tile_sheet.tile_sheet;
-    let palette = &tile_sheet.palette;
+    let src  = &sheet.tile_sheet;
+    let palette = &sheet.palette;
 
     let src_y = frame_y;
     let dst_y = start_y;
-    for y in 0..12 {
-        let src_pixel = frame_x + ((src_y + y) * (tile_sheet.tile_width * tile_sheet.columns));
-        let dst_pixel = start_x + ((dst_y + y) * dst_width);
-        for x in 0..12 {
+    for y in 0..sprite.bounds.height {
+        let src_pixel = frame_x + ((src_y + y) * sheet.width());
+        let dst_pixel = start_x + ((dst_y + y) * dst.width);
+        for x in 0..sprite.bounds.width {
             let pixel = src[(src_pixel + x) as usize];
             if pixel != 0 {
-                dst[(dst_pixel + x) as usize] = palette[pixel as usize];
+                dst.texture[(dst_pixel + x) as usize] = palette[pixel as usize];
             }
         }
     }
