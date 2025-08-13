@@ -61,7 +61,7 @@ struct ExampleCore {
     x: f64,
     y: f64,
     sprite_sheet: Vec<u16>,
-    pixels: Vec<u8>,
+    pixels: Vec<u16>,
 }
 
 retro_core!(ExampleCore {
@@ -73,7 +73,7 @@ retro_core!(ExampleCore {
     x: 100.0,
     y: 100.0,
     sprite_sheet: Vec::new(),
-    pixels: vec![0; WIDTH as usize * HEIGHT as usize * PIXEL_FORMAT.bit_per_pixel()]
+    pixels: vec![0; WIDTH as usize * HEIGHT as usize]
 });
 
 impl Core for ExampleCore {
@@ -143,12 +143,12 @@ impl Core for ExampleCore {
             }
             let mut vec: Vec<u8> = vec![0; reader.output_buffer_size()];
             if let Ok(frame_info) = reader.next_frame(&mut vec) {
-                    for pixel in vec {
-                        self.sprite_sheet.push(palette[pixel as usize]);
-                    }
-                    self.sprite_sheet_width = frame_info.width;
-                    self.sprite_sheet_height = frame_info.height;
+                for pixel in vec {
+                    self.sprite_sheet.push(palette[pixel as usize]);
                 }
+                self.sprite_sheet_width = frame_info.width;
+                self.sprite_sheet_height = frame_info.height;
+            }
         }
 
         let gctx: GenericContext = ctx.into();
@@ -205,22 +205,23 @@ impl Core for ExampleCore {
 
         let src = &self.sprite_sheet;
 
-        for x in 0.. 12 {
-            for y in 0.. 12 {
+        for x in 0..12 {
+            for y in 0..12 {
                 let src_x = frame_x + x;
                 let src_y = frame_y + y;
                 let src_pixel = src_x + (src_y * self.sprite_sheet_width);
                 let dst_x = start_x + x;
                 let dst_y = start_y + y;
-                let dst_pixel = ((dst_x) + ((dst_y) * WIDTH)) * 2;
+                let dst_pixel = ((dst_x) + ((dst_y) * WIDTH));
                 let src_pixel = src[src_pixel as usize];
-                self.pixels[dst_pixel as usize] = src_pixel as u8;
-                self.pixels[(dst_pixel + 1) as usize] = (src_pixel >> 8) as u8;
+                self.pixels[dst_pixel as usize] = src_pixel;
             }
         }
 
+        let pixels: &[u16] = self.pixels.as_ref();
+        let (_prefix, content, _suffix) = unsafe { pixels.align_to::<u8>() };
         ctx.draw_frame(
-            self.pixels.as_ref(),
+            content,
             WIDTH,
             HEIGHT,
             WIDTH as usize * PIXEL_FORMAT.bit_per_pixel(),
