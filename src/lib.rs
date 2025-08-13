@@ -207,21 +207,17 @@ impl Core for ExampleCore {
         let src = &self.sprite_sheet;
         let palette = &self.palette;
 
-        let mut src_y = frame_y;
-        let mut dst_y = start_y;
-        for _y in 0..12 {
-            let mut src_pixel = frame_x + (src_y * self.sprite_sheet_width);
-            let mut dst_pixel = start_x + ((dst_y) * WIDTH);
-            for _x in 0..12 {
-                let pixel = src[src_pixel as usize];
+        let src_y = frame_y;
+        let dst_y = start_y;
+        for y in 0..12 {
+            let src_pixel = frame_x + ((src_y + y) * self.sprite_sheet_width);
+            let dst_pixel = start_x + ((dst_y + y) * WIDTH);
+            for x in 0..12 {
+                let pixel = src[(src_pixel + x) as usize];
                 if pixel != 0 {
-                    self.pixels[dst_pixel as usize] = palette[pixel as usize];
+                    self.pixels[(dst_pixel + x) as usize] = palette[pixel as usize];
                 }
-                src_pixel += 1;
-                dst_pixel += 1;
             }
-            src_y += 1;
-            dst_y += 1;
         }
 
         let pixels: &[u16] = self.pixels.as_ref();
