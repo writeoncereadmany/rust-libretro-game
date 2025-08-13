@@ -1,7 +1,8 @@
 mod renderer;
 
 use crate::renderer::texture::Texture;
-use crate::renderer::tilesheet::TileSheet;
+use crate::renderer::tilesheet::{Sprite, TileSheet};
+use rand::prelude::*;
 use rust_libretro::{
     contexts::*, core::Core, env_version, input_descriptors, proc::*, retro_core, sys::*, types::*,
 };
@@ -9,6 +10,7 @@ use std::collections::HashMap;
 use std::ffi::c_uint;
 use std::ffi::CString;
 use std::slice;
+use std::sync::Arc;
 use tar::Archive;
 
 const WIDTH: c_uint = 360;
@@ -22,6 +24,14 @@ const INPUT_DESCRIPTORS: &[retro_input_descriptor] = &input_descriptors!(
     { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
     { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "Action" },
 );
+
+struct Bubble {
+    x: f64,
+    y: f64,
+    dx: f64,
+    dy: f64,
+    sprite: Sprite
+}
 
 #[derive(CoreOptions)]
 #[categories({
@@ -61,10 +71,13 @@ struct ExampleCore {
     option_1: bool,
     option_2: bool,
 
-    tile_sheets: HashMap<String, TileSheet>,
+    tile_sheets: HashMap<String, Arc<TileSheet>>,
+    fountain: Vec<Bubble>,
     x: f64,
     y: f64,
     texture: Texture,
+    time_to_next_bubble: f64,
+    rng: ThreadRng
 }
 
 retro_core!(ExampleCore {
@@ -72,13 +85,16 @@ retro_core!(ExampleCore {
     option_2: true,
 
     tile_sheets: HashMap::new(),
+    fountain: Vec::new(),
     x: 100.0,
     y: 100.0,
     texture: Texture {
         texture: vec![0; WIDTH as usize * HEIGHT as usize],
         width: WIDTH,
         height: HEIGHT
-    }
+    },
+    time_to_next_bubble: 0.0,
+    rng: rand::rng()
 });
 
 impl Core for ExampleCore {
@@ -149,7 +165,7 @@ impl Core for ExampleCore {
                     .unwrap_or_else(String::new);
                 let decoder = png::Decoder::new(unwrapped_entry);
                 self.tile_sheets
-                    .insert(filename, TileSheet::from_png(decoder, 12, 12));
+                    .insert(filename, Arc::new(TileSheet::from_png(decoder, 12, 12)));
             }
         }
 
@@ -184,6 +200,7 @@ impl Core for ExampleCore {
         }
         let speed = 100.0;
         let delta_s = (delta_us.unwrap_or(16_666) as f64) / 1_000_000.0;
+        self.time_to_next_bubble -= delta_s;
         if input.contains(JoypadState::UP) {
             self.y -= delta_s * speed
         }
@@ -197,13 +214,33 @@ impl Core for ExampleCore {
             self.x += delta_s * speed
         }
 
+        if self.time_to_next_bubble <= 0.0 {
+            let dx = self.rng.random_range(-100.0 .. 100.0);
+            self.fountain.push(Bubble {
+                x: 180.0,
+                y: 210.0,
+                dx,
+                dy: -250.0,
+                sprite: TileSheet::sprite(&self.tile_sheets.get("spritesheet").unwrap(), 5, 3)
+            });
+            self.time_to_next_bubble += 0.15;
+        }
+
+        for bubble in self.fountain.iter_mut() {
+            bubble.x += bubble.dx * delta_s;
+            bubble.dy += 200.0 * delta_s;
+            bubble.y += bubble.dy * delta_s;
+        }
+
+        self.fountain.retain(|bubble| bubble.y > 0.0 && bubble.y < (HEIGHT + 12) as f64 );
+
         self.texture.texture.fill(0);
 
-        self.tile_sheets
-            .get("spritesheet")
-            .unwrap()
-            .sprite(2, 1)
-            .draw_to(&mut self.texture, self.x as u32, self.y as u32);
+        let sprite = TileSheet::sprite(&self.tile_sheets.get("spritesheet").unwrap(), 2, 1);
+        sprite.draw_to(&mut self.texture, self.x as i32, self.y as i32);
+        for bubble in &self.fountain {
+            bubble.sprite.draw_to(&mut self.texture, bubble.x as i32, bubble.y as i32);
+        }
 
         self.texture.render(ctx);
     }

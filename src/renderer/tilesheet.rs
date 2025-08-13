@@ -1,5 +1,6 @@
 use crate::renderer::texture::Texture;
 use png::Decoder;
+use std::sync::Arc;
 use tar::Entry;
 
 pub struct TileSheet {
@@ -11,8 +12,8 @@ pub struct TileSheet {
     rows: u32,
 }
 
-pub struct Sprite<'a> {
-    tile_sheet: &'a TileSheet,
+pub struct Sprite {
+    tile_sheet: Arc<TileSheet>,
     bounds: Bounds,
 }
 
@@ -45,9 +46,9 @@ impl TileSheet {
         self.tile_width * self.columns
     }
 
-    pub fn sprite(&self, column: u32, row: u32) -> Sprite {
+    pub fn sprite(self: &Arc<Self>, column: u32, row: u32) -> Sprite {
         Sprite {
-            tile_sheet: self,
+            tile_sheet: self.clone(),
             bounds: Bounds {
                 x: column * self.tile_width,
                 y: row * self.tile_height,
@@ -58,24 +59,35 @@ impl TileSheet {
     }
 }
 
-impl <'a> Sprite<'a> {
-    pub fn draw_to(&'a self, dst: &mut Texture, x: u32, y: u32) {
-        let sheet = self.tile_sheet;
-        let frame_x = self.bounds.x;
-        let frame_y = self.bounds.y;
+impl Sprite {
+    pub fn draw_to(&self, dst: &mut Texture, x: i32, y: i32) {
+        let sheet = &self.tile_sheet;
 
-        let start_x = x;
-        let start_y = y;
+        let src_x = self.bounds.x as i32;
+        let src_y = self.bounds.y as i32;
+
+        let dst_x = x;
+        let dst_y = y;
 
         let src = &sheet.tile_sheet;
         let palette = &sheet.palette;
 
-        let src_y = frame_y;
-        let dst_y = start_y;
-        for y in 0..self.bounds.height {
-            let src_pixel = frame_x + ((src_y + y) * sheet.width());
-            let dst_pixel = start_x + ((dst_y + y) * dst.width);
-            for x in 0..self.bounds.width {
+        for y in 0..self.bounds.height as i32 {
+            let src_pixel = src_x + ((src_y + y) * sheet.width() as i32);
+            let dst_pixel = dst_x + ((dst_y + y) * dst.width as i32);
+            if dst_y + y < 0 {
+                continue;
+            }
+            if dst_y + y >= dst.height as i32 {
+                break;
+            }
+            for x in 0..self.bounds.width as i32 {
+                if dst_x + x < 0 {
+                    continue;
+                }
+                if dst_x + x >= dst.width as i32 {
+                    break;
+                }
                 let pixel = src[(src_pixel + x) as usize];
                 if pixel != 0 {
                     dst.texture[(dst_pixel + x) as usize] = palette[pixel as usize];
