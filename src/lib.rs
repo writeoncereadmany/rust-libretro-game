@@ -205,21 +205,23 @@ impl Core for ExampleCore {
 
         let src = &self.sprite_sheet;
 
-        for x in 0..12 {
-            for y in 0..12 {
-                let src_x = frame_x + x;
-                let src_y = frame_y + y;
-                let src_pixel = src_x + (src_y * self.sprite_sheet_width);
-                let dst_x = start_x + x;
-                let dst_y = start_y + y;
-                let dst_pixel = ((dst_x) + ((dst_y) * WIDTH));
-                let src_pixel = src[src_pixel as usize];
-                self.pixels[dst_pixel as usize] = src_pixel;
+        let mut src_y = frame_y;
+        let mut dst_y = start_y;
+        for _y in 0..12 {
+            let mut src_pixel = frame_x + (src_y * self.sprite_sheet_width);
+            let mut dst_pixel = start_x + ((dst_y) * WIDTH);
+            for _x in 0..12 {
+                let pixel = src[src_pixel as usize];
+                self.pixels[dst_pixel as usize] = pixel;
+                src_pixel += 1;
+                dst_pixel += 1;
             }
+            src_y += 1;
+            dst_y += 1;
         }
 
         let pixels: &[u16] = self.pixels.as_ref();
-        let (_prefix, content, _suffix) = unsafe { pixels.align_to::<u8>() };
+        let content = unsafe { slice::from_raw_parts(pixels.as_ptr().cast::<u8>(), (WIDTH * HEIGHT * 2) as usize) };
         ctx.draw_frame(
             content,
             WIDTH,
