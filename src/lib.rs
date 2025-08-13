@@ -58,9 +58,10 @@ struct ExampleCore {
 
     sprite_sheet_height: u32,
     sprite_sheet_width: u32,
+    sprite_sheet: Vec<u8>,
+    palette: Vec<u16>,
     x: f64,
     y: f64,
-    sprite_sheet: Vec<u16>,
     pixels: Vec<u16>,
 }
 
@@ -70,9 +71,10 @@ retro_core!(ExampleCore {
 
     sprite_sheet_height: 0,
     sprite_sheet_width: 0,
+    sprite_sheet: Vec::new(),
+    palette: Vec::new(),
     x: 100.0,
     y: 100.0,
-    sprite_sheet: Vec::new(),
     pixels: vec![0; WIDTH as usize * HEIGHT as usize]
 });
 
@@ -135,16 +137,15 @@ impl Core for ExampleCore {
             let decoder = png::Decoder::new(unwrapped_entry);
             let mut reader = decoder.read_info().unwrap();
             let info = reader.info();
-            let mut palette: Vec<u16> = Vec::new();
             if let Some(png_palette) = &info.palette {
                 for color in png_palette.chunks_exact(3) {
-                    palette.push(color_xrgb565(color[0], color[1], color[2]));
+                    self.palette.push(color_xrgb565(color[0], color[1], color[2]));
                 }
             }
             let mut vec: Vec<u8> = vec![0; reader.output_buffer_size()];
             if let Ok(frame_info) = reader.next_frame(&mut vec) {
                 for pixel in vec {
-                    self.sprite_sheet.push(palette[pixel as usize]);
+                    self.sprite_sheet.push(pixel);
                 }
                 self.sprite_sheet_width = frame_info.width;
                 self.sprite_sheet_height = frame_info.height;
@@ -181,7 +182,7 @@ impl Core for ExampleCore {
             return gctx.shutdown();
         }
         let speed = 100.0;
-        let delta_s = ((delta_us.unwrap_or(16_666) as f64) / 1_000_000.0);
+        let delta_s = (delta_us.unwrap_or(16_666) as f64) / 1_000_000.0;
         if input.contains(JoypadState::UP) {
             self.y -= delta_s * speed
         }
@@ -204,6 +205,7 @@ impl Core for ExampleCore {
         let start_y = self.y as u32;
 
         let src = &self.sprite_sheet;
+        let palette = &self.palette;
 
         let mut src_y = frame_y;
         let mut dst_y = start_y;
@@ -212,7 +214,9 @@ impl Core for ExampleCore {
             let mut dst_pixel = start_x + ((dst_y) * WIDTH);
             for _x in 0..12 {
                 let pixel = src[src_pixel as usize];
-                self.pixels[dst_pixel as usize] = pixel;
+                if pixel != 0 {
+                    self.pixels[dst_pixel as usize] = palette[pixel as usize];
+                }
                 src_pixel += 1;
                 dst_pixel += 1;
             }
