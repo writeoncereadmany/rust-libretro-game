@@ -30,7 +30,7 @@ struct Bubble {
     y: f64,
     dx: f64,
     dy: f64,
-    sprite: Sprite
+    sprite: Sprite,
 }
 
 #[derive(CoreOptions)]
@@ -77,7 +77,7 @@ struct ExampleCore {
     y: f64,
     texture: Texture,
     time_to_next_bubble: f64,
-    rng: ThreadRng
+    rng: ThreadRng,
 }
 
 retro_core!(ExampleCore {
@@ -164,8 +164,22 @@ impl Core for ExampleCore {
                     .map(|filename| filename.to_string_lossy().to_string())
                     .unwrap_or_else(String::new);
                 let decoder = png::Decoder::new(unwrapped_entry);
+                let sheet = TileSheet::from_png(decoder, 12, 12);
                 self.tile_sheets
-                    .insert(filename, Arc::new(TileSheet::from_png(decoder, 12, 12)));
+                    .insert(filename, Arc::new(sheet));
+            }
+            else if path
+                .extension()
+                .map(|ext| ext.eq_ignore_ascii_case("tmx"))
+                .unwrap_or(false)
+            {
+                let mut map_loader = tiled::Loader::new();
+                let map = map_loader.load_tmx_map(&path).unwrap();
+                for tileset in map.tilesets() {
+                    println!("Map {} uses tileset {}",
+                             &path.file_stem().unwrap().to_string_lossy(),
+                             tileset.name);
+                }
             }
         }
 
@@ -215,13 +229,13 @@ impl Core for ExampleCore {
         }
 
         if self.time_to_next_bubble <= 0.0 {
-            let dx = self.rng.random_range(-100.0 .. 100.0);
+            let dx = self.rng.random_range(-100.0..100.0);
             self.fountain.push(Bubble {
                 x: 180.0,
                 y: 210.0,
                 dx,
                 dy: -250.0,
-                sprite: TileSheet::sprite(&self.tile_sheets.get("spritesheet").unwrap(), 5, 3)
+                sprite: TileSheet::sprite(&self.tile_sheets.get("spritesheet").unwrap(), 5, 3),
             });
             self.time_to_next_bubble += 0.15;
         }
@@ -232,14 +246,17 @@ impl Core for ExampleCore {
             bubble.y += bubble.dy * delta_s;
         }
 
-        self.fountain.retain(|bubble| bubble.y > 0.0 && bubble.y < (HEIGHT + 12) as f64 );
+        self.fountain
+            .retain(|bubble| bubble.y > 0.0 && bubble.y < (HEIGHT + 12) as f64);
 
         self.texture.texture.fill(0);
 
         let sprite = TileSheet::sprite(&self.tile_sheets.get("spritesheet").unwrap(), 2, 1);
         sprite.draw_to(&mut self.texture, self.x as i32, self.y as i32);
         for bubble in &self.fountain {
-            bubble.sprite.draw_to(&mut self.texture, bubble.x as i32, bubble.y as i32);
+            bubble
+                .sprite
+                .draw_to(&mut self.texture, bubble.x as i32, bubble.y as i32);
         }
 
         self.texture.render(ctx);
