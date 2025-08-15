@@ -1,0 +1,158 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "lake.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "file.lastUsedOpenFilter": "All Files (*)",
+    "fileStates": {
+        "/Users/tomj/Projects/rust/sdl2-experiments/assets/template.tmx": {
+            "scale": 2.2044,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 179.86753765196877,
+                "y": 119.9872981310107
+            }
+        },
+        "0001.tmx": {
+            "scale": 2.44,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 168.0327868852459,
+                "y": 107.99180327868852
+            }
+        },
+        "0002.tmx": {
+            "scale": 2.44,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 169.2622950819672,
+                "y": 138.31967213114754
+            }
+        },
+        "001.tmx": {
+            "scale": 2.15,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 198.13953488372093,
+                "y": 140.69767441860466
+            }
+        },
+        "002.tmx": {
+            "scale": 1.1142,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 258.48142164781905,
+                "y": 282.26530245916354
+            }
+        },
+        "003.tmx": {
+            "scale": 2.15,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 184.1860465116279,
+                "y": 129.53488372093022
+            }
+        },
+        "More.tsx": {
+            "scaleInDock": 1.91,
+            "scaleInEditor": 4.01
+        },
+        "Objects.tsx": {
+            "scaleInDock": 1.91,
+            "scaleInEditor": 4.01
+        },
+        "Walls.tsx": {
+            "scaleInDock": 1.91,
+            "scaleInEditor": 4.01
+        },
+        "gaps.tmx": {
+            "scale": 2.44,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 221.72131147540983,
+                "y": 134.22131147540986
+            }
+        },
+        "hills.tmx": {
+            "scale": 2.44,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 150.00000000000003,
+                "y": 149.38524590163934
+            }
+        },
+        "lake.tmx": {
+            "scale": 2.44,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 90.98360655737704,
+                "y": 100.61475409836066
+            }
+        },
+        "ledges.tmx": {
+            "scale": 2.44,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 200.40983606557376,
+                "y": 162.90983606557376
+            }
+        },
+        "rocks.tmx": {
+            "scale": 2.44,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 166.39344262295083,
+                "y": 134.22131147540986
+            }
+        },
+        "start.tmx": {
+            "scale": 2.44,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 174.59016393442624,
+                "y": 153.48360655737704
+            }
+        }
+    },
+    "last.imagePath": "/Users/tomj/Projects/rust/sdl2-experiments/assets/graphics",
+    "map.height": 18,
+    "map.lastUsedFormat": "tmx",
+    "map.renderOrder": "1",
+    "map.tileHeight": 12,
+    "map.tileWidth": 12,
+    "map.width": 28,
+    "openFiles": [
+        "Walls.tsx",
+        "Objects.tsx",
+        "More.tsx",
+        "lake.tmx",
+        "rocks.tmx",
+        "ledges.tmx",
+        "hills.tmx",
+        "start.tmx"
+    ],
+    "project": "Maps.tiled-project",
+    "recentFiles": [
+        "Walls.tsx",
+        "Objects.tsx",
+        "More.tsx",
+        "start.tmx",
+        "hills.tmx",
+        "ledges.tmx",
+        "rocks.tmx",
+        "lake.tmx",
+        "gaps.tmx",
+        "0001.tmx",
+        "0002.tmx",
+        "/Users/tomj/Projects/rust/sdl2-experiments/assets/template.tmx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 12,
+        "width": 12
+    }
+}
