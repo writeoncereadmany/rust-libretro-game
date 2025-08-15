@@ -72,22 +72,19 @@ impl Sprite {
         let src = &sheet.tile_sheet;
         let palette = &sheet.palette;
 
-        for y in 0..self.bounds.height as i32 {
+        let min_x = 0.max(-dst_x);
+        let min_y = 0.max(-dst_y);
+        let max_x = (self.bounds.width as i32).min(dst.width as i32 - dst_x);
+        let max_y = (self.bounds.height as i32).min(dst.height as i32 - dst_y);
+
+        if min_y > max_y || min_x > max_x {
+            return;
+        }
+
+        for y in min_y..max_y {
             let src_pixel = src_x + ((src_y + y) * sheet.width() as i32);
             let dst_pixel = dst_x + ((dst_y + y) * dst.width as i32);
-            if dst_y + y < 0 {
-                continue;
-            }
-            if dst_y + y >= dst.height as i32 {
-                break;
-            }
-            for x in 0..self.bounds.width as i32 {
-                if dst_x + x < 0 {
-                    continue;
-                }
-                if dst_x + x >= dst.width as i32 {
-                    break;
-                }
+            for x in min_x..max_x {
                 let pixel = src[(src_pixel + x) as usize];
                 if pixel != 0 {
                     dst.texture[(dst_pixel + x) as usize] = palette[pixel as usize];
