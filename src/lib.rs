@@ -25,14 +25,6 @@ const INPUT_DESCRIPTORS: &[retro_input_descriptor] = &input_descriptors!(
     { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "Action" },
 );
 
-struct Bubble {
-    x: f64,
-    y: f64,
-    dx: f64,
-    dy: f64,
-    sprite: Sprite,
-}
-
 #[derive(CoreOptions)]
 #[categories({
     "advanced_settings",
@@ -72,7 +64,6 @@ struct ExampleCore {
     option_2: bool,
 
     tile_sheets: HashMap<String, Arc<TileSheet>>,
-    fountain: Vec<Bubble>,
     x: f64,
     y: f64,
     texture: Texture,
@@ -85,7 +76,6 @@ retro_core!(ExampleCore {
     option_2: true,
 
     tile_sheets: HashMap::new(),
-    fountain: Vec::new(),
     x: 100.0,
     y: 100.0,
     texture: Texture {
@@ -228,36 +218,10 @@ impl Core for ExampleCore {
             self.x += delta_s * speed
         }
 
-        if self.time_to_next_bubble <= 0.0 {
-            let dx = self.rng.random_range(-100.0..100.0);
-            self.fountain.push(Bubble {
-                x: 180.0,
-                y: 210.0,
-                dx,
-                dy: -250.0,
-                sprite: TileSheet::sprite(&self.tile_sheets.get("spritesheet").unwrap(), 5, 3),
-            });
-            self.time_to_next_bubble += 0.15;
-        }
-
-        for bubble in self.fountain.iter_mut() {
-            bubble.x += bubble.dx * delta_s;
-            bubble.dy += 200.0 * delta_s;
-            bubble.y += bubble.dy * delta_s;
-        }
-
-        self.fountain
-            .retain(|bubble| bubble.y > 0.0 && bubble.y < (HEIGHT + 12) as f64);
-
         self.texture.texture.fill(0);
 
         let sprite = TileSheet::sprite(&self.tile_sheets.get("spritesheet").unwrap(), 2, 1);
         sprite.draw_to(&mut self.texture, self.x as i32, self.y as i32);
-        for bubble in &self.fountain {
-            bubble
-                .sprite
-                .draw_to(&mut self.texture, bubble.x as i32, bubble.y as i32);
-        }
 
         self.texture.render(ctx);
     }
