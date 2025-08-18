@@ -81,44 +81,44 @@
             "scale": 2.44,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 150.00000000000003,
-                "y": 149.38524590163934
+                "x": 168.0327868852459,
+                "y": 107.99180327868854
             }
         },
         "lake.tmx": {
             "scale": 2.44,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 90.98360655737704,
-                "y": 100.61475409836066
+                "x": 168.0327868852459,
+                "y": 107.99180327868854
             }
         },
         "ledges.tmx": {
             "scale": 2.44,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 200.40983606557376,
-                "y": 162.90983606557376
+                "x": 168.0327868852459,
+                "y": 107.99180327868854
             }
         },
         "rocks.tmx": {
             "scale": 2.44,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 166.39344262295083,
-                "y": 134.22131147540986
+                "x": 168.0327868852459,
+                "y": 107.99180327868854
             }
         },
         "start.tmx": {
             "scale": 2.44,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 174.59016393442624,
-                "y": 153.48360655737704
+                "x": 168.0327868852459,
+                "y": 107.99180327868854
             }
         }
     },
-    "last.imagePath": "/Users/tomj/Projects/rust/sdl2-experiments/assets/graphics",
+    "last.imagePath": "/Users/tomj/Projects/rust/libretro/example/assets/fonts",
     "map.height": 18,
     "map.lastUsedFormat": "tmx",
     "map.renderOrder": "1",
@@ -152,7 +152,7 @@
     ],
     "tileset.lastUsedFormat": "tsx",
     "tileset.tileSize": {
-        "height": 12,
-        "width": 12
+        "height": 6,
+        "width": 4
     }
 }

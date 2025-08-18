@@ -143,7 +143,6 @@ name = "example"
 version = "0.1.0"
 dependencies = [
  "libc",
- "log",
  "png",
  "rand",
  "rust-libretro",
