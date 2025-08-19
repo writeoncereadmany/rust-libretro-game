@@ -19,7 +19,7 @@ impl Assets {
         Assets {
             tilesheets: HashMap::new(),
             maps: HashMap::new(),
-            fonts: HashMap::new()
+            fonts: HashMap::new(),
         }
     }
 
@@ -47,12 +47,18 @@ impl Assets {
         }
 
         for tileset in tilesets {
-            let properties = &tileset.properties;
+            let user_type = &tileset.user_type;
             let tile_filename = &filename(&tileset.image.as_ref().unwrap().source);
             let texture = textures.remove(tile_filename).unwrap();
-            let tilesheet = Arc::new(TileSheet::new(texture.palette, texture.texture, tileset.tile_width, tileset.tile_height, tileset.columns));
+            let tilesheet = Arc::new(TileSheet::new(
+                texture.palette,
+                texture.texture,
+                tileset.tile_width,
+                tileset.tile_height,
+                tileset.columns,
+            ));
 
-            if has_property(properties, "Class", "Font") {
+            if user_type == &Some("Font".to_string()) {
                 let mut glyphs = HashMap::new();
                 for (tile_id, tile) in tileset.tiles() {
                     let x = tile_id % tileset.columns;
@@ -60,19 +66,21 @@ impl Assets {
                     match tile.properties.get("Glyph") {
                         Some(StringValue(glyph)) => {
                             glyphs.insert(glyph.clone(), tilesheet.sprite(x, y));
-                        },
+                        }
                         _otherwise => {}
                     }
                 }
-                self.fonts.insert(tileset.name.clone(), SpriteFont::new(glyphs, tileset.tile_width, tileset.tile_height));
-            }
-            else {
+                let error_glyph = glyphs.remove("ERROR").unwrap();
+                self.fonts.insert(
+                    tileset.name.clone(),
+                    SpriteFont::new(glyphs, tileset.tile_width, tileset.tile_height, error_glyph),
+                );
+            } else {
                 self.tilesheets.insert(tileset.name.clone(), tilesheet);
             }
         }
     }
 }
-
 
 fn filename(path: &Path) -> String {
     path.file_stem()
@@ -85,8 +93,3 @@ fn extension(path: &Path, extension: &str) -> bool {
         .map(|ext| ext.eq_ignore_ascii_case(extension))
         .unwrap_or(false)
 }
-
-fn has_property(properties: &Properties, property: &str, value: &str) -> bool {
-    properties.get(property) == Some(&StringValue(value.to_string()))
-}
-

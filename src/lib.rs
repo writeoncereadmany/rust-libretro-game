@@ -182,10 +182,13 @@ impl Core for ExampleCore {
             self.x += delta_s * speed
         }
 
-        self.texture.texture.fill(0);
+        self.texture.texture.fill((24 << 5) + 24);
 
         let sprite = TileSheet::sprite(&self.assets.tilesheets.get("Sprites").unwrap(), 2, 1);
         sprite.draw_to(&mut self.texture, self.x as i32, self.y as i32);
+
+        self.assets.fonts.get("Spritefont_Medium").unwrap().draw_text(&mut self.texture, 10, 10, "Hello, World!");
+        self.assets.fonts.get("Spritefont_Small").unwrap().draw_text(&mut self.texture, 10, 20, "Hello, World!");
 
         self.texture.render(ctx);
     }
