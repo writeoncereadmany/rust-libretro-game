@@ -4,8 +4,6 @@ use tar::Entry;
 pub struct IndexedTexture {
     pub palette: Vec<u16>,
     pub texture: Vec<u8>,
-    pub width: u32,
-    pub height: u32
 }
 
 impl IndexedTexture {
@@ -19,9 +17,9 @@ impl IndexedTexture {
             }
         }
         let mut texture: Vec<u8> = vec![0; reader.output_buffer_size()];
-        let frame_info = reader.next_frame(&mut texture).unwrap();
+        let _frame_info = reader.next_frame(&mut texture).unwrap();
 
-        IndexedTexture { palette, texture, width: frame_info.width, height: frame_info.height }
+        IndexedTexture { palette, texture }
 
     }
 }

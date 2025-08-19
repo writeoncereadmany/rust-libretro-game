@@ -1,13 +1,12 @@
 use crate::renderer::indexed_texture::IndexedTexture;
 use crate::renderer::spritefont::SpriteFont;
 use crate::renderer::tilesheet::TileSheet;
-use std::borrow::Cow;
 use std::collections::HashMap;
-use std::io::Error;
 use std::path::Path;
 use std::sync::Arc;
 use tar::Archive;
-use tiled::Map;
+use tiled::PropertyValue::StringValue;
+use tiled::{Map, Properties};
 
 pub struct Assets {
     pub tilesheets: HashMap<String, Arc<TileSheet>>,
@@ -48,10 +47,28 @@ impl Assets {
         }
 
         for tileset in tilesets {
-            let tile_filename = &filename(&tileset.image.unwrap().source);
+            let properties = &tileset.properties;
+            let tile_filename = &filename(&tileset.image.as_ref().unwrap().source);
             let texture = textures.remove(tile_filename).unwrap();
-            let tilesheet = TileSheet::new(texture.palette, texture.texture, tileset.tile_width, tileset.tile_height, tileset.columns);
-            self.tilesheets.insert(tileset.name.clone(), Arc::new(tilesheet));
+            let tilesheet = Arc::new(TileSheet::new(texture.palette, texture.texture, tileset.tile_width, tileset.tile_height, tileset.columns));
+
+            if has_property(properties, "Class", "Font") {
+                let mut glyphs = HashMap::new();
+                for (tile_id, tile) in tileset.tiles() {
+                    let x = tile_id % tileset.columns;
+                    let y = tile_id / tileset.columns;
+                    match tile.properties.get("Glyph") {
+                        Some(StringValue(glyph)) => {
+                            glyphs.insert(glyph.clone(), tilesheet.sprite(x, y));
+                        },
+                        _otherwise => {}
+                    }
+                }
+                self.fonts.insert(tileset.name.clone(), SpriteFont::new(glyphs, tileset.tile_width, tileset.tile_height));
+            }
+            else {
+                self.tilesheets.insert(tileset.name.clone(), tilesheet);
+            }
         }
     }
 }
@@ -68,3 +85,8 @@ fn extension(path: &Path, extension: &str) -> bool {
         .map(|ext| ext.eq_ignore_ascii_case(extension))
         .unwrap_or(false)
 }
+
+fn has_property(properties: &Properties, property: &str, value: &str) -> bool {
+    properties.get(property) == Some(&StringValue(value.to_string()))
+}
+

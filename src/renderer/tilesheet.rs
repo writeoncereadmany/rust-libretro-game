@@ -40,28 +40,6 @@ impl TileSheet {
         }
     }
 
-    pub fn from_png(decoder: Decoder<Entry<&[u8]>>, tile_width: u32, tile_height: u32) -> Self {
-        let mut reader = decoder.read_info().unwrap();
-        let info = reader.info();
-        let mut palette = Vec::new();
-        if let Some(png_palette) = &info.palette {
-            for color in png_palette.chunks_exact(3) {
-                palette.push(color_xrgb565(color[0], color[1], color[2]));
-            }
-        }
-        let mut tile_sheet: Vec<u8> = vec![0; reader.output_buffer_size()];
-        let frame_info = reader.next_frame(&mut tile_sheet).unwrap();
-        let columns = frame_info.width / tile_width;
-
-        TileSheet {
-            palette,
-            tile_sheet,
-            tile_width,
-            tile_height,
-            columns,
-        }
-    }
-
     pub fn width(&self) -> u32 {
         self.tile_width * self.columns
     }
@@ -112,8 +90,4 @@ impl Sprite {
             }
         }
     }
-}
-
-fn color_xrgb565(red: u8, green: u8, blue: u8) -> u16 {
-    (((red >> 3) as u16) << 11) + (((green >> 2) as u16) << 5) + (blue >> 3) as u16
 }

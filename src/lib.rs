@@ -66,9 +66,7 @@ struct ExampleCore {
     assets: Assets,
     x: f64,
     y: f64,
-    texture: Texture,
-    rng: ThreadRng,
-}
+    texture: Texture}
 
 retro_core!(ExampleCore {
     option_1: false,
@@ -81,8 +79,7 @@ retro_core!(ExampleCore {
         texture: vec![0; WIDTH as usize * HEIGHT as usize],
         width: WIDTH,
         height: HEIGHT
-    },
-    rng: rand::rng()
+    }
 });
 
 impl Core for ExampleCore {
