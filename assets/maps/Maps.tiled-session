@@ -57,10 +57,6 @@
                 "y": 129.53488372093022
             }
         },
-        "More.tsx": {
-            "scaleInDock": 1.91,
-            "scaleInEditor": 4.01
-        },
         "Objects.tsx": {
             "scaleInDock": 1.91,
             "scaleInEditor": 4.01
@@ -139,7 +135,6 @@
     "recentFiles": [
         "Walls.tsx",
         "Objects.tsx",
-        "More.tsx",
         "start.tmx",
         "hills.tmx",
         "ledges.tmx",

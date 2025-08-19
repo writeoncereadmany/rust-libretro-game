@@ -1,17 +1,16 @@
 mod renderer;
 mod assets;
 
+use crate::assets::assets::Assets;
 use crate::renderer::texture::Texture;
-use crate::renderer::tilesheet::{Sprite, TileSheet};
+use crate::renderer::tilesheet::TileSheet;
 use rand::prelude::*;
 use rust_libretro::{
     contexts::*, core::Core, env_version, input_descriptors, proc::*, retro_core, sys::*, types::*,
 };
-use std::collections::HashMap;
 use std::ffi::c_uint;
 use std::ffi::CString;
 use std::slice;
-use std::sync::Arc;
 use tar::Archive;
 
 const WIDTH: c_uint = 360;
@@ -64,11 +63,10 @@ struct ExampleCore {
     option_1: bool,
     option_2: bool,
 
-    tile_sheets: HashMap<String, Arc<TileSheet>>,
+    assets: Assets,
     x: f64,
     y: f64,
     texture: Texture,
-    time_to_next_bubble: f64,
     rng: ThreadRng,
 }
 
@@ -76,7 +74,7 @@ retro_core!(ExampleCore {
     option_1: false,
     option_2: true,
 
-    tile_sheets: HashMap::new(),
+    assets: Assets::new(),
     x: 100.0,
     y: 100.0,
     texture: Texture {
@@ -84,7 +82,6 @@ retro_core!(ExampleCore {
         width: WIDTH,
         height: HEIGHT
     },
-    time_to_next_bubble: 0.0,
     rng: rand::rng()
 });
 
@@ -142,7 +139,7 @@ impl Core for ExampleCore {
         let data = unsafe { slice::from_raw_parts(game_info.data as *const u8, game_info.size) };
         let mut archive = Archive::new(data);
 
-        self.load_assets(&mut archive);
+        self.assets.load_assets(&mut archive);
 
         let gctx: GenericContext = ctx.into();
         gctx.enable_audio_callback();
@@ -175,7 +172,6 @@ impl Core for ExampleCore {
         }
         let speed = 100.0;
         let delta_s = (delta_us.unwrap_or(16_666) as f64) / 1_000_000.0;
-        self.time_to_next_bubble -= delta_s;
         if input.contains(JoypadState::UP) {
             self.y -= delta_s * speed
         }
@@ -191,7 +187,7 @@ impl Core for ExampleCore {
 
         self.texture.texture.fill(0);
 
-        let sprite = TileSheet::sprite(&self.tile_sheets.get("spritesheet").unwrap(), 2, 1);
+        let sprite = TileSheet::sprite(&self.assets.tilesheets.get("Sprites").unwrap(), 2, 1);
         sprite.draw_to(&mut self.texture, self.x as i32, self.y as i32);
 
         self.texture.render(ctx);
@@ -199,40 +195,5 @@ impl Core for ExampleCore {
 
     fn on_write_audio(&mut self, ctx: &mut AudioContext) {
         ctx.queue_audio_sample(0, 0);
-    }
-}
-
-impl ExampleCore {
-    fn load_assets(&mut self, archive: &mut Archive<&[u8]>) {
-        for entry in archive.entries().unwrap() {
-            let unwrapped_entry = entry.unwrap();
-            let path = unwrapped_entry.path().unwrap();
-            if path
-                .extension()
-                .map(|ext| ext.eq_ignore_ascii_case("png"))
-                .unwrap_or(false)
-            {
-                let filename = path
-                    .file_stem()
-                    .map(|filename| filename.to_string_lossy().to_string())
-                    .unwrap_or_else(String::new);
-                let decoder = png::Decoder::new(unwrapped_entry);
-                let sheet = TileSheet::from_png(decoder, 12, 12);
-                self.tile_sheets
-                    .insert(filename, Arc::new(sheet));
-            } else if path
-                .extension()
-                .map(|ext| ext.eq_ignore_ascii_case("tmx"))
-                .unwrap_or(false)
-            {
-                let mut map_loader = tiled::Loader::new();
-                let map = map_loader.load_tmx_map(&path).unwrap();
-                for tileset in map.tilesets() {
-                    println!("Map {} uses tileset {}",
-                             &path.file_stem().unwrap().to_string_lossy(),
-                             tileset.name);
-                }
-            }
-        }
     }
 }

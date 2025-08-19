@@ -5,52 +5,57 @@ use std::borrow::Cow;
 use std::collections::HashMap;
 use std::io::Error;
 use std::path::Path;
+use std::sync::Arc;
 use tar::Archive;
 use tiled::Map;
 
 pub struct Assets {
-    tilesheets: HashMap<String, TileSheet>,
-    maps: HashMap<String, Map>,
-    fonts: HashMap<String, SpriteFont>,
+    pub tilesheets: HashMap<String, Arc<TileSheet>>,
+    pub maps: HashMap<String, Map>,
+    pub fonts: HashMap<String, SpriteFont>,
 }
 
-pub fn load_assets(archive: &mut Archive<&[u8]>) -> Result<Assets, Error> {
-    let mut textures = HashMap::new();
-    let mut tilesheets = HashMap::new();
-    let mut tilesets = Vec::new();
-    let mut fonts = HashMap::new();
-    let mut maps = HashMap::new();
-
-    let mut map_loader = tiled::Loader::new();
-
-    for entry in archive.entries()? {
-        let entry = entry?;
-        let path = entry.path()?;
-        if extension(&path, "png") {
-            let filename = filename(&path);
-            let decoder = png::Decoder::new(entry);
-            let sheet = IndexedTexture::from_png(decoder);
-            textures.insert(filename, sheet);
-        } else if extension(&path, "tmx") {
-            let map = map_loader.load_tmx_map(&path).unwrap();
-            maps.insert(filename(&path), map);
-        } else if extension(&path, "tsx") {
-            let tileset = map_loader.load_tsx_tileset(&path).unwrap();
-            tilesets.push(tileset);
+impl Assets {
+    pub fn new() -> Self {
+        Assets {
+            tilesheets: HashMap::new(),
+            maps: HashMap::new(),
+            fonts: HashMap::new()
         }
     }
 
-    for (tileset) in tilesets {
-        let texture = textures.remove(&filename(&tileset.source)).unwrap();
-        let tilesheet = TileSheet::new(texture.palette, texture.texture, tileset.tile_width, tileset.tile_height, tileset.columns);
-        tilesheets.insert(tileset.name.clone(), tilesheet);
+    pub fn load_assets(&mut self, archive: &mut Archive<&[u8]>) {
+        let mut textures = HashMap::new();
+        let mut tilesets = Vec::new();
+
+        let mut map_loader = tiled::Loader::new();
+
+        for entry in archive.entries().unwrap() {
+            let entry = entry.unwrap();
+            let path = entry.path().unwrap();
+            if extension(&path, "png") {
+                let filename = filename(&path);
+                let decoder = png::Decoder::new(entry);
+                let sheet = IndexedTexture::from_png(decoder);
+                textures.insert(filename, sheet);
+            } else if extension(&path, "tmx") {
+                let map = map_loader.load_tmx_map(&path).unwrap();
+                self.maps.insert(filename(&path), map);
+            } else if extension(&path, "tsx") {
+                let tileset = map_loader.load_tsx_tileset(&path).unwrap();
+                tilesets.push(tileset);
+            }
+        }
+
+        for tileset in tilesets {
+            let tile_filename = &filename(&tileset.image.unwrap().source);
+            let texture = textures.remove(tile_filename).unwrap();
+            let tilesheet = TileSheet::new(texture.palette, texture.texture, tileset.tile_width, tileset.tile_height, tileset.columns);
+            self.tilesheets.insert(tileset.name.clone(), Arc::new(tilesheet));
+        }
     }
-    Ok(Assets {
-        tilesheets,
-        maps,
-        fonts,
-    })
 }
+
 
 fn filename(path: &Path) -> String {
     path.file_stem()
