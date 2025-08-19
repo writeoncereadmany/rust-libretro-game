@@ -8,8 +8,7 @@ pub struct TileSheet {
     tile_sheet: Vec<u8>,
     tile_width: u32,
     tile_height: u32,
-    columns: u32,
-    rows: u32,
+    columns: u32
 }
 
 pub struct Sprite {
@@ -21,10 +20,26 @@ pub struct Bounds {
     x: u32,
     y: u32,
     width: u32,
-    height: u32
+    height: u32,
 }
 
 impl TileSheet {
+    pub fn new(
+        palette: Vec<u16>,
+        tile_sheet: Vec<u8>,
+        tile_width: u32,
+        tile_height: u32,
+        columns: u32,
+    ) -> Self {
+        TileSheet {
+            palette,
+            tile_sheet,
+            tile_width,
+            tile_height,
+            columns,
+        }
+    }
+
     pub fn from_png(decoder: Decoder<Entry<&[u8]>>, tile_width: u32, tile_height: u32) -> Self {
         let mut reader = decoder.read_info().unwrap();
         let info = reader.info();
@@ -37,9 +52,14 @@ impl TileSheet {
         let mut tile_sheet: Vec<u8> = vec![0; reader.output_buffer_size()];
         let frame_info = reader.next_frame(&mut tile_sheet).unwrap();
         let columns = frame_info.width / tile_width;
-        let rows = frame_info.height / tile_height;
 
-        TileSheet { palette, tile_sheet, tile_width, tile_height, columns, rows }
+        TileSheet {
+            palette,
+            tile_sheet,
+            tile_width,
+            tile_height,
+            columns,
+        }
     }
 
     pub fn width(&self) -> u32 {
@@ -53,8 +73,8 @@ impl TileSheet {
                 x: column * self.tile_width,
                 y: row * self.tile_height,
                 width: self.tile_width,
-                height: self.tile_height
-            }
+                height: self.tile_height,
+            },
         }
     }
 }
