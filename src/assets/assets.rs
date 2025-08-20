@@ -6,7 +6,7 @@ use std::path::Path;
 use std::sync::Arc;
 use tar::Archive;
 use tiled::PropertyValue::StringValue;
-use tiled::{Map, Properties};
+use tiled::Map;
 
 pub struct Assets {
     pub tilesheets: HashMap<String, Arc<TileSheet>>,
@@ -60,20 +60,25 @@ impl Assets {
 
             if user_type == &Some("Font".to_string()) {
                 let mut glyphs = HashMap::new();
+                let mut error_glyph = Option::None;
                 for (tile_id, tile) in tileset.tiles() {
                     let x = tile_id % tileset.columns;
                     let y = tile_id / tileset.columns;
                     match tile.properties.get("Glyph") {
                         Some(StringValue(glyph)) => {
-                            glyphs.insert(glyph.clone(), tilesheet.sprite(x, y));
+                            if glyph.len() == 1 {
+                                glyphs.insert(glyph.chars().nth(0).unwrap(), tilesheet.sprite(x, y));
+                            }
+                            else if glyph == "ERROR" {
+                                error_glyph = Some(tilesheet.sprite(x, y));
+                            }
                         }
                         _otherwise => {}
                     }
                 }
-                let error_glyph = glyphs.remove("ERROR").unwrap();
                 self.fonts.insert(
                     tileset.name.clone(),
-                    SpriteFont::new(glyphs, tileset.tile_width, tileset.tile_height, error_glyph),
+                    SpriteFont::new(glyphs, tileset.tile_width, tileset.tile_height, error_glyph.unwrap()),
                 );
             } else {
                 self.tilesheets.insert(tileset.name.clone(), tilesheet);

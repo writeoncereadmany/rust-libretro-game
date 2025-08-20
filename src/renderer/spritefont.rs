@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::renderer::texture::Texture;
 
 pub struct SpriteFont {
-    glyphs: HashMap<String, Sprite>,
+    glyphs: HashMap<char, Sprite>,
     glyph_width: u32,
     glyph_height: u32,
     error_glyph: Sprite,
@@ -11,7 +11,7 @@ pub struct SpriteFont {
 
 impl SpriteFont {
     pub fn new(
-        glyphs: HashMap<String, Sprite>,
+        glyphs: HashMap<char, Sprite>,
         glyph_width: u32,
         glyph_height: u32,
         error_glyph: Sprite,
@@ -27,7 +27,7 @@ impl SpriteFont {
     pub fn draw_text(&self, dst: &mut Texture, x: i32, y: i32, text: &str) {
         let mut next_x = x;
         for glyph in text.chars() {
-            let sprite = self.glyphs.get(&glyph.to_string());
+            let sprite = self.glyphs.get(&glyph);
             sprite.unwrap_or(&self.error_glyph).draw_to(dst, next_x, y);
             next_x += self.glyph_width as i32;
         }

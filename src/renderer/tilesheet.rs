@@ -1,7 +1,5 @@
 use crate::renderer::texture::Texture;
-use png::Decoder;
 use std::sync::Arc;
-use tar::Entry;
 
 pub struct TileSheet {
     palette: Vec<u16>,

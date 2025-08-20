@@ -4,7 +4,6 @@ mod assets;
 use crate::assets::assets::Assets;
 use crate::renderer::texture::Texture;
 use crate::renderer::tilesheet::TileSheet;
-use rand::prelude::*;
 use rust_libretro::{
     contexts::*, core::Core, env_version, input_descriptors, proc::*, retro_core, sys::*, types::*,
 };
