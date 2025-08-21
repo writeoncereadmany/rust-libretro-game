@@ -1,7 +1,10 @@
-mod renderer;
 mod assets;
+mod renderer;
 
 use crate::assets::assets::Assets;
+use crate::renderer::spritefont::HorizontalAlignment::CENTER;
+use crate::renderer::spritefont::VerticalAlignment::{BOTTOM, MIDDLE};
+use crate::renderer::spritefont::{Alignment, BOTTOM_LEFT};
 use crate::renderer::texture::Texture;
 use crate::renderer::tilesheet::TileSheet;
 use rust_libretro::{
@@ -65,7 +68,8 @@ struct ExampleCore {
     assets: Assets,
     x: f64,
     y: f64,
-    texture: Texture}
+    texture: Texture,
+}
 
 retro_core!(ExampleCore {
     option_1: false,
@@ -186,8 +190,22 @@ impl Core for ExampleCore {
         let sprite = TileSheet::sprite(&self.assets.tilesheets.get("Sprites").unwrap(), 2, 1);
         sprite.draw_to(&mut self.texture, self.x as i32, self.y as i32);
 
-        self.assets.fonts.get("Spritefont_Medium").unwrap().draw_text(&mut self.texture, 10, 10, "Hello, World!");
-        self.assets.fonts.get("Spritefont_Small").unwrap().draw_text(&mut self.texture, 10, 20, "Hello, World!");
+        self.assets
+            .fonts
+            .get("Spritefont_Medium")
+            .unwrap()
+            .draw_text(&mut self.texture, 100, 80, "Hello, World!", BOTTOM_LEFT);
+        self.assets
+            .fonts
+            .get("Spritefont_Small")
+            .unwrap()
+            .draw_text(
+                &mut self.texture,
+                100,
+                100,
+                "Hello, World!",
+                Alignment::aligned(CENTER, MIDDLE),
+            );
 
         self.texture.render(ctx);
     }

@@ -1,6 +1,40 @@
+use crate::renderer::texture::Texture;
 use crate::renderer::tilesheet::Sprite;
 use std::collections::HashMap;
-use crate::renderer::texture::Texture;
+
+pub enum HorizontalAlignment {
+    LEFT,
+    CENTER,
+    RIGHT,
+}
+
+pub enum VerticalAlignment {
+    TOP,
+    MIDDLE,
+    BOTTOM,
+}
+
+pub struct Alignment {
+    horizontal_alignment: HorizontalAlignment,
+    vertical_alignment: VerticalAlignment,
+}
+
+pub const BOTTOM_LEFT: Alignment = Alignment {
+    horizontal_alignment: HorizontalAlignment::LEFT,
+    vertical_alignment: VerticalAlignment::BOTTOM
+};
+
+impl Alignment {
+    pub fn aligned(
+        horizontal_alignment: HorizontalAlignment,
+        vertical_alignment: VerticalAlignment,
+    ) -> Self {
+        Alignment {
+            horizontal_alignment,
+            vertical_alignment,
+        }
+    }
+}
 
 pub struct SpriteFont {
     glyphs: HashMap<char, Sprite>,
@@ -20,12 +54,25 @@ impl SpriteFont {
             glyphs,
             glyph_width,
             glyph_height,
-            error_glyph
+            error_glyph,
         }
     }
 
-    pub fn draw_text(&self, dst: &mut Texture, x: i32, y: i32, text: &str) {
-        let mut next_x = x;
+    pub fn draw_text(&self, dst: &mut Texture, x: i32, y: i32, text: &str, alignment: Alignment) {
+        let text_width = (text.len() as u32 * self.glyph_width) as i32;
+
+        let mut next_x = match alignment.horizontal_alignment {
+            HorizontalAlignment::LEFT => x,
+            HorizontalAlignment::CENTER => x - (text_width / 2),
+            HorizontalAlignment::RIGHT => x - text_width
+        };
+
+        let y = match alignment.vertical_alignment {
+            VerticalAlignment::TOP => y,
+            VerticalAlignment::MIDDLE => y + (self.glyph_height / 2) as i32,
+            VerticalAlignment::BOTTOM => y + self.glyph_height as i32,
+        };
+
         for glyph in text.chars() {
             let sprite = self.glyphs.get(&glyph);
             sprite.unwrap_or(&self.error_glyph).draw_to(dst, next_x, y);
