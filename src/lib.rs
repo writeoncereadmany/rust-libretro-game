@@ -2,9 +2,9 @@ mod assets;
 mod renderer;
 
 use crate::assets::assets::Assets;
-use crate::renderer::spritefont::HorizontalAlignment::{CENTER, LEFT};
-use crate::renderer::spritefont::VerticalAlignment::{BOTTOM, MIDDLE, TOP};
-use crate::renderer::spritefont::{Alignment, BOTTOM_LEFT};
+use crate::renderer::spritefont::HorizontalAlignment::LEFT;
+use crate::renderer::spritefont::VerticalAlignment::BOTTOM;
+use crate::renderer::spritefont::Alignment;
 use crate::renderer::texture::Texture;
 use crate::renderer::tilesheet::TileSheet;
 use rust_libretro::{
@@ -70,7 +70,7 @@ struct ExampleCore {
     x: f64,
     y: f64,
     texture: Texture,
-    previous_frame_time_us: u128
+    previous_frame_time_us: u128,
 }
 
 retro_core!(ExampleCore {
@@ -193,23 +193,15 @@ impl Core for ExampleCore {
         let frame_draw_start = Instant::now();
 
         let map = self.assets.maps.get("start").unwrap();
-        for layer in map.layers() {
-            if let Some(tiles) = layer.as_tile_layer() {
-                if let (Some(width), Some(height)) = (tiles.width(), tiles.height()) {
-                    for x in 0..width {
-                        for y in 0..height {
-                            if let Some(tile) = tiles.get_tile(x as i32, y as i32) {
-                                let tileset = tile.get_tileset();
-                                let tileset_name = &tileset.name;
-                                if let Some(tilesheet) = &self.assets.tilesheets.get(tileset_name) {
-                                    tilesheet.tile(tile.id()).draw_to(
-                                        &mut self.texture,
-                                        (x * tileset.tile_width) as i32,
-                                        (y * tileset.tile_height) as i32)
-                                }
-
-                            }
-                        }
+        for layer in &map.layers {
+            for x in 0..layer.width {
+                for y in 0..layer.height {
+                    if let Some(tile) = &layer.tiles[x][y] {
+                        tile.sprite.draw_to(
+                            &mut self.texture,
+                            x as i32 * layer.tile_width,
+                            y as i32 * layer.tile_height,
+                        );
                     }
                 }
             }
@@ -219,7 +211,13 @@ impl Core for ExampleCore {
             .fonts
             .get("Spritefont_Medium")
             .unwrap()
-            .draw_text(&mut self.texture, 0, 220, &format!("Frame time: {}us", self.previous_frame_time_us), Alignment::aligned(LEFT, BOTTOM));
+            .draw_text(
+                &mut self.texture,
+                0,
+                220,
+                &format!("Frame time: {}us", self.previous_frame_time_us),
+                Alignment::aligned(LEFT, BOTTOM),
+            );
 
         let sprite = TileSheet::sprite(&self.assets.tilesheets.get("Sprites").unwrap(), 2, 1);
         sprite.draw_to(&mut self.texture, self.x as i32, self.y as i32);

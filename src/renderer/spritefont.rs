@@ -19,11 +19,6 @@ pub struct Alignment {
     vertical_alignment: VerticalAlignment,
 }
 
-pub const BOTTOM_LEFT: Alignment = Alignment {
-    horizontal_alignment: HorizontalAlignment::LEFT,
-    vertical_alignment: VerticalAlignment::BOTTOM
-};
-
 impl Alignment {
     pub fn aligned(
         horizontal_alignment: HorizontalAlignment,

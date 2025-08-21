@@ -9,11 +9,13 @@ pub struct TileSheet {
     columns: u32
 }
 
+#[derive(Clone)]
 pub struct Sprite {
     tile_sheet: Arc<TileSheet>,
     bounds: Bounds,
 }
 
+#[derive(Clone)]
 pub struct Bounds {
     x: u32,
     y: u32,
@@ -54,8 +56,8 @@ impl TileSheet {
         }
     }
 
-    pub fn tile(self: &Arc<Self>, tileId: u32) -> Sprite {
-        self.sprite(tileId % self.columns, tileId / self.columns)
+    pub fn tile(self: &Arc<Self>, tile_id: u32) -> Sprite {
+        self.sprite(tile_id % self.columns, tile_id / self.columns)
     }
 }
 
