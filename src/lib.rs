@@ -2,8 +2,8 @@ mod assets;
 mod renderer;
 
 use crate::assets::assets::Assets;
-use crate::renderer::spritefont::HorizontalAlignment::CENTER;
-use crate::renderer::spritefont::VerticalAlignment::{BOTTOM, MIDDLE};
+use crate::renderer::spritefont::HorizontalAlignment::{CENTER, LEFT};
+use crate::renderer::spritefont::VerticalAlignment::{BOTTOM, MIDDLE, TOP};
 use crate::renderer::spritefont::{Alignment, BOTTOM_LEFT};
 use crate::renderer::texture::Texture;
 use crate::renderer::tilesheet::TileSheet;
@@ -13,6 +13,7 @@ use rust_libretro::{
 use std::ffi::c_uint;
 use std::ffi::CString;
 use std::slice;
+use std::time::Instant;
 use tar::Archive;
 
 const WIDTH: c_uint = 360;
@@ -69,6 +70,7 @@ struct ExampleCore {
     x: f64,
     y: f64,
     texture: Texture,
+    previous_frame_time_us: u128
 }
 
 retro_core!(ExampleCore {
@@ -82,7 +84,8 @@ retro_core!(ExampleCore {
         texture: vec![0; WIDTH as usize * HEIGHT as usize],
         width: WIDTH,
         height: HEIGHT
-    }
+    },
+    previous_frame_time_us: 0
 });
 
 impl Core for ExampleCore {
@@ -185,6 +188,10 @@ impl Core for ExampleCore {
             self.x += delta_s * speed
         }
 
+        self.texture.texture.fill(0);
+
+        let frame_draw_start = Instant::now();
+
         let map = self.assets.maps.get("start").unwrap();
         for layer in map.layers() {
             if let Some(tiles) = layer.as_tile_layer() {
@@ -212,23 +219,14 @@ impl Core for ExampleCore {
             .fonts
             .get("Spritefont_Medium")
             .unwrap()
-            .draw_text(&mut self.texture, 100, 80, "Hello, World!", BOTTOM_LEFT);
-        self.assets
-            .fonts
-            .get("Spritefont_Small")
-            .unwrap()
-            .draw_text(
-                &mut self.texture,
-                100,
-                100,
-                "Hello, World!",
-                Alignment::aligned(CENTER, MIDDLE),
-            );
+            .draw_text(&mut self.texture, 0, 220, &format!("Frame time: {}us", self.previous_frame_time_us), Alignment::aligned(LEFT, BOTTOM));
 
         let sprite = TileSheet::sprite(&self.assets.tilesheets.get("Sprites").unwrap(), 2, 1);
         sprite.draw_to(&mut self.texture, self.x as i32, self.y as i32);
 
+        let frame_draw_end = Instant::now();
 
+        self.previous_frame_time_us = (frame_draw_end - frame_draw_start).as_micros();
         self.texture.render(ctx);
     }
 
