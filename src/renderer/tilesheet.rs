@@ -53,6 +53,10 @@ impl TileSheet {
             },
         }
     }
+
+    pub fn tile(self: &Arc<Self>, tileId: u32) -> Sprite {
+        self.sprite(tileId % self.columns, tileId / self.columns)
+    }
 }
 
 impl Sprite {

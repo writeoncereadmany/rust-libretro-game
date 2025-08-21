@@ -185,10 +185,28 @@ impl Core for ExampleCore {
             self.x += delta_s * speed
         }
 
-        self.texture.texture.fill((24 << 5) + 24);
+        let map = self.assets.maps.get("start").unwrap();
+        for layer in map.layers() {
+            if let Some(tiles) = layer.as_tile_layer() {
+                if let (Some(width), Some(height)) = (tiles.width(), tiles.height()) {
+                    for x in 0..width {
+                        for y in 0..height {
+                            if let Some(tile) = tiles.get_tile(x as i32, y as i32) {
+                                let tileset = tile.get_tileset();
+                                let tileset_name = &tileset.name;
+                                if let Some(tilesheet) = &self.assets.tilesheets.get(tileset_name) {
+                                    tilesheet.tile(tile.id()).draw_to(
+                                        &mut self.texture,
+                                        (x * tileset.tile_width) as i32,
+                                        (y * tileset.tile_height) as i32)
+                                }
 
-        let sprite = TileSheet::sprite(&self.assets.tilesheets.get("Sprites").unwrap(), 2, 1);
-        sprite.draw_to(&mut self.texture, self.x as i32, self.y as i32);
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         self.assets
             .fonts
@@ -206,6 +224,10 @@ impl Core for ExampleCore {
                 "Hello, World!",
                 Alignment::aligned(CENTER, MIDDLE),
             );
+
+        let sprite = TileSheet::sprite(&self.assets.tilesheets.get("Sprites").unwrap(), 2, 1);
+        sprite.draw_to(&mut self.texture, self.x as i32, self.y as i32);
+
 
         self.texture.render(ctx);
     }
