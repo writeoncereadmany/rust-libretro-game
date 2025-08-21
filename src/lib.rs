@@ -193,19 +193,8 @@ impl Core for ExampleCore {
         let frame_draw_start = Instant::now();
 
         let map = self.assets.maps.get("start").unwrap();
-        for layer in &map.layers {
-            for x in 0..layer.width {
-                for y in 0..layer.height {
-                    if let Some(tile) = &layer.tiles[x][y] {
-                        tile.sprite.draw_to(
-                            &mut self.texture,
-                            x as i32 * layer.tile_width,
-                            y as i32 * layer.tile_height,
-                        );
-                    }
-                }
-            }
-        }
+
+        map.draw_map(&mut self.texture, 12, 12);
 
         self.assets
             .fonts

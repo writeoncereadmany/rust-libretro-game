@@ -1,6 +1,7 @@
 use crate::renderer::tilesheet::{Sprite, TileSheet};
 use std::collections::HashMap;
 use std::sync::Arc;
+use crate::renderer::texture::Texture;
 
 pub struct Map {
     pub layers: Vec<Layer>,
@@ -53,5 +54,22 @@ impl Map {
             }
         }
         Map { layers, objects }
+    }
+
+    pub fn draw_map(&self, texture: &mut Texture, start_x: i32, start_y: i32) {
+        for layer in &self.layers {
+            for x in 0..layer.width {
+                for y in 0..layer.height {
+                    if let Some(tile) = &layer.tiles[x][y] {
+                        tile.sprite.draw_to(
+                            texture,
+                            x as i32 * layer.tile_width + start_x,
+                            y as i32 * layer.tile_height + start_y,
+                        );
+                    }
+                }
+            }
+        }
+
     }
 }
