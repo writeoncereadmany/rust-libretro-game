@@ -17,7 +17,7 @@ pub struct Bounds {
 }
 
 impl Sprite {
-    pub fn draw_to(&self, dst: &mut Texture, x: i32, y: i32) {
+    pub fn draw_to(&self, dst: &mut Texture, x: i32, y: i32, flip_x: bool) {
         let sheet = &self.tile_sheet;
 
         let src_x = self.bounds.x as i32;
@@ -39,10 +39,19 @@ impl Sprite {
         }
 
         for y in min_y..max_y {
-            let src_pixel = src_x + ((src_y + y) * sheet.width() as i32);
+            let src_pixel = if flip_x {
+                src_x + (self.bounds.width as i32 - 1) +((src_y + y) * sheet.width() as i32)
+            } else {
+                src_x + ((src_y + y) * sheet.width() as i32)
+            };
             let dst_pixel = dst_x + ((dst_y + y) * dst.width as i32);
             for x in min_x..max_x {
-                let pixel = src[(src_pixel + x) as usize];
+                let pixel = if flip_x {
+                    src[(src_pixel - x) as usize]
+                } else
+                {
+                    src[(src_pixel + x) as usize]
+                };
                 if pixel != 0 {
                     dst.texture[(dst_pixel + x) as usize] = palette[pixel as usize];
                 }

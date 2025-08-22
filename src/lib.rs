@@ -71,6 +71,7 @@ struct ExampleCore {
     y: f64,
     renderer: Renderer,
     previous_frame_time_us: u128,
+    facing: bool
 }
 
 retro_core!(ExampleCore {
@@ -81,7 +82,8 @@ retro_core!(ExampleCore {
     x: 100.0,
     y: 100.0,
     renderer: Renderer::new(WIDTH, HEIGHT),
-    previous_frame_time_us: 0
+    previous_frame_time_us: 0,
+    facing: false
 });
 
 impl Core for ExampleCore {
@@ -176,16 +178,18 @@ impl Core for ExampleCore {
         let speed = 100.0;
         let delta_s = (delta_us.unwrap_or(16_666) as f64) / 1_000_000.0;
         if input.contains(JoypadState::UP) {
-            self.y -= delta_s * speed
+            self.y -= delta_s * speed;
         }
         if input.contains(JoypadState::DOWN) {
-            self.y += delta_s * speed
+            self.y += delta_s * speed;
         }
         if input.contains(JoypadState::LEFT) {
-            self.x -= delta_s * speed
+            self.x -= delta_s * speed;
+            self.facing = true;
         }
         if input.contains(JoypadState::RIGHT) {
-            self.x += delta_s * speed
+            self.x += delta_s * speed;
+            self.facing = false;
         }
 
         self.renderer.clear_sprites();
@@ -202,7 +206,7 @@ impl Core for ExampleCore {
 
         let sprite = TileSheet::sprite(&self.assets.tilesheets.get("Sprites").unwrap(), 2, 1);
         self.renderer
-            .draw_sprite(&sprite, self.x as i32, self.y as i32);
+            .draw_sprite(&sprite, self.x as i32, self.y as i32, self.facing);
 
         let frame_draw_end = Instant::now();
 

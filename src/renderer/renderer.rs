@@ -25,11 +25,11 @@ impl Renderer {
     }
 
     pub fn draw_background(&mut self, sprite: &Sprite, x: i32, y: i32) {
-        sprite.draw_to(&mut self.background, x, y);
+        sprite.draw_to(&mut self.background, x, y, false);
     }
 
-    pub fn draw_sprite(&mut self, sprite: &Sprite, x: i32, y: i32) {
-        sprite.draw_to(&mut self.buffer, x, y);
+    pub fn draw_sprite(&mut self, sprite: &Sprite, x: i32, y: i32, flip_x: bool) {
+        sprite.draw_to(&mut self.buffer, x, y, flip_x);
     }
 
     pub fn draw_text(&mut self, font: &SpriteFont, text: &str, x: i32, y: i32, alignment: Alignment) {

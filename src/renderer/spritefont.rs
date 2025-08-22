@@ -70,7 +70,7 @@ impl SpriteFont {
 
         for glyph in text.chars() {
             let sprite = self.glyphs.get(&glyph);
-            sprite.unwrap_or(&self.error_glyph).draw_to(dst, next_x, y);
+            sprite.unwrap_or(&self.error_glyph).draw_to(dst, next_x, y, false);
             next_x += self.glyph_width as i32;
         }
     }
