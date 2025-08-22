@@ -3,10 +3,11 @@ use crate::renderer::sprite::Sprite;
 use crate::renderer::tilesheet::TileSheet;
 use std::collections::HashMap;
 use std::sync::Arc;
+use tiled::{Object, ObjectLayer, TileLayer};
 
 pub struct Map {
     pub layers: Vec<Layer>,
-    pub objects: Vec<Spawn>,
+    pub spawns: Vec<Spawn>,
 }
 
 pub struct Layer {
@@ -20,41 +21,79 @@ pub struct Layer {
 #[derive(Clone)]
 pub struct Tile {
     pub sprite: Sprite,
+    pub tile_type: Option<String>
 }
 
-pub struct Spawn;
+pub struct Spawn {
+    object_type: String,
+    x: i32,
+    y: i32
+}
 
 impl Map {
     pub fn new(map: &tiled::Map, tilesheets: &HashMap<String, Arc<TileSheet>>) -> Self {
         let mut layers = Vec::new();
-        let mut objects = Vec::new();
+        let mut spawns = Vec::new();
+        let tile_width = map.tile_width as i32;
+        let tile_height = map.tile_height as i32;
 
         for layer in map.layers() {
             if let Some(tiles) = layer.as_tile_layer() {
-                if let (Some(width), Some(height)) = (tiles.width(), tiles.height()) {
-                    let mut layer = vec![vec![None; height as usize]; width as usize];
-                    for x in 0..width as i32 {
-                        for y in 0..height as i32 {
-                            if let Some(tile) = tiles.get_tile(x, y) {
-                                let tilesheet = tilesheets.get(&tile.get_tileset().name).unwrap();
-                                let tile_id = tile.id();
-                                layer[x as usize][y as usize] = Some(Tile {
-                                    sprite: tilesheet.tile(tile_id),
-                                });
-                            }
-                        }
-                    }
-                    layers.push(Layer {
-                        tiles: layer,
-                        width: width as usize,
-                        height: height as usize,
-                        tile_width: map.tile_width as i32,
-                        tile_height: map.tile_height as i32,
-                    });
-                }
+                Self::add_tile_layer(&tiles, &mut layers, tilesheets, tile_width, tile_height);
+            }
+            if let Some(objects) = layer.as_object_layer() {
+                Self::add_spawns(&objects, &mut spawns, tile_width, tile_height);
             }
         }
-        Map { layers, objects }
+        Map { layers, spawns }
+    }
+
+    fn add_tile_layer(
+        tiles: &TileLayer,
+        layers: &mut Vec<Layer>,
+        tilesheets: &HashMap<String, Arc<TileSheet>>,
+        tile_width: i32,
+        tile_height: i32,
+    ) {
+        if let (Some(width), Some(height)) = (tiles.width(), tiles.height()) {
+            let mut layer = vec![vec![None; height as usize]; width as usize];
+            for x in 0..width as i32 {
+                for y in 0..height as i32 {
+                    if let Some(tile) = tiles.get_tile(x, y) {
+                        let tilesheet = tilesheets.get(&tile.get_tileset().name).unwrap();
+                        let tile_id = tile.id();
+                        layer[x as usize][y as usize] = Some(Tile {
+                            sprite: tilesheet.tile(tile_id),
+                            tile_type: tile.get_tile().map(|t| t.user_type).flatten()
+                        });
+                    }
+                }
+            }
+            layers.push(Layer {
+                tiles: layer,
+                width: width as usize,
+                height: height as usize,
+                tile_width,
+                tile_height,
+            });
+        }
+    }
+
+    fn add_spawns(objects: &ObjectLayer, spawns: &mut Vec<Spawn>, tile_width: i32, tile_height: i32) {
+        for object in objects.objects() {
+            if let Some(object_type) = Self::object_type(&object) {
+                println!("Object type: {:?}, with properties: {:?}", object_type, object.properties);
+                spawns.push(Spawn { object_type, x: object.x as i32, y: object.y as i32});
+            }
+        }
+    }
+
+    fn object_type(object: &Object) -> Option<String> {
+        if object.user_type != "" {
+            Some(object.user_type.clone())
+        } else {
+            object.get_tile()?.get_tile()?.user_type.clone()
+        }
     }
 
     pub fn draw_map(&self, renderer: &mut Renderer, start_x: i32, start_y: i32) {
@@ -71,6 +110,5 @@ impl Map {
                 }
             }
         }
-
     }
 }

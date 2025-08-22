@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-up" width="28" height="18" tilewidth="12" tileheight="12" infinite="0" nextlayerid="8" nextobjectid="1">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-up" width="28" height="18" tilewidth="12" tileheight="12" infinite="0" nextlayerid="9" nextobjectid="35">
  <properties>
   <property name="next_level" value="rocks"/>
  </properties>
@@ -49,29 +49,33 @@
 22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22
 </data>
  </layer>
- <layer id="7" name="Objects" class="BonusFlag" width="28" height="18">
-  <properties>
-   <property name="next_level" value="0002"/>
-  </properties>
-  <data encoding="csv">
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,137,137,137,0,0,122,122,0,0,0,0,0,0,0,122,122,0,0,137,137,137,0,0,0,
-0,0,0,0,0,0,0,0,0,122,122,0,0,0,0,0,0,0,122,122,0,0,0,0,0,0,0,0,
-0,121,0,0,122,122,122,0,0,0,0,0,0,122,122,122,0,0,0,0,0,0,122,122,122,0,128,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-</data>
- </layer>
+ <objectgroup id="8" name="Objects">
+  <object id="1" gid="121" x="12" y="156" width="12" height="12"/>
+  <object id="2" gid="128" x="312" y="156" width="12" height="12"/>
+  <object id="3" gid="137" x="72" y="132" width="12" height="12"/>
+  <object id="4" gid="137" x="48" y="132" width="12" height="12"/>
+  <object id="5" gid="137" x="60" y="132" width="12" height="12"/>
+  <object id="6" gid="137" x="276" y="132" width="12" height="12"/>
+  <object id="7" gid="137" x="252" y="132" width="12" height="12"/>
+  <object id="8" gid="137" x="264" y="132" width="12" height="12"/>
+  <object id="10" gid="122" x="264" y="156" width="12" height="12"/>
+  <object id="11" gid="122" x="252" y="156" width="12" height="12"/>
+  <object id="16" gid="122" x="60" y="156" width="12" height="12"/>
+  <object id="17" gid="122" x="72" y="156" width="12" height="12"/>
+  <object id="18" gid="122" x="84" y="156" width="12" height="12"/>
+  <object id="19" gid="122" x="120" y="132" width="12" height="12"/>
+  <object id="20" gid="122" x="120" y="144" width="12" height="12"/>
+  <object id="21" gid="122" x="132" y="144" width="12" height="12"/>
+  <object id="22" gid="122" x="132" y="132" width="12" height="12"/>
+  <object id="23" gid="122" x="192" y="132" width="12" height="12"/>
+  <object id="24" gid="122" x="204" y="132" width="12" height="12"/>
+  <object id="25" gid="122" x="204" y="144" width="12" height="12"/>
+  <object id="26" gid="122" x="192" y="144" width="12" height="12"/>
+  <object id="27" gid="122" x="240" y="156" width="12" height="12"/>
+  <object id="30" gid="124" x="168" y="156" width="12" height="12">
+   <properties>
+    <property name="contents" value="Ruby"/>
+   </properties>
+  </object>
+ </objectgroup>
 </map>
