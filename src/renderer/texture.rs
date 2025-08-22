@@ -8,6 +8,14 @@ pub struct Texture {
 }
 
 impl Texture {
+    pub fn new(width: u32, height: u32) -> Self {
+        Texture {
+            texture: vec![0; (width * height) as usize],
+            width,
+            height
+        }
+    }
+
     pub fn render(&self, ctx: &mut RunContext) {
         let pixels : &[u16] = self.texture.as_ref();
         let pixels_as_u8_ptr = pixels.as_ptr().cast::<u8>();

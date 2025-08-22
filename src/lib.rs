@@ -2,9 +2,10 @@ mod assets;
 mod renderer;
 
 use crate::assets::assets::Assets;
+use crate::renderer::renderer::Renderer;
+use crate::renderer::spritefont::Alignment;
 use crate::renderer::spritefont::HorizontalAlignment::LEFT;
 use crate::renderer::spritefont::VerticalAlignment::BOTTOM;
-use crate::renderer::spritefont::Alignment;
 use crate::renderer::texture::Texture;
 use crate::renderer::tilesheet::TileSheet;
 use rust_libretro::{
@@ -69,7 +70,7 @@ struct ExampleCore {
     assets: Assets,
     x: f64,
     y: f64,
-    texture: Texture,
+    renderer: Renderer,
     previous_frame_time_us: u128,
 }
 
@@ -80,11 +81,7 @@ retro_core!(ExampleCore {
     assets: Assets::new(),
     x: 100.0,
     y: 100.0,
-    texture: Texture {
-        texture: vec![0; WIDTH as usize * HEIGHT as usize],
-        width: WIDTH,
-        height: HEIGHT
-    },
+    renderer: Renderer::new(WIDTH, HEIGHT),
     previous_frame_time_us: 0
 });
 
@@ -144,6 +141,10 @@ impl Core for ExampleCore {
 
         self.assets.load_assets(&mut archive);
 
+        let map = self.assets.maps.get("start").unwrap();
+
+        map.draw_map(&mut self.renderer, 12, 12);
+
         let gctx: GenericContext = ctx.into();
         gctx.enable_audio_callback();
 
@@ -188,33 +189,26 @@ impl Core for ExampleCore {
             self.x += delta_s * speed
         }
 
-        self.texture.texture.fill(0);
+        self.renderer.clear_sprites();
 
         let frame_draw_start = Instant::now();
 
-        let map = self.assets.maps.get("start").unwrap();
-
-        map.draw_map(&mut self.texture, 12, 12);
-
-        self.assets
-            .fonts
-            .get("Spritefont_Medium")
-            .unwrap()
-            .draw_text(
-                &mut self.texture,
-                0,
-                220,
-                &format!("Frame time: {}us", self.previous_frame_time_us),
-                Alignment::aligned(LEFT, BOTTOM),
-            );
+        self.renderer.draw_text(
+            &self.assets.fonts.get("Spritefont_Medium").unwrap(),
+            &format!("Frame time: {}us", self.previous_frame_time_us),
+            0,
+            220,
+            Alignment::aligned(LEFT, BOTTOM),
+        );
 
         let sprite = TileSheet::sprite(&self.assets.tilesheets.get("Sprites").unwrap(), 2, 1);
-        sprite.draw_to(&mut self.texture, self.x as i32, self.y as i32);
+        self.renderer
+            .draw_sprite(&sprite, self.x as i32, self.y as i32);
 
         let frame_draw_end = Instant::now();
 
         self.previous_frame_time_us = (frame_draw_end - frame_draw_start).as_micros();
-        self.texture.render(ctx);
+        self.renderer.render(ctx);
     }
 
     fn on_write_audio(&mut self, ctx: &mut AudioContext) {

@@ -1,5 +1,5 @@
 use crate::renderer::texture::Texture;
-use crate::renderer::tilesheet::Sprite;
+use crate::renderer::sprite::Sprite;
 use std::collections::HashMap;
 
 pub enum HorizontalAlignment {
