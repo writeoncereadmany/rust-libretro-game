@@ -71,6 +71,7 @@ struct ExampleCore {
     y: f64,
     renderer: Renderer,
     previous_frame_time_us: u128,
+    sound_processing_time: u128,
     facing: bool
 }
 
@@ -83,6 +84,7 @@ retro_core!(ExampleCore {
     y: 100.0,
     renderer: Renderer::new(WIDTH, HEIGHT),
     previous_frame_time_us: 0,
+    sound_processing_time: 0,
     facing: false
 });
 
@@ -122,7 +124,7 @@ impl Core for ExampleCore {
             },
             timing: retro_system_timing {
                 fps: 60.0,
-                sample_rate: 0.0,
+                sample_rate: 44100.0,
             },
         }
     }
@@ -200,7 +202,7 @@ impl Core for ExampleCore {
             &self.assets.fonts.get("Spritefont_Medium").unwrap(),
             &format!("Frame time: {}us", self.previous_frame_time_us),
             0,
-            220,
+            212,
             Alignment::aligned(LEFT, BOTTOM),
         );
 
@@ -215,6 +217,11 @@ impl Core for ExampleCore {
     }
 
     fn on_write_audio(&mut self, ctx: &mut AudioContext) {
-        ctx.queue_audio_sample(0, 0);
+        let mut batch = [0i16; 100];
+        let theta = (std::f64::consts::PI * 2.0) / 100.0;
+        for i in 0..100usize {
+            batch[i] = (f64::sin(theta * i as f64) * i16::MAX as f64) as i16;
+        }
+        // ctx.batch_audio_samples(&batch);
     }
 }
