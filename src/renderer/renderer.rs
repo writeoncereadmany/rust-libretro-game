@@ -1,7 +1,7 @@
-use rust_libretro::contexts::RunContext;
 use crate::renderer::sprite::Sprite;
 use crate::renderer::spritefont::{Alignment, SpriteFont};
 use crate::renderer::texture::Texture;
+use rust_libretro::contexts::RunContext;
 
 pub struct Renderer {
     background: Texture,
@@ -21,7 +21,7 @@ impl Renderer {
     }
 
     pub fn clear_sprites(&mut self) {
-        let _ = &self.buffer.texture.copy_from_slice(&self.background.texture);
+        self.buffer.texture.copy_from_slice(&self.background.texture);
     }
 
     pub fn draw_background(&mut self, sprite: &Sprite, x: i32, y: i32) {

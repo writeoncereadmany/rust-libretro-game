@@ -1,6 +1,6 @@
-use std::sync::Arc;
 use crate::renderer::texture::Texture;
 use crate::renderer::tilesheet::TileSheet;
+use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct Sprite {

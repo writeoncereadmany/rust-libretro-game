@@ -1,8 +1,8 @@
+use crate::renderer::renderer::Renderer;
+use crate::renderer::sprite::Sprite;
 use crate::renderer::tilesheet::TileSheet;
 use std::collections::HashMap;
 use std::sync::Arc;
-use crate::renderer::renderer::Renderer;
-use crate::renderer::sprite::Sprite;
 
 pub struct Map {
     pub layers: Vec<Layer>,

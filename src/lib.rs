@@ -6,7 +6,6 @@ use crate::renderer::renderer::Renderer;
 use crate::renderer::spritefont::Alignment;
 use crate::renderer::spritefont::HorizontalAlignment::LEFT;
 use crate::renderer::spritefont::VerticalAlignment::BOTTOM;
-use crate::renderer::texture::Texture;
 use crate::renderer::tilesheet::TileSheet;
 use rust_libretro::{
     contexts::*, core::Core, env_version, input_descriptors, proc::*, retro_core, sys::*, types::*,

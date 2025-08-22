@@ -1,3 +1,4 @@
+use crate::assets::map::Map;
 use crate::renderer::indexed_texture::IndexedTexture;
 use crate::renderer::spritefont::SpriteFont;
 use crate::renderer::tilesheet::TileSheet;
@@ -6,7 +7,6 @@ use std::path::Path;
 use std::sync::Arc;
 use tar::Archive;
 use tiled::PropertyValue::StringValue;
-use crate::assets::map::Map;
 
 pub struct Assets {
     pub tilesheets: HashMap<String, Arc<TileSheet>>,
