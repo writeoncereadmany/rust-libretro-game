@@ -1,6 +1,8 @@
 mod assets;
 mod renderer;
 mod app;
+mod events;
+mod screens;
 
 use crate::app::application::Application;
 use crate::assets::assets::Assets;
@@ -174,11 +176,5 @@ impl Core for ExampleCore {
         if let Some(ref mut application) = self.application {
             application.play(ctx);
         }
-        let mut batch = [0i16; 100];
-        let theta = (std::f64::consts::PI * 2.0) / 100.0;
-        for i in 0..100usize {
-            batch[i] = (f64::sin(theta * i as f64) * i16::MAX as f64) as i16;
-        }
-        // ctx.batch_audio_samples(&batch);
     }
 }
