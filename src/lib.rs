@@ -1,19 +1,16 @@
 mod assets;
 mod renderer;
+mod app;
 
+use crate::app::application::Application;
 use crate::assets::assets::Assets;
 use crate::renderer::renderer::Renderer;
-use crate::renderer::spritefont::Alignment;
-use crate::renderer::spritefont::HorizontalAlignment::LEFT;
-use crate::renderer::spritefont::VerticalAlignment::BOTTOM;
-use crate::renderer::tilesheet::TileSheet;
 use rust_libretro::{
     contexts::*, core::Core, env_version, input_descriptors, proc::*, retro_core, sys::*, types::*,
 };
 use std::ffi::c_uint;
 use std::ffi::CString;
 use std::slice;
-use std::time::Instant;
 use tar::Archive;
 
 const WIDTH: c_uint = 360;
@@ -66,26 +63,16 @@ struct ExampleCore {
     option_1: bool,
     option_2: bool,
 
-    assets: Assets,
-    x: f64,
-    y: f64,
-    renderer: Renderer,
-    previous_frame_time_us: u128,
-    sound_processing_time: u128,
-    facing: bool
+    application: Option<Application>,
+    renderer: Renderer
 }
 
 retro_core!(ExampleCore {
     option_1: false,
     option_2: true,
 
-    assets: Assets::new(),
-    x: 100.0,
-    y: 100.0,
+    application: None,
     renderer: Renderer::new(WIDTH, HEIGHT),
-    previous_frame_time_us: 0,
-    sound_processing_time: 0,
-    facing: false
 });
 
 impl Core for ExampleCore {
@@ -141,12 +128,9 @@ impl Core for ExampleCore {
         let game_info = info.unwrap();
         let data = unsafe { slice::from_raw_parts(game_info.data as *const u8, game_info.size) };
         let mut archive = Archive::new(data);
-
-        self.assets.load_assets(&mut archive);
-
-        let map = self.assets.maps.get("start").unwrap();
-
-        map.draw_map(&mut self.renderer, 12, 12);
+        let mut assets = Assets::new();
+        assets.load_assets(&mut archive);
+        self.application = Some(Application::new(assets));
 
         let gctx: GenericContext = ctx.into();
         gctx.enable_audio_callback();
@@ -177,46 +161,19 @@ impl Core for ExampleCore {
         if input.contains(JoypadState::START) && input.contains(JoypadState::SELECT) {
             return gctx.shutdown();
         }
-        let speed = 100.0;
-        let delta_s = (delta_us.unwrap_or(16_666) as f64) / 1_000_000.0;
-        if input.contains(JoypadState::UP) {
-            self.y -= delta_s * speed;
-        }
-        if input.contains(JoypadState::DOWN) {
-            self.y += delta_s * speed;
-        }
-        if input.contains(JoypadState::LEFT) {
-            self.x -= delta_s * speed;
-            self.facing = true;
-        }
-        if input.contains(JoypadState::RIGHT) {
-            self.x += delta_s * speed;
-            self.facing = false;
+
+        if let Some(ref mut application) = self.application {
+            application.update(input, delta_us.unwrap_or(16_6666) as u32);
+            application.draw(&mut self.renderer);
         }
 
-        self.renderer.clear_sprites();
-
-        let frame_draw_start = Instant::now();
-
-        self.renderer.draw_text(
-            &self.assets.fonts.get("Spritefont_Medium").unwrap(),
-            &format!("Frame time: {}us", self.previous_frame_time_us),
-            0,
-            212,
-            Alignment::aligned(LEFT, BOTTOM),
-        );
-
-        let sprite = TileSheet::sprite(&self.assets.tilesheets.get("Sprites").unwrap(), 2, 1);
-        self.renderer
-            .draw_sprite(&sprite, self.x as i32, self.y as i32, self.facing);
-
-        let frame_draw_end = Instant::now();
-
-        self.previous_frame_time_us = (frame_draw_end - frame_draw_start).as_micros();
         self.renderer.render(ctx);
     }
 
     fn on_write_audio(&mut self, ctx: &mut AudioContext) {
+        if let Some(ref mut application) = self.application {
+            application.play(ctx);
+        }
         let mut batch = [0i16; 100];
         let theta = (std::f64::consts::PI * 2.0) / 100.0;
         for i in 0..100usize {

@@ -16,8 +16,9 @@ impl Renderer {
         }
     }
 
-    pub fn clear_background(&mut self) {
+    pub fn clear(&mut self) {
         self.background.texture.fill(0);
+        self.buffer.texture.fill(0);
     }
 
     pub fn clear_sprites(&mut self) {
