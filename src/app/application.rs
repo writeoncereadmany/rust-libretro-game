@@ -9,7 +9,7 @@ use rust_libretro::types::JoypadState;
 use std::sync::Arc;
 use std::time::Duration;
 use derive::Event;
-use crate::screens::game::Game;
+use crate::screens::game::{Game, StartLevel};
 
 pub struct Application {
     assets: Arc<Assets>,
@@ -47,15 +47,16 @@ impl Application {
         self.previous_joypad_state = input;
     }
 
-    pub fn draw(&self, renderer: &mut Renderer) {
+    pub fn draw(&mut self, renderer: &mut Renderer) {
         self.screen.draw(renderer);
     }
 
     pub fn play(&mut self, ctx: &mut AudioContext) {}
 
-    fn on_event(&mut self, event: &Event, _events: &mut Events) {
+    fn on_event(&mut self, event: &Event, events: &mut Events) {
         event.apply(|StartGame| {
-            self.screen = Box::new(Game::new(&self.assets))
+            self.screen = Box::new(Game::new(&self.assets));
+            events.fire(StartLevel("start".to_string()));
         });
         event.apply(|GameOver| {
             self.screen = Box::new(TitleScreen::new(&self.assets))

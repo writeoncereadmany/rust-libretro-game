@@ -25,7 +25,7 @@ impl Screen for TitleScreen {
         event.apply(|ButtonPressed(button)| if button == &JoypadState::START { events.fire(StartGame) });
     }
 
-    fn draw(&self, renderer: &mut Renderer) {
+    fn draw(&mut self, renderer: &mut Renderer) {
         renderer.clear();
         renderer.draw_text(
             self.assets.fonts.get("Spritefont_Medium").unwrap(),

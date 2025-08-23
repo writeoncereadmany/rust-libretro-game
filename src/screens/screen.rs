@@ -4,5 +4,5 @@ use crate::renderer::renderer::Renderer;
 pub trait Screen {
     fn on_event(&mut self, event: &Event, events: &mut Events);
 
-    fn draw(&self, renderer: &mut Renderer);
+    fn draw(&mut self, renderer: &mut Renderer);
 }

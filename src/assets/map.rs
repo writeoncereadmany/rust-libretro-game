@@ -5,11 +5,13 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tiled::{Object, ObjectLayer, TileLayer};
 
+#[derive(Clone)]
 pub struct Map {
     pub layers: Vec<Layer>,
     pub spawns: Vec<Spawn>,
 }
 
+#[derive(Clone)]
 pub struct Layer {
     pub tiles: Vec<Vec<Option<Tile>>>,
     pub width: usize,
@@ -24,6 +26,7 @@ pub struct Tile {
     pub tile_type: Option<String>
 }
 
+#[derive(Clone)]
 pub struct Spawn {
     object_type: String,
     x: i32,
