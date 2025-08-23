@@ -64,7 +64,7 @@ impl Map {
                         let tile_id = tile.id();
                         layer[x as usize][y as usize] = Some(Tile {
                             sprite: tilesheet.tile(tile_id),
-                            tile_type: tile.get_tile().map(|t| t.user_type).flatten()
+                            tile_type: tile.get_tile().map(|t| t.user_type.clone()).flatten()
                         });
                     }
                 }
