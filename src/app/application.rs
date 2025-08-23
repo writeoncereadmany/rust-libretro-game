@@ -8,6 +8,8 @@ use rust_libretro::contexts::AudioContext;
 use rust_libretro::types::JoypadState;
 use std::sync::Arc;
 use std::time::Duration;
+use derive::Event;
+use crate::screens::game::Game;
 
 pub struct Application {
     assets: Arc<Assets>,
@@ -15,13 +17,19 @@ pub struct Application {
     screen: Box<dyn Screen>,
 }
 
+#[derive(Event)]
+pub struct StartGame;
+
+#[derive(Event)]
+pub struct GameOver;
+
 impl Application {
     pub fn new(assets: Assets) -> Self {
         let assets = Arc::new(assets);
         Application {
             assets: assets.clone(),
             previous_joypad_state: JoypadState::empty(),
-            screen: Box::new(TitleScreen::new(assets)),
+            screen: Box::new(TitleScreen::new(&assets)),
         }
     }
 
@@ -45,5 +53,12 @@ impl Application {
 
     pub fn play(&mut self, ctx: &mut AudioContext) {}
 
-    fn on_event(&mut self, event: &Event, events: &mut Events) {}
+    fn on_event(&mut self, event: &Event, _events: &mut Events) {
+        event.apply(|StartGame| {
+            self.screen = Box::new(Game::new(&self.assets))
+        });
+        event.apply(|GameOver| {
+            self.screen = Box::new(TitleScreen::new(&self.assets))
+        });
+    }
 }
