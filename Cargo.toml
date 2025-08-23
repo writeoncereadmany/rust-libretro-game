@@ -12,3 +12,4 @@ png = "0.17.16"
 tar = "0.4.44"
 tiled = "0.14.0"
 rust-libretro = {  version = "0.3.2", features = [ "log", "unstable-env-commands" ] }
+derive = { path = "./derive" }

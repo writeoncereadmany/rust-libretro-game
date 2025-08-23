@@ -1,5 +1,7 @@
 use crate::assets::assets::Assets;
+use crate::events::elapsed::ElapsedTime;
 use crate::events::event::{Event, Events};
+use crate::events::input::{fire_input_events, ButtonPressed, ButtonReleased, InputState};
 use crate::renderer::renderer::Renderer;
 use crate::screens::screen::Screen;
 use crate::screens::title::TitleScreen;
@@ -10,7 +12,7 @@ use std::sync::Arc;
 pub struct Application {
     assets: Arc<Assets>,
     previous_joypad_state: JoypadState,
-    screen: Box<dyn Screen>
+    screen: Box<dyn Screen>,
 }
 
 impl Application {
@@ -19,12 +21,15 @@ impl Application {
         Application {
             assets: assets.clone(),
             previous_joypad_state: JoypadState::empty(),
-            screen: Box::new(TitleScreen::new(assets))
+            screen: Box::new(TitleScreen::new(assets)),
         }
     }
 
     pub fn update(&mut self, input: JoypadState, delta_time: u32) {
         let mut events = Events::new();
+
+        events.fire(ElapsedTime(delta_time));
+        fire_input_events(input, self.previous_joypad_state, &mut events);
 
         while let Some(event) = events.pop() {
             self.on_event(&event, &mut events);
@@ -38,10 +43,7 @@ impl Application {
         self.screen.draw(renderer);
     }
 
-    pub fn play(&mut self, ctx: &mut AudioContext) {
-    }
+    pub fn play(&mut self, ctx: &mut AudioContext) {}
 
-    fn on_event(&mut self, event: &Event, events: &mut Events) {
-
-    }
+    fn on_event(&mut self, event: &Event, events: &mut Events) {}
 }
