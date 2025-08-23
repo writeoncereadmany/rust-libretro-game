@@ -1,8 +1,15 @@
 use std::any::Any;
 use std::collections::VecDeque;
+use std::time::Duration;
 
 pub trait EventTrait {
     fn as_any(&self) -> &dyn Any;
+}
+
+impl EventTrait for Duration {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 }
 
 pub struct Event(Box<dyn EventTrait>);
@@ -34,6 +41,10 @@ impl Events {
 
     pub fn fire<E: EventTrait + 'static>(&mut self, event: E) {
         self.events.push_back(Event::new(event));
+    }
+
+    pub fn fire_event(&mut self, event: Event) {
+        self.events.push_back(event);
     }
 
     pub fn pop(&mut self) -> Option<Event> {

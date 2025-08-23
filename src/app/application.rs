@@ -1,13 +1,13 @@
 use crate::assets::assets::Assets;
-use crate::events::elapsed::ElapsedTime;
 use crate::events::event::{Event, Events};
-use crate::events::input::{fire_input_events, ButtonPressed, ButtonReleased, InputState};
+use crate::events::input::fire_input_events;
 use crate::renderer::renderer::Renderer;
 use crate::screens::screen::Screen;
 use crate::screens::title::TitleScreen;
 use rust_libretro::contexts::AudioContext;
 use rust_libretro::types::JoypadState;
 use std::sync::Arc;
+use std::time::Duration;
 
 pub struct Application {
     assets: Arc<Assets>,
@@ -25,10 +25,10 @@ impl Application {
         }
     }
 
-    pub fn update(&mut self, input: JoypadState, delta_time: u32) {
+    pub fn update(&mut self, input: JoypadState, delta_time: u64) {
         let mut events = Events::new();
 
-        events.fire(ElapsedTime(delta_time));
+        events.fire(Duration::from_micros(delta_time));
         fire_input_events(input, self.previous_joypad_state, &mut events);
 
         while let Some(event) = events.pop() {

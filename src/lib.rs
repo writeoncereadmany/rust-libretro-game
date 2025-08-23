@@ -165,7 +165,7 @@ impl Core for ExampleCore {
         }
 
         if let Some(ref mut application) = self.application {
-            application.update(input, delta_us.unwrap_or(16_6666) as u32);
+            application.update(input, delta_us.unwrap_or(16_666) as u64);
             application.draw(&mut self.renderer);
         }
 
