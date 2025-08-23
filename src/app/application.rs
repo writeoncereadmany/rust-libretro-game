@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use rust_libretro::contexts::AudioContext;
 use rust_libretro::types::JoypadState;
 use crate::assets::assets::Assets;
@@ -7,13 +8,13 @@ use crate::renderer::spritefont::HorizontalAlignment::CENTER;
 use crate::renderer::spritefont::VerticalAlignment::MIDDLE;
 
 pub struct Application {
-    assets: Assets
+    assets: Arc<Assets>
 }
 
 impl Application {
     pub fn new(assets: Assets) -> Self {
         Application {
-            assets
+            assets: Arc::new(assets)
         }
     }
 
