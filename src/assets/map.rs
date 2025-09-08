@@ -85,7 +85,6 @@ impl Map {
     fn add_spawns(objects: &ObjectLayer, spawns: &mut Vec<Spawn>, tile_width: i32, tile_height: i32) {
         for object in objects.objects() {
             if let Some(object_type) = Self::object_type(&object) {
-                println!("Object type: {:?}, with properties: {:?}", object_type, object.properties);
                 spawns.push(Spawn { object_type, x: object.x as i32, y: object.y as i32});
             }
         }
