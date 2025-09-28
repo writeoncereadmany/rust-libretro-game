@@ -14,6 +14,7 @@ use std::ffi::c_uint;
 use std::ffi::CString;
 use std::slice;
 use tar::Archive;
+use crate::events::event::Events;
 
 const WIDTH: c_uint = 360;
 const HEIGHT: c_uint = 240;
@@ -66,6 +67,7 @@ struct ExampleCore {
     option_2: bool,
 
     application: Option<Application>,
+    events: Events,
     renderer: Renderer
 }
 
@@ -75,6 +77,7 @@ retro_core!(ExampleCore {
 
     application: None,
     renderer: Renderer::new(WIDTH, HEIGHT),
+    events: Events::new()
 });
 
 impl Core for ExampleCore {
@@ -165,7 +168,7 @@ impl Core for ExampleCore {
         }
 
         if let Some(ref mut application) = self.application {
-            application.update(input, delta_us.unwrap_or(16_666) as u64);
+            application.update(input, delta_us.unwrap_or(16_666) as u64, &mut self.events);
             application.draw(&mut self.renderer);
         }
 

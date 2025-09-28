@@ -3,7 +3,6 @@ use crate::assets::assets::Assets;
 use crate::assets::map::Map;
 use crate::events::event::{Event, Events};
 use crate::events::input::ButtonPressed;
-use crate::events::timer::{EventFactory, ScheduleEvent, Timer};
 use crate::renderer::renderer::Renderer;
 use crate::renderer::sprite::Sprite;
 use crate::screens::screen::Screen;
@@ -31,25 +30,10 @@ enum RedrawBackgroundTask {
     UpdateBackgroundTile { x: i32, y: i32, sprite: Sprite },
 }
 
-struct LightBulb {
-    x: i32,
-    y: i32,
-    sprite: Sprite
-}
-
-impl EventFactory for LightBulb {
-    fn create(&self) -> Event {
-        Event::new(UpdateBackgroundTile {
-            x: self.x, y: self.y, sprite: self.sprite.clone()
-        })
-    }
-}
-
 pub struct Game {
     assets: Arc<Assets>,
     map: Option<Map>,
-    render_tasks: VecDeque<RedrawBackgroundTask>,
-    timer: Timer,
+    render_tasks: VecDeque<RedrawBackgroundTask>
 }
 
 impl Game {
@@ -57,8 +41,7 @@ impl Game {
         Game {
             assets: assets.clone(),
             map: None,
-            render_tasks: VecDeque::new(),
-            timer: Timer::new(),
+            render_tasks: VecDeque::new()
         }
     }
 
@@ -106,15 +89,13 @@ impl Game {
             let unlit = self.assets.tilesheets.get("Walls").unwrap().sprite(6, 4);
             let lit = self.assets.tilesheets.get("Walls").unwrap().sprite(7, 4);
             events.fire(UpdateBackgroundTile { x, y, sprite: unlit });
-            events.fire(ScheduleEvent { fire_in, event: Box:: new(LightBulb {x, y, sprite: lit})});
+            events.schedule(fire_in, UpdateBackgroundTile{x, y, sprite: lit});
         }
     }
 }
 
 impl Screen for Game {
     fn on_event(&mut self, event: &Event, events: &mut Events) {
-        self.timer.on_event(event);
-        event.apply(|dt| self.timer.elapse(dt, events));
         event.apply(|ButtonPressed(button)| {
             if button == &JoypadState::START {
                 events.fire(GameOver)

@@ -14,7 +14,7 @@ use crate::screens::game::{Game, StartLevel};
 pub struct Application {
     assets: Arc<Assets>,
     previous_joypad_state: JoypadState,
-    screen: Box<dyn Screen>,
+    screen: Box<dyn Screen>
 }
 
 #[derive(Event)]
@@ -29,19 +29,19 @@ impl Application {
         Application {
             assets: assets.clone(),
             previous_joypad_state: JoypadState::empty(),
-            screen: Box::new(TitleScreen::new(&assets)),
+            screen: Box::new(TitleScreen::new(&assets))
         }
     }
 
-    pub fn update(&mut self, input: JoypadState, delta_time: u64) {
-        let mut events = Events::new();
-
-        events.fire(Duration::from_micros(delta_time));
-        fire_input_events(input, self.previous_joypad_state, &mut events);
+    pub fn update(&mut self, input: JoypadState, delta_time: u64, events: &mut Events) {
+        let dt = Duration::from_micros(delta_time);
+        events.elapse(dt);
+        events.fire(dt);
+        fire_input_events(input, self.previous_joypad_state, events);
 
         while let Some(event) = events.pop() {
-            self.on_event(&event, &mut events);
-            self.screen.on_event(&event, &mut events);
+            self.on_event(&event, events);
+            self.screen.on_event(&event, events);
         }
 
         self.previous_joypad_state = input;

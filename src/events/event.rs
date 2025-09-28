@@ -1,6 +1,7 @@
 use std::any::Any;
 use std::collections::VecDeque;
 use std::time::Duration;
+use crate::events::timer::Timer;
 
 pub trait EventTrait {
     fn as_any(&self) -> &dyn Any;
@@ -30,13 +31,23 @@ impl Event {
 }
 
 pub struct Events {
-    events: VecDeque<Event>
+    events: VecDeque<Event>,
+    timer: Timer
 }
 
 impl Events {
 
     pub fn new() -> Self {
-        Events { events: VecDeque::new() }
+        Events { events: VecDeque::new(), timer: Timer::new() }
+    }
+
+    pub fn schedule<E: EventTrait + 'static>(&mut self, fires_in: Duration, event: E) {
+        self.timer.schedule(fires_in, Event::new(event));
+    }
+
+    pub fn elapse(&mut self, dt: Duration) {
+        let timer = &mut self.timer;
+        timer.elapse(&dt, &mut self.events);
     }
 
     pub fn fire<E: EventTrait + 'static>(&mut self, event: E) {

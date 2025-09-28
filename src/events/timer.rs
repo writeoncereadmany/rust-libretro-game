@@ -1,18 +1,7 @@
-use derive::Event;
+use crate::events::event::{Event, Events};
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, VecDeque};
 use std::time::{Duration, Instant};
-use crate::events::event::{Event, EventTrait, Events};
-
-#[derive(Event)]
-pub struct ScheduleEvent {
-    pub fire_in: Duration,
-    pub event: Box<dyn EventFactory>
-}
-
-pub trait EventFactory {
-    fn create(&self) -> Event;
-}
 
 struct TimerEvent {
     fires_at: Instant,
@@ -20,10 +9,10 @@ struct TimerEvent {
 }
 
 impl TimerEvent {
-    fn from(instant: Instant, schedule: &ScheduleEvent) -> Self {
+    fn from(instant: Instant, fire_in: Duration, event: Event) -> Self {
         TimerEvent {
-            fires_at: instant + schedule.fire_in,
-            event: schedule.event.create()
+            fires_at: instant + fire_in,
+            event
         }
     }
 }
@@ -59,19 +48,19 @@ impl Timer {
         Timer { current_time: Instant::now(), scheduled_events: BinaryHeap::new() }
     }
 
-    pub fn on_event(&mut self, event: &Event) {
-        event.apply(|schedule| self.scheduled_events.push(TimerEvent::from(self.current_time, schedule)));
+    pub fn schedule(&mut self, fires_in: Duration, event: Event) {
+        self.scheduled_events.push(TimerEvent::from(self.current_time, fires_in, event));
     }
 
     pub fn clear_schedule(&mut self) {
         self.scheduled_events.clear();
     }
 
-    pub fn elapse(&mut self, dt: &Duration, events: &mut Events) {
+    pub fn elapse(&mut self, dt: &Duration, events: &mut VecDeque<Event>) {
         self.current_time += *dt;
         while self.has_pending_events() {
             if let Some(TimerEvent { event, .. }) = self.scheduled_events.pop() {
-                events.fire_event(event);
+                events.push_back(event);
             } else {
                 break;
             }
