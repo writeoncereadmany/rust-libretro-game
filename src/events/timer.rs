@@ -5,9 +5,13 @@ use std::time::{Duration, Instant};
 use crate::events::event::{Event, EventTrait, Events};
 
 #[derive(Event)]
-struct ScheduleEvent {
-    fire_in: Duration,
-    event: fn() -> Event
+pub struct ScheduleEvent {
+    pub fire_in: Duration,
+    pub event: Box<dyn EventFactory>
+}
+
+pub trait EventFactory {
+    fn create(&self) -> Event;
 }
 
 struct TimerEvent {
@@ -19,7 +23,7 @@ impl TimerEvent {
     fn from(instant: Instant, schedule: &ScheduleEvent) -> Self {
         TimerEvent {
             fires_at: instant + schedule.fire_in,
-            event: (schedule.event)()
+            event: schedule.event.create()
         }
     }
 }

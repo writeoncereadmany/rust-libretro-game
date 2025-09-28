@@ -1,1 +1,1 @@
-/Applications/RetroArch.app/Contents/MacOS/RetroArch -L target/release/libexample.dylib data.tar
+/Applications/RetroArch.app/Contents/MacOS/RetroArch -L target/release/libpandamonium.dylib pandamonium.tar
