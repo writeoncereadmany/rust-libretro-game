@@ -9,7 +9,7 @@ use rust_libretro::types::JoypadState;
 use std::sync::Arc;
 use std::time::Duration;
 use derive::Event;
-use crate::screens::game::{Game, StartLevel};
+use crate::game::game::{Game, StartLevel};
 
 pub struct Application {
     assets: Arc<Assets>,

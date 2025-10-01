@@ -11,6 +11,7 @@ use rust_libretro::types::JoypadState;
 use std::collections::VecDeque;
 use std::sync::Arc;
 use std::time::Duration;
+use crate::game::flashlamps::setup_flashlamps;
 
 #[derive(Event)]
 pub struct StartLevel(pub String);
@@ -20,9 +21,9 @@ pub struct RedrawBackground;
 
 #[derive(Event)]
 pub struct UpdateBackgroundTile {
-    x: i32,
-    y: i32,
-    sprite: Sprite,
+    pub x: i32,
+    pub y: i32,
+    pub sprite: Sprite,
 }
 
 enum RedrawBackgroundTask {
@@ -46,10 +47,11 @@ impl Game {
     }
 
     fn load_map(&mut self, map: &String, events: &mut Events) {
+        events.clear_schedule();
+
         self.map = self.assets.maps.get(map).map(|map| map.clone());
         events.fire(RedrawBackground);
-        events.clear_schedule();
-        self.spawn_hud(events);
+        setup_flashlamps(&self.assets, events);
     }
 
     fn update_background(&mut self, renderer: &mut Renderer) {
@@ -62,35 +64,6 @@ impl Game {
                     renderer.draw_background(&sprite, x, y);
                 }
             };
-        }
-    }
-
-    fn spawn_hud(&mut self, events: &mut Events) {
-        let mut flashlamps: Vec<(i32, i32)> = Vec::new();
-        for x in 17..30 {
-            flashlamps.push((x, 0))
-        }
-        for y in 1..19 {
-            flashlamps.push((29, y))
-        }
-        for x in 0..30 {
-            flashlamps.push((29 - x, 19))
-        }
-        for y in 1..19 {
-            flashlamps.push((0, 19 - y))
-        }
-        for x in 0..12 {
-            flashlamps.push((x, 0))
-        }
-
-        for (i, (x, y)) in flashlamps.iter().enumerate() {
-            let (x, y) = (x * 12, y * 12);
-            let fraction_of_fulltime = i as f64 / flashlamps.len() as f64;
-            let fire_in = Duration::from_secs_f64(2.4 + (10.0 * fraction_of_fulltime));
-            let unlit = self.assets.sprites.get("lamp_unlit").unwrap().clone();
-            let lit = self.assets.sprites.get("lamp_green").unwrap().clone();
-            events.fire(UpdateBackgroundTile { x, y, sprite: unlit });
-            events.schedule(fire_in, UpdateBackgroundTile{x, y, sprite: lit});
         }
     }
 }

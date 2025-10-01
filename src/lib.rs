@@ -1,7 +1,8 @@
-mod assets;
-mod renderer;
 mod app;
+mod assets;
 mod events;
+mod game;
+mod renderer;
 mod screens;
 
 use crate::app::application::Application;
