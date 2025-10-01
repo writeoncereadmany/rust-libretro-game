@@ -48,6 +48,7 @@ impl Game {
     fn load_map(&mut self, map: &String, events: &mut Events) {
         self.map = self.assets.maps.get(map).map(|map| map.clone());
         events.fire(RedrawBackground);
+        events.clear_schedule();
         self.spawn_hud(events);
     }
 

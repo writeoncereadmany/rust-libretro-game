@@ -45,6 +45,10 @@ impl Events {
         self.timer.schedule(fires_in, Event::new(event));
     }
 
+    pub fn clear_schedule(&mut self) {
+        self.timer.clear_schedule();
+    }
+
     pub fn elapse(&mut self, dt: Duration) {
         let timer = &mut self.timer;
         timer.elapse(&dt, &mut self.events);
