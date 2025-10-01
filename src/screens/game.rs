@@ -86,8 +86,8 @@ impl Game {
             let (x, y) = (x * 12, y * 12);
             let fraction_of_fulltime = i as f64 / flashlamps.len() as f64;
             let fire_in = Duration::from_secs_f64(2.4 + (10.0 * fraction_of_fulltime));
-            let unlit = self.assets.tilesheets.get("Walls").unwrap().sprite(6, 4);
-            let lit = self.assets.tilesheets.get("Walls").unwrap().sprite(7, 4);
+            let unlit = self.assets.sprites.get("lamp_unlit").unwrap().clone();
+            let lit = self.assets.sprites.get("lamp_green").unwrap().clone();
             events.fire(UpdateBackgroundTile { x, y, sprite: unlit });
             events.schedule(fire_in, UpdateBackgroundTile{x, y, sprite: lit});
         }

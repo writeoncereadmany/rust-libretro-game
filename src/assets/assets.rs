@@ -7,11 +7,13 @@ use std::path::Path;
 use std::sync::Arc;
 use tar::Archive;
 use tiled::PropertyValue::StringValue;
+use crate::renderer::sprite::Sprite;
 
 pub struct Assets {
     pub tilesheets: HashMap<String, Arc<TileSheet>>,
     pub maps: HashMap<String, Map>,
     pub fonts: HashMap<String, SpriteFont>,
+    pub sprites: HashMap<String, Sprite>
 }
 
 impl Assets {
@@ -20,6 +22,7 @@ impl Assets {
             tilesheets: HashMap::new(),
             maps: HashMap::new(),
             fonts: HashMap::new(),
+            sprites: HashMap::new()
         }
     }
 
@@ -81,6 +84,17 @@ impl Assets {
                     tileset.name.clone(),
                     SpriteFont::new(glyphs, tileset.tile_width, tileset.tile_height, error_glyph.unwrap()),
                 );
+            } else if user_type == &Some("Sprite".to_string()) {
+                for (tile_id, tile) in tileset.tiles() {
+                    let x = tile_id % tileset.columns;
+                    let y = tile_id / tileset.columns;
+                    match &tile.user_type {
+                        Some(name) => {
+                            self.sprites.insert(name.clone(), tilesheet.sprite(x, y));
+                        }
+                        _otherwise => {}
+                    }
+                }
             } else {
                 self.tilesheets.insert(tileset.name.clone(), tilesheet);
             }
