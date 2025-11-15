@@ -4,6 +4,7 @@ mod events;
 mod game;
 mod renderer;
 mod screens;
+mod entities;
 
 use crate::app::application::Application;
 use crate::assets::assets::Assets;

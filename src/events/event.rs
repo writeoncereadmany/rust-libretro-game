@@ -1,15 +1,23 @@
 use std::any::Any;
 use std::collections::VecDeque;
 use std::time::Duration;
+use crate::entities::entity::Entities;
+use crate::events::dispatcher::Dispatcher;
 use crate::events::timer::Timer;
 
 pub trait EventTrait {
     fn as_any(&self) -> &dyn Any;
+
+    fn dispatch(&self, dispatcher: &super::dispatcher::Dispatcher, world: &mut crate::entities::entity::Entities, events: &mut Events);
 }
 
 impl EventTrait for Duration {
     fn as_any(&self) -> &dyn Any {
         self
+    }
+
+    fn dispatch(&self, dispatcher: &Dispatcher, world: &mut Entities, events: &mut Events) {
+        dispatcher.dispatch(self, world, events);
     }
 }
 
