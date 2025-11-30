@@ -14,6 +14,7 @@ use std::time::Duration;
 use crate::component::graphics::{Animation, Phase};
 use crate::component::physics::Position;
 use crate::entities::entity::{Entities, entity};
+use crate::events::dispatcher::Dispatcher;
 use crate::game::flashlamps::setup_flashlamps;
 
 #[derive(Event)]
@@ -38,15 +39,28 @@ pub struct Game {
     assets: Arc<Assets>,
     map: Option<Map>,
     world: Entities,
+    dispatcher: Dispatcher,
     render_tasks: VecDeque<RedrawBackgroundTask>
 }
 
 impl Game {
     pub fn new(assets: &Arc<Assets>) -> Self {
+        let mut dispatcher = Dispatcher::new();
+        
+        dispatcher.register(|dt: &Duration,  world, entities| {
+            world.apply(|(Animation{ sprites, period}, Phase(p))|
+                {
+                    let new_phase = p + (dt.as_secs_f64() / period) % 1.0;
+                    let new_sprite_index = (new_phase * sprites.len() as f64) as usize % sprites.len();
+                    (Phase(new_phase), sprites[new_sprite_index].clone())
+                })
+        });
+        
         Game {
             assets: assets.clone(),
             map: None,
             world: Entities::new(),
+            dispatcher,
             render_tasks: VecDeque::new()
         }
     }
@@ -102,14 +116,7 @@ impl Screen for Game {
             self.render_tasks
                 .push_back(RedrawBackgroundTask::RedrawBackground)
         });
-        event.apply(|duration: &Duration| {
-            self.world.apply(|(Animation{ sprites, period}, Phase(p))|
-                {
-                    let new_phase = p + (duration.as_secs_f64() / period) % 1.0;
-                    let new_sprite_index = (new_phase * sprites.len() as f64) as usize % sprites.len();
-                    (Phase(new_phase), sprites[new_sprite_index].clone())
-                })
-        });
+        event.dispatch(&self.dispatcher, &mut self.world, events)
     }
 
     fn draw(&mut self, renderer: &mut Renderer) {

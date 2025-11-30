@@ -36,6 +36,11 @@ impl Event {
     pub fn apply<E:EventTrait + 'static, O>(&self, f: impl FnMut(&E) -> O) -> Option<O> {
         self.unwrap().map(f)
     }
+
+    pub fn dispatch(&self, dispatcher: &Dispatcher, world: &mut Entities, events: &mut Events) {
+        let Event(event) = self;
+        event.dispatch(dispatcher, world, events);
+    }
 }
 
 pub struct Events {
