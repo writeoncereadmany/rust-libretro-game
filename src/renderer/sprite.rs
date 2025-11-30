@@ -4,7 +4,7 @@ use crate::renderer::tilesheet::TileSheet;
 use std::sync::Arc;
 use derive::Variable;
 
-#[derive(Variable, Clone)]
+#[derive(Clone)]
 pub struct Sprite {
     pub tile_sheet: Arc<TileSheet>,
     pub bounds: Bounds,

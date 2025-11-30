@@ -1,21 +1,20 @@
 use crate::app::application::GameOver;
 use crate::assets::assets::Assets;
 use crate::assets::map::Map;
+use crate::component::graphics::{Animation, Phase, Sprite};
+use crate::component::physics::Position;
+use crate::entities::entity::{Entities, entity};
+use crate::events::dispatcher::Dispatcher;
 use crate::events::event::{Event, Events};
 use crate::events::input::ButtonPressed;
+use crate::game::flashlamps::setup_flashlamps;
 use crate::renderer::renderer::Renderer;
-use crate::renderer::sprite::Sprite;
 use crate::screens::screen::Screen;
 use derive::Event;
 use rust_libretro::types::JoypadState;
 use std::collections::VecDeque;
 use std::sync::Arc;
 use std::time::Duration;
-use crate::component::graphics::{Animation, Phase};
-use crate::component::physics::Position;
-use crate::entities::entity::{Entities, entity};
-use crate::events::dispatcher::Dispatcher;
-use crate::game::flashlamps::setup_flashlamps;
 
 #[derive(Event)]
 pub struct StartLevel(pub String);
@@ -40,28 +39,27 @@ pub struct Game {
     map: Option<Map>,
     world: Entities,
     dispatcher: Dispatcher,
-    render_tasks: VecDeque<RedrawBackgroundTask>
+    render_tasks: VecDeque<RedrawBackgroundTask>,
 }
 
 impl Game {
     pub fn new(assets: &Arc<Assets>) -> Self {
         let mut dispatcher = Dispatcher::new();
-        
-        dispatcher.register(|dt: &Duration,  world, entities| {
-            world.apply(|(Animation{ sprites, period}, Phase(p))|
-                {
-                    let new_phase = p + (dt.as_secs_f64() / period) % 1.0;
-                    let new_sprite_index = (new_phase * sprites.len() as f64) as usize % sprites.len();
-                    (Phase(new_phase), sprites[new_sprite_index].clone())
-                })
+
+        dispatcher.register(|dt: &Duration, world, entities| {
+            world.apply(|(Animation { sprites, period }, Phase(p))| {
+                let new_phase = p + (dt.as_secs_f64() / period) % 1.0;
+                let new_sprite_index = (new_phase * sprites.len() as f64) as usize % sprites.len();
+                (Phase(new_phase), Sprite(sprites[new_sprite_index]))
+            })
         });
-        
+
         Game {
             assets: assets.clone(),
             map: None,
             world: Entities::new(),
             dispatcher,
-            render_tasks: VecDeque::new()
+            render_tasks: VecDeque::new(),
         }
     }
 
@@ -73,17 +71,16 @@ impl Game {
         setup_flashlamps(&self.assets, events);
 
         self.map.as_mut().unwrap().spawns.iter().for_each(|spawn| {
-            self.world.spawn(entity()
-                .with(Animation { sprites: vec![
-                    self.assets.sprite("coin_1"),
-                    self.assets.sprite("coin_2"),
-                    self.assets.sprite("coin_3"),
-                    self.assets.sprite("coin_4"),
-                ], period: 0.5}
-                )
-                .with(Phase(0.0))
-                .with(self.assets.sprite("coin_1"))
-                .with(Position(spawn.x as f64, spawn.y as f64)));
+            self.world.spawn(
+                entity()
+                    .with(Animation {
+                        sprites: vec!["coin_1", "coin_2", "coin_3", "coin_4"],
+                        period: 0.5,
+                    })
+                    .with(Phase(0.0))
+                    .with(Sprite("coin_1"))
+                    .with(Position(spawn.x as f64, spawn.y as f64)),
+            );
         });
     }
 
@@ -93,8 +90,9 @@ impl Game {
                 RedrawBackgroundTask::RedrawBackground => {
                     self.map.as_ref().map(|map| map.draw_map(renderer, 12, 12));
                 }
-                RedrawBackgroundTask::UpdateBackgroundTile{x, y, sprite} => {
-                    renderer.draw_background(&sprite, x, y);
+                RedrawBackgroundTask::UpdateBackgroundTile { x, y, sprite } => {
+                    let Sprite(sprite) = sprite;
+                    renderer.draw_background(self.assets.sprite(sprite), x, y);
                 }
             };
         }
@@ -109,9 +107,14 @@ impl Screen for Game {
             }
         });
         event.apply(|StartLevel(map)| self.load_map(map, events));
-        event.apply(|UpdateBackgroundTile {x, y, sprite}|
+        event.apply(|UpdateBackgroundTile { x, y, sprite }| {
             self.render_tasks
-                .push_back(RedrawBackgroundTask::UpdateBackgroundTile {x: *x, y: *y, sprite: sprite.clone()}));
+                .push_back(RedrawBackgroundTask::UpdateBackgroundTile {
+                    x: *x,
+                    y: *y,
+                    sprite: sprite.clone(),
+                })
+        });
         event.apply(|RedrawBackground| {
             self.render_tasks
                 .push_back(RedrawBackgroundTask::RedrawBackground)
@@ -122,7 +125,12 @@ impl Screen for Game {
     fn draw(&mut self, renderer: &mut Renderer) {
         self.update_background(renderer);
         renderer.clear_sprites();
-        self.world.collect().iter().for_each(|(sprite, Position(x, y))|
-            renderer.draw_sprite(&sprite, *x as i32, *y as i32, false));
+        self.world
+            .collect()
+            .iter()
+            .for_each(|(Sprite(sprite), Position(x, y))| {
+                let r_sprite = self.assets.sprite(sprite);
+                renderer.draw_sprite(r_sprite, *x as i32, *y as i32, false)
+            });
     }
 }

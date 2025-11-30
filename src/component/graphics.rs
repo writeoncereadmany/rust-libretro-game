@@ -1,11 +1,13 @@
 use crate::entities::entity;
 use derive::{Constant, Variable};
-use crate::renderer::sprite::Sprite;
 
+
+#[derive(Clone, Variable)]
+pub struct Sprite(pub &'static str);
 
 #[derive(Clone, Constant)]
 pub struct Animation {
-    pub sprites: Vec<Sprite>,
+    pub sprites: Vec<&'static str>,
     pub period: f64
 }
 

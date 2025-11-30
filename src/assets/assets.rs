@@ -105,8 +105,8 @@ impl Assets {
         }
     }
 
-    pub fn sprite(&self, name: &str) -> Sprite {
-        self.sprites.get(name).unwrap_or(self.sprites.get("error").unwrap()).clone()
+    pub fn sprite(&self, name: &str) -> &Sprite {
+        self.sprites.get(name).unwrap_or(self.sprites.get("error").unwrap())
     }
 }
 
