@@ -10,7 +10,7 @@ crate-type = ["cdylib"]
 libc = "0.2.174"
 png = "0.17.16"
 tar = "0.4.44"
-tiled = "0.14.0"
+tiled = "0.15.0"
 rust-libretro = {  version = "0.3.2", features = [ "unstable-env-commands" ] }
 derive = { path = "./derive" }
 itertools = "0.14.0"

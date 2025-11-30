@@ -11,6 +11,8 @@ use rust_libretro::types::JoypadState;
 use std::collections::VecDeque;
 use std::sync::Arc;
 use std::time::Duration;
+use crate::component::physics::Position;
+use crate::entities::entity::{Entities, entity};
 use crate::game::flashlamps::setup_flashlamps;
 
 #[derive(Event)]
@@ -34,6 +36,7 @@ enum RedrawBackgroundTask {
 pub struct Game {
     assets: Arc<Assets>,
     map: Option<Map>,
+    world: Entities,
     render_tasks: VecDeque<RedrawBackgroundTask>
 }
 
@@ -42,6 +45,7 @@ impl Game {
         Game {
             assets: assets.clone(),
             map: None,
+            world: Entities::new(),
             render_tasks: VecDeque::new()
         }
     }
@@ -50,6 +54,11 @@ impl Game {
         events.clear_schedule();
 
         self.map = self.assets.maps.get(map).map(|map| map.clone());
+        self.map.as_mut().unwrap().spawns.iter().for_each(|spawn| {
+            self.world.spawn(entity()
+                .with(self.assets.sprites.get("coin_1").unwrap().clone())
+                .with(Position(spawn.x as f64, spawn.y as f64)));
+        });
         events.fire(RedrawBackground);
         setup_flashlamps(&self.assets, events);
     }
@@ -88,5 +97,7 @@ impl Screen for Game {
     fn draw(&mut self, renderer: &mut Renderer) {
         self.update_background(renderer);
         renderer.clear_sprites();
+        self.world.collect().iter().for_each(|(sprite, Position(x, y))|
+            renderer.draw_sprite(&sprite, *x as i32, *y as i32, false));
     }
 }

@@ -28,9 +28,9 @@ pub struct Tile {
 
 #[derive(Clone)]
 pub struct Spawn {
-    object_type: String,
-    x: i32,
-    y: i32
+    pub object_type: String,
+    pub x: i32,
+    pub y: i32
 }
 
 impl Map {

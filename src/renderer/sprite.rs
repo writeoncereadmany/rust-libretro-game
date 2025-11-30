@@ -1,8 +1,10 @@
+use crate::entities::entity;
 use crate::renderer::texture::Texture;
 use crate::renderer::tilesheet::TileSheet;
 use std::sync::Arc;
+use derive::Variable;
 
-#[derive(Clone)]
+#[derive(Variable, Clone)]
 pub struct Sprite {
     pub tile_sheet: Arc<TileSheet>,
     pub bounds: Bounds,
