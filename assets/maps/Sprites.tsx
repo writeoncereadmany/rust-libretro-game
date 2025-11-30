@@ -2,10 +2,74 @@
 <tileset version="1.10" tiledversion="1.11.2" name="Sprites" class="Sprite" tilewidth="12" tileheight="12" tilecount="88" columns="8">
  <image source="../graphics/spritesheet.png" width="96" height="132"/>
  <tile id="0" type="error"/>
+ <tile id="1" type="bell"/>
+ <tile id="2" type="crumbler"/>
+ <tile id="3" type="crumbling_1"/>
+ <tile id="4" type="crumbling_2"/>
+ <tile id="5" type="crumbling_3"/>
+ <tile id="8" type="panda_doll"/>
+ <tile id="9" type="panda_wallslide"/>
+ <tile id="10" type="panda_ascend"/>
+ <tile id="11" type="panda_descend"/>
+ <tile id="12" type="bubble_pop_1"/>
+ <tile id="13" type="bubble_pop_2"/>
+ <tile id="14" type="bubble_pop_3"/>
+ <tile id="16" type="panda_stand"/>
+ <tile id="17" type="panda_run_1"/>
+ <tile id="18" type="panda_run_2"/>
+ <tile id="19" type="panda_run_3"/>
+ <tile id="20" type="ball_blue"/>
+ <tile id="21" type="ball_white"/>
+ <tile id="22" type="ball_brown"/>
+ <tile id="23" type="ball_red"/>
+ <tile id="24" type="panda_swim_up"/>
+ <tile id="25" type="panda_swim_down"/>
+ <tile id="28" type="grapes"/>
+ <tile id="29" type="bubble_1"/>
+ <tile id="30" type="bubble_2"/>
+ <tile id="31" type="bubble_3"/>
+ <tile id="32" type="redd_doll"/>
+ <tile id="33" type="redd_wall_slide"/>
+ <tile id="34" type="redd_ascend"/>
+ <tile id="35" type="redd_descend"/>
+ <tile id="36" type="cherry"/>
+ <tile id="37" type="banana"/>
+ <tile id="38" type="apple"/>
+ <tile id="39" type="watermelon"/>
+ <tile id="40" type="redd_stand"/>
+ <tile id="41" type="redd_run_1"/>
+ <tile id="42" type="redd_run_2"/>
+ <tile id="43" type="redd_run_3"/>
+ <tile id="48" type="redd_swim_up"/>
+ <tile id="49" type="redd_swim_down"/>
  <tile id="52" type="coin_1"/>
  <tile id="53" type="coin_2"/>
  <tile id="54" type="coin_3"/>
  <tile id="55" type="coin_4"/>
+ <tile id="56" type="sparkle_small"/>
+ <tile id="57" type="sparkle_big"/>
+ <tile id="58" type="chest_closed"/>
+ <tile id="59" type="chest_open"/>
+ <tile id="60" type="key"/>
+ <tile id="61" type="flagpole_silver"/>
+ <tile id="62" type="flag_blue_1"/>
+ <tile id="63" type="flag_blue_2"/>
+ <tile id="64" type="spring_down"/>
+ <tile id="65" type="spring_mid"/>
+ <tile id="66" type="spring_up"/>
+ <tile id="67" type="ruby"/>
+ <tile id="68" type="lockbox"/>
+ <tile id="69" type="flagpole_gold"/>
+ <tile id="70" type="flag_red_1"/>
+ <tile id="71" type="flag_red_2"/>
+ <tile id="72" type="bonus_1"/>
+ <tile id="73" type="bonus_2"/>
+ <tile id="74" type="bonus_3"/>
+ <tile id="75" type="bonus_4"/>
+ <tile id="76" type="bonus_5"/>
+ <tile id="77" type="score_left"/>
+ <tile id="78" type="score_mid"/>
+ <tile id="79" type="score_right"/>
  <tile id="80" type="lamp_unlit"/>
  <tile id="81" type="lamp_green"/>
  <tile id="82" type="lamp_amber"/>
