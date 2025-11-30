@@ -11,6 +11,7 @@ use rust_libretro::types::JoypadState;
 use std::collections::VecDeque;
 use std::sync::Arc;
 use std::time::Duration;
+use crate::component::graphics::{Animation, Phase};
 use crate::component::physics::Position;
 use crate::entities::entity::{Entities, entity};
 use crate::game::flashlamps::setup_flashlamps;
@@ -54,13 +55,22 @@ impl Game {
         events.clear_schedule();
 
         self.map = self.assets.maps.get(map).map(|map| map.clone());
-        self.map.as_mut().unwrap().spawns.iter().for_each(|spawn| {
-            self.world.spawn(entity()
-                .with(self.assets.sprites.get("coin_1").unwrap().clone())
-                .with(Position(spawn.x as f64, spawn.y as f64)));
-        });
         events.fire(RedrawBackground);
         setup_flashlamps(&self.assets, events);
+
+        self.map.as_mut().unwrap().spawns.iter().for_each(|spawn| {
+            self.world.spawn(entity()
+                .with(Animation { sprites: vec![
+                    self.assets.sprite("coin_1"),
+                    self.assets.sprite("coin_2"),
+                    self.assets.sprite("coin_3"),
+                    self.assets.sprite("coin_4"),
+                ], period: 0.5}
+                )
+                .with(Phase(0.0))
+                .with(self.assets.sprite("coin_1"))
+                .with(Position(spawn.x as f64, spawn.y as f64)));
+        });
     }
 
     fn update_background(&mut self, renderer: &mut Renderer) {
@@ -91,6 +101,14 @@ impl Screen for Game {
         event.apply(|RedrawBackground| {
             self.render_tasks
                 .push_back(RedrawBackgroundTask::RedrawBackground)
+        });
+        event.apply(|duration: &Duration| {
+            self.world.apply(|(Animation{ sprites, period}, Phase(p))|
+                {
+                    let new_phase = p + (duration.as_secs_f64() / period) % 1.0;
+                    let new_sprite_index = (new_phase * sprites.len() as f64) as usize % sprites.len();
+                    (Phase(new_phase), sprites[new_sprite_index].clone())
+                })
         });
     }
 

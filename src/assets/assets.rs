@@ -104,6 +104,10 @@ impl Assets {
             self.maps.insert(name, Map::new(&map, &self.tilesheets));
         }
     }
+
+    pub fn sprite(&self, name: &str) -> Sprite {
+        self.sprites.get(name).unwrap_or(self.sprites.get("error").unwrap()).clone()
+    }
 }
 
 fn filename(path: &Path) -> String {
