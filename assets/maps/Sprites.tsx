@@ -40,6 +40,10 @@
  <tile id="41" type="redd_run_1"/>
  <tile id="42" type="redd_run_2"/>
  <tile id="43" type="redd_run_3"/>
+ <tile id="44" type="flashbulb_1"/>
+ <tile id="45" type="flashbulb_2"/>
+ <tile id="46" type="flashbulb_3"/>
+ <tile id="47" type="flashbulb_4"/>
  <tile id="48" type="redd_swim_up"/>
  <tile id="49" type="redd_swim_down"/>
  <tile id="52" type="coin_1"/>
