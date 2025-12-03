@@ -1,9 +1,10 @@
 use crate::app::application::GameOver;
 use crate::assets::assets::Assets;
-use crate::assets::map::Map;
+use crate::assets::map::{Map, Spawn};
 use crate::component::graphics::{Animation, Phase, Sprite};
 use crate::component::physics::Position;
-use crate::entities::entity::{Entities, entity};
+use crate::entities::entity::{entity, Entities};
+use crate::entities::spawner::Spawner;
 use crate::events::dispatcher::Dispatcher;
 use crate::events::event::{Event, Events};
 use crate::events::input::ButtonPressed;
@@ -39,6 +40,7 @@ pub struct Game {
     map: Option<Map>,
     world: Entities,
     dispatcher: Dispatcher,
+    spawner: Spawner<Spawn>,
     render_tasks: VecDeque<RedrawBackgroundTask>,
 }
 
@@ -54,11 +56,27 @@ impl Game {
             })
         });
 
+        let mut spawner = Spawner::<Spawn>::new();
+
+        spawner.register("Coin", |spawn, world|
+            {
+            world.spawn(entity()
+                .with(Animation {
+                    sprites: vec!["coin_1", "coin_2", "coin_3", "coin_4"],
+                    period: 0.5,
+                })
+                .with(Phase(0.0))
+                .with(Sprite("coin_1"))
+                .with(Position(spawn.x as f64, spawn.y as f64)));
+            }
+        );
+
         Game {
             assets: assets.clone(),
             map: None,
             world: Entities::new(),
             dispatcher,
+            spawner,
             render_tasks: VecDeque::new(),
         }
     }
@@ -70,18 +88,8 @@ impl Game {
         events.fire(RedrawBackground);
         setup_flashlamps(&self.assets, events);
 
-        self.map.as_mut().unwrap().spawns.iter().for_each(|spawn| {
-            self.world.spawn(
-                entity()
-                    .with(Animation {
-                        sprites: vec!["coin_1", "coin_2", "coin_3", "coin_4"],
-                        period: 0.5,
-                    })
-                    .with(Phase(0.0))
-                    .with(Sprite("coin_1"))
-                    .with(Position(spawn.x as f64, spawn.y as f64)),
-            );
-        });
+        self.map.as_mut().unwrap().spawns.iter().for_each(|spawn|
+            self.spawner.spawn(&spawn.object_type, spawn, &mut self.world));
     }
 
     fn update_background(&mut self, renderer: &mut Renderer) {
