@@ -1,10 +1,8 @@
 mod app;
 mod assets;
-mod events;
 mod game;
 mod renderer;
 mod screens;
-mod entities;
 mod component;
 
 use crate::app::application::Application;
@@ -17,7 +15,7 @@ use std::ffi::c_uint;
 use std::ffi::CString;
 use std::slice;
 use tar::Archive;
-use crate::events::event::Events;
+use engine::events::event::Events;
 
 const WIDTH: c_uint = 360;
 const HEIGHT: c_uint = 240;

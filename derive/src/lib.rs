@@ -7,7 +7,7 @@ pub fn derive_component(input: TokenStream) -> TokenStream {
     let DeriveInput { ident, .. } = parse_macro_input!(input);
     let output = quote! {
         impl entity::Component for #ident {
-            fn get(entity: &crate::entities::entity::Entity) -> Option<Self> {
+            fn get(entity: &engine::entities::entity::Entity) -> Option<Self> {
                 Some(entity.get::<#ident>()?.clone())
             }
         }
@@ -20,15 +20,15 @@ pub fn derive_variable(input: TokenStream) -> TokenStream {
     let DeriveInput { ident, .. } = parse_macro_input!(input);
     let output = quote! {
         impl entity::Component for #ident {
-            fn get(entity: &crate::entities::entity::Entity) -> Option<Self> {
+            fn get(entity: &engine::entities::entity::Entity) -> Option<Self> {
                 Some(entity.get::<#ident>()?.clone())
             }
         }
         impl entity::Variable for #ident {
-            fn set(self, entity: &mut crate::entities::entity::Entity) {
+            fn set(self, entity: &mut engine::entities::entity::Entity) {
                 entity.set(self)
             }
-            fn remove(entity: &mut crate::entities::entity::Entity) {
+            fn remove(entity: &mut engine::entities::entity::Entity) {
                 entity.remove::<#ident>()
             }
         }
@@ -40,12 +40,12 @@ pub fn derive_variable(input: TokenStream) -> TokenStream {
 pub fn derive_event(input: TokenStream) -> TokenStream {
     let DeriveInput { ident, .. } = parse_macro_input!(input);
     let output = quote! {
-        impl crate::events::event::EventTrait for #ident {
+        impl engine::events::event::EventTrait for #ident {
             fn as_any(&self) -> &dyn std::any::Any {
                 self
             }
 
-            fn dispatch(&self, dispatcher: &crate::events::dispatcher::Dispatcher, world: &mut crate::entities::entity::Entities, events: &mut crate::events::event::Events) {
+            fn dispatch(&self, dispatcher: &engine::events::dispatcher::Dispatcher, world: &mut engine::entities::entity::Entities, events: &mut engine::events::event::Events) {
                 dispatcher.dispatch(self, world, events);
             }
         }

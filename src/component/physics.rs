@@ -1,4 +1,4 @@
-use crate::entities::entity;
+use engine::entities::entity;
 use derive::Variable;
 
 #[derive(Clone, Variable)]

@@ -1,4 +1,4 @@
-use crate::events::event::{Event, Events};
+use engine::events::event::{Event, Events};
 use crate::renderer::renderer::Renderer;
 
 pub trait Screen {

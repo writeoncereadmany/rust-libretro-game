@@ -1,8 +1,6 @@
-use crate::entities::entity;
 use crate::renderer::texture::Texture;
 use crate::renderer::tilesheet::TileSheet;
 use std::sync::Arc;
-use derive::Variable;
 
 #[derive(Clone)]
 pub struct Sprite {

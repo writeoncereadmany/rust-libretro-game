@@ -1,15 +1,46 @@
-use derive::Event;
+use std::any::Any;
 use rust_libretro::types::JoypadState;
-use crate::events::event::Events;
+use crate::entities::entity::Entities;
+use crate::events::dispatcher::Dispatcher;
+use crate::events::event::{EventTrait, Events};
 
-#[derive(Event)]
 pub struct ButtonPressed(pub JoypadState);
 
-#[derive(Event)]
+impl EventTrait for ButtonPressed {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn dispatch(&self, dispatcher: &Dispatcher, world: &mut Entities, events: &mut Events) {
+        dispatcher.dispatch(self, world, events);
+    }
+}
+
 pub struct ButtonReleased(pub JoypadState);
 
-#[derive(Event)]
+impl EventTrait for ButtonReleased {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn dispatch(&self, dispatcher: &Dispatcher, world: &mut Entities, events: &mut Events) {
+        dispatcher.dispatch(self, world, events);
+    }
+}
+
+
 pub struct InputState(pub JoypadState);
+
+impl EventTrait for InputState {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn dispatch(&self, dispatcher: &Dispatcher, world: &mut Entities, events: &mut Events) {
+        dispatcher.dispatch(self, world, events);
+    }
+}
+
 
 pub fn fire_input_events(current_input: JoypadState, old_input: JoypadState, events: &mut Events) {
     events.fire(InputState(current_input));

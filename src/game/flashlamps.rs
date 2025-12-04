@@ -1,7 +1,7 @@
 use std::time::Duration;
 use crate::assets::assets::Assets;
 use crate::component::graphics::Sprite;
-use crate::events::event::Events;
+use engine::events::event::Events;
 use crate::game::game::UpdateBackgroundTile;
 
 pub fn setup_flashlamps(assets: &Assets, events: &mut Events) {
