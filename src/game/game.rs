@@ -39,38 +39,13 @@ pub struct Game {
     assets: Arc<Assets>,
     map: Option<Map>,
     world: Entities,
-    dispatcher: Dispatcher,
-    spawner: Spawner<Spawn>,
+    dispatcher: Arc<Dispatcher>,
+    spawner: Arc<Spawner<Spawn>>,
     render_tasks: VecDeque<RedrawBackgroundTask>,
 }
 
 impl Game {
-    pub fn new(assets: &Arc<Assets>) -> Self {
-        let mut dispatcher = Dispatcher::new();
-
-        dispatcher.register(|dt: &Duration, world, entities| {
-            world.apply(|(Animation { sprites, period }, Phase(p))| {
-                let new_phase = p + (dt.as_secs_f64() / period) % 1.0;
-                let new_sprite_index = (new_phase * sprites.len() as f64) as usize % sprites.len();
-                (Phase(new_phase), Sprite(sprites[new_sprite_index]))
-            })
-        });
-
-        let mut spawner = Spawner::<Spawn>::new();
-
-        spawner.register("Coin", |spawn, world|
-            {
-            world.spawn(entity()
-                .with(Animation {
-                    sprites: vec!["coin_1", "coin_2", "coin_3", "coin_4"],
-                    period: 0.5,
-                })
-                .with(Phase(0.0))
-                .with(Sprite("coin_1"))
-                .with(Position(spawn.x as f64, spawn.y as f64)));
-            }
-        );
-
+    pub fn new(assets: &Arc<Assets>, dispatcher: Arc<Dispatcher>, spawner: Arc<Spawner<Spawn>>) -> Self {
         Game {
             assets: assets.clone(),
             map: None,
