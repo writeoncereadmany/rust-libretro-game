@@ -1,9 +1,9 @@
 use crate::app::application::GameOver;
 use crate::assets::assets::Assets;
 use crate::assets::map::{Map, Spawn};
-use crate::component::graphics::{Animation, Phase, Sprite};
+use crate::component::graphics::Sprite;
 use crate::component::physics::Position;
-use crate::entities::entity::{entity, Entities};
+use crate::entities::entity::Entities;
 use crate::entities::spawner::Spawner;
 use crate::events::dispatcher::Dispatcher;
 use crate::events::event::{Event, Events};
@@ -15,7 +15,6 @@ use derive::Event;
 use rust_libretro::types::JoypadState;
 use std::collections::VecDeque;
 use std::sync::Arc;
-use std::time::Duration;
 
 #[derive(Event)]
 pub struct StartLevel(pub String);
@@ -64,7 +63,7 @@ impl Game {
         setup_flashlamps(&self.assets, events);
 
         self.map.as_mut().unwrap().spawns.iter().for_each(|spawn|
-            self.spawner.spawn(&spawn.object_type, spawn, &mut self.world));
+            self.spawner.spawn(&spawn.object_type, spawn, events));
     }
 
     fn update_background(&mut self, renderer: &mut Renderer) {
