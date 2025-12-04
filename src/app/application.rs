@@ -48,14 +48,14 @@ impl Application {
                 (Phase(new_phase), Sprite(sprites[new_sprite_index]))
             })
         });
-        
+
         dispatcher.register(|&SpawnCoin(x, y), world, events| {
             world.spawn(entity()
                 .with(Animation {
                     sprites: vec!["coin_1", "coin_2", "coin_3", "coin_4"],
                     period: 0.5,
                 })
-                .with(Phase(0.0))
+                .with(Phase((-0.005*x + 0.015*y) % 1.0))
                 .with(Sprite("coin_1"))
                 .with(Position(x, y)));
         });
