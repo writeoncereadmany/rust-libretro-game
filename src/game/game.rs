@@ -9,7 +9,7 @@ use engine::events::dispatcher::Dispatcher;
 use engine::events::event::{Event, Events, EventTrait};
 use engine::events::input::ButtonPressed;
 use crate::game::flashlamps::setup_flashlamps;
-use crate::renderer::renderer::Renderer;
+use engine::renderer::renderer::Renderer;
 use crate::screens::screen::Screen;
 use derive::Event;
 use rust_libretro::types::JoypadState;

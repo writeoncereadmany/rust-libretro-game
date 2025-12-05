@@ -1,9 +1,9 @@
 use crate::app::application::StartGame;
 use crate::assets::assets::Assets;
-use crate::renderer::renderer::Renderer;
-use crate::renderer::spritefont::Alignment;
-use crate::renderer::spritefont::HorizontalAlignment::CENTER;
-use crate::renderer::spritefont::VerticalAlignment::MIDDLE;
+use engine::renderer::renderer::Renderer;
+use engine::renderer::spritefont::Alignment;
+use engine::renderer::spritefont::HorizontalAlignment::CENTER;
+use engine::renderer::spritefont::VerticalAlignment::MIDDLE;
 use crate::screens::screen::Screen;
 use engine::events::event::{Event, Events};
 use engine::events::input::ButtonPressed;

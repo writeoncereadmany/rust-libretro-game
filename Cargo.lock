@@ -129,7 +129,9 @@ name = "engine"
 version = "0.1.0"
 dependencies = [
  "itertools",
+ "png",
  "rust-libretro",
+ "tar",
 ]
 
 [[package]]

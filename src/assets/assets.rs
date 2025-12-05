@@ -1,13 +1,13 @@
 use crate::assets::map::Map;
-use crate::renderer::indexed_texture::IndexedTexture;
-use crate::renderer::spritefont::SpriteFont;
-use crate::renderer::tilesheet::TileSheet;
+use engine::renderer::indexed_texture::IndexedTexture;
+use engine::renderer::sprite::Sprite;
+use engine::renderer::spritefont::SpriteFont;
+use engine::renderer::tilesheet::TileSheet;
 use std::collections::HashMap;
 use std::path::Path;
 use std::sync::Arc;
 use tar::Archive;
 use tiled::PropertyValue::StringValue;
-use crate::renderer::sprite::Sprite;
 
 pub struct Assets {
     pub tilesheets: HashMap<String, Arc<TileSheet>>,
