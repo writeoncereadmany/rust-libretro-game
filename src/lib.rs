@@ -3,6 +3,7 @@ mod assets;
 mod game;
 mod screens;
 mod component;
+mod entities;
 
 use crate::app::application::Application;
 use crate::assets::assets::Assets;
