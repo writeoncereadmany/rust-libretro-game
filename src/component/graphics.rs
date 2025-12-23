@@ -2,9 +2,13 @@ use std::time::Duration;
 use engine::entities::entity;
 use derive::{Constant, Variable};
 use engine::events::dispatcher::Dispatcher;
+use tiled::TileId;
 
 #[derive(Clone, Variable)]
 pub struct Sprite(pub &'static str);
+
+#[derive(Clone)]
+pub struct Tile(pub String, pub TileId);
 
 #[derive(Clone, Constant)]
 pub struct Animation {

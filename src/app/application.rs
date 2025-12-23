@@ -1,5 +1,4 @@
 use crate::assets::assets::Assets;
-use crate::assets::map::Spawn;
 use crate::game::game::{Game, StartLevel};
 use crate::screens::screen::Screen;
 use crate::screens::title::TitleScreen;

@@ -1,4 +1,3 @@
-use crate::assets::map::Map;
 use engine::renderer::indexed_texture::IndexedTexture;
 use engine::renderer::sprite::Sprite;
 use engine::renderer::spritefont::SpriteFont;
@@ -8,21 +7,22 @@ use std::path::Path;
 use std::sync::Arc;
 use tar::Archive;
 use tiled::PropertyValue::StringValue;
+use tiled::TileId;
 
 pub struct Assets {
-    pub tilesheets: HashMap<String, Arc<TileSheet>>,
     pub maps: HashMap<String, tiled::Map>,
     pub fonts: HashMap<String, SpriteFont>,
-    pub sprites: HashMap<String, Sprite>
+    pub sprites: HashMap<String, Sprite>,
+    pub tiles: HashMap<(String, TileId), Sprite>
 }
 
 impl Assets {
     pub fn new() -> Self {
         Assets {
-            tilesheets: HashMap::new(),
             maps: HashMap::new(),
             fonts: HashMap::new(),
-            sprites: HashMap::new()
+            sprites: HashMap::new(),
+            tiles: HashMap::new()
         }
     }
 
@@ -87,21 +87,26 @@ impl Assets {
                 for (tile_id, tile) in tileset.tiles() {
                     let x = tile_id % tileset.columns;
                     let y = tile_id / tileset.columns;
-                    match &tile.user_type {
-                        Some(name) => {
-                            self.sprites.insert(name.clone(), tilesheet.sprite(x, y));
-                        }
-                        _otherwise => {}
+                    if let Some(name) = &tile.user_type {
+                        self.sprites.insert(name.clone(), tilesheet.sprite(x, y));
                     }
                 }
             } else {
-                self.tilesheets.insert(tileset.name.clone(), tilesheet);
+                for (tile_id, tile) in tileset.tiles() {
+                    let x = tile_id % tileset.columns;
+                    let y = tile_id / tileset.columns;
+                    self.tiles.insert((tileset.name.clone(), tile_id), tilesheet.sprite(x, y));
+                }
             }
         }
     }
 
     pub fn sprite(&self, name: &str) -> &Sprite {
         self.sprites.get(name).unwrap_or(self.sprites.get("error").unwrap())
+    }
+
+    pub fn tile(&self, tilesheet: &str, index: TileId) -> &Sprite {
+        self.tiles.get(&(tilesheet.to_string(), index)).unwrap_or(self.sprites.get("error").unwrap())
     }
 }
 

@@ -1,8 +1,7 @@
-use crate::assets::map::Spawn;
 use crate::component::graphics::{Animation, Phase, Sprite};
 use crate::component::physics::Position;
 use derive::Event;
-use engine::entities::entity::{Entities, entity};
+use engine::entities::entity::{entity, Entities};
 use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use engine::events::spawner::Spawner;
