@@ -10,7 +10,7 @@ use engine::events::spawner::Spawner;
 #[derive(Event)]
 pub struct SpawnCoin(f64, f64);
 
-pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner<Spawn>) {
+pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     dispatcher.register(spawn_coin);
 
     spawner.register("Coin", |spawn, events| {
@@ -18,7 +18,7 @@ pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner<Spawn>) {
     });
 }
 
-fn spawn_coin(&SpawnCoin(x, y): &SpawnCoin, world: &mut Entities, events: &mut Events) {
+fn spawn_coin(&SpawnCoin(x, y): &SpawnCoin, world: &mut Entities, _events: &mut Events) {
     world.spawn(
         entity()
             .with(Animation {

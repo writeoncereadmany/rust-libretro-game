@@ -11,7 +11,7 @@ use tiled::PropertyValue::StringValue;
 
 pub struct Assets {
     pub tilesheets: HashMap<String, Arc<TileSheet>>,
-    pub maps: HashMap<String, Map>,
+    pub maps: HashMap<String, tiled::Map>,
     pub fonts: HashMap<String, SpriteFont>,
     pub sprites: HashMap<String, Sprite>
 }
@@ -29,7 +29,6 @@ impl Assets {
     pub fn load_assets(&mut self, archive: &mut Archive<&[u8]>) {
         let mut textures = HashMap::new();
         let mut tilesets = Vec::new();
-        let mut tilemaps = HashMap::new();
 
         let mut map_loader = tiled::Loader::new();
 
@@ -43,7 +42,7 @@ impl Assets {
                 textures.insert(filename, sheet);
             } else if extension(&path, "tmx") {
                 let map = map_loader.load_tmx_map(&path).unwrap();
-                tilemaps.insert(filename(&path), map);
+                self.maps.insert(filename(&path), map);
             } else if extension(&path, "tsx") {
                 let tileset = map_loader.load_tsx_tileset(&path).unwrap();
                 tilesets.push(tileset);
@@ -98,10 +97,6 @@ impl Assets {
             } else {
                 self.tilesheets.insert(tileset.name.clone(), tilesheet);
             }
-        }
-
-        for (name, map) in tilemaps {
-            self.maps.insert(name, Map::new(&map, &self.tilesheets));
         }
     }
 

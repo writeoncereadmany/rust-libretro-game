@@ -8,5 +8,6 @@ edition = "2024"
 [dependencies]
 png = "0.17.16"
 tar = "0.4.44"
+tiled = "0.15.0"
 rust-libretro = {  version = "0.3.2", features = [ "unstable-env-commands" ] }
 itertools = "0.14.0"

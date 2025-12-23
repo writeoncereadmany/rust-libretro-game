@@ -132,6 +132,7 @@ dependencies = [
  "png",
  "rust-libretro",
  "tar",
+ "tiled",
 ]
 
 [[package]]

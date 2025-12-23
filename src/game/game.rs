@@ -15,6 +15,7 @@ use derive::Event;
 use rust_libretro::types::JoypadState;
 use std::collections::VecDeque;
 use std::sync::Arc;
+use crate::entities::load_map;
 
 #[derive(Event)]
 pub struct StartLevel(pub String);
@@ -39,12 +40,12 @@ pub struct Game {
     map: Option<Map>,
     world: Entities,
     dispatcher: Arc<Dispatcher>,
-    spawner: Arc<Spawner<Spawn>>,
+    spawner: Arc<Spawner>,
     render_tasks: VecDeque<RedrawBackgroundTask>,
 }
 
 impl Game {
-    pub fn new(assets: &Arc<Assets>, dispatcher: Arc<Dispatcher>, spawner: Arc<Spawner<Spawn>>) -> Self {
+    pub fn new(assets: &Arc<Assets>, dispatcher: Arc<Dispatcher>, spawner: Arc<Spawner>) -> Self {
         Game {
             assets: assets.clone(),
             map: None,
@@ -58,12 +59,12 @@ impl Game {
     fn load_map(&mut self, map: &String, events: &mut Events) {
         events.clear_schedule();
 
-        self.map = self.assets.maps.get(map).map(|map| map.clone());
+        match (self.assets.maps.get(map)) {
+            Some(map) => load_map(map, &self.spawner, events),
+            None => panic!("Map {map} could not be found")
+        };
         events.fire(RedrawBackground);
         setup_flashlamps(&self.assets, events);
-
-        self.map.as_mut().unwrap().spawns.iter().for_each(|spawn|
-            self.spawner.spawn(&spawn.object_type, spawn, events));
     }
 
     fn update_background(&mut self, renderer: &mut Renderer) {

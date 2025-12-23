@@ -18,7 +18,7 @@ pub struct Application {
     assets: Arc<Assets>,
     previous_joypad_state: JoypadState,
     dispatcher: Arc<Dispatcher>,
-    spawner: Arc<Spawner<Spawn>>,
+    spawner: Arc<Spawner>,
     screen: Box<dyn Screen>
 }
 
@@ -33,7 +33,7 @@ impl Application {
         let assets = Arc::new(assets);
 
         let mut dispatcher = Dispatcher::new();
-        let mut spawner = Spawner::<Spawn>::new();
+        let mut spawner = Spawner::new();
 
         crate::component::register(&mut dispatcher);
         crate::entities::register(&mut dispatcher, &mut spawner);
