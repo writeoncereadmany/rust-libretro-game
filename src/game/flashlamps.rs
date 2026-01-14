@@ -4,7 +4,7 @@ use crate::component::graphics::Sprite;
 use engine::events::event::Events;
 use crate::game::game::UpdateBackgroundTile;
 
-pub fn setup_flashlamps(assets: &Assets, events: &mut Events) {
+pub fn setup_flashlamps(events: &mut Events) {
     let mut flashlamps: Vec<(i32, i32)> = Vec::new();
     for x in 17..30 {
         flashlamps.push((x, 0))

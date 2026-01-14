@@ -1,21 +1,23 @@
 use crate::app::application::GameOver;
 use crate::assets::assets::Assets;
-use crate::assets::map::{Map, Spawn};
+use crate::assets::map::Map;
 use crate::component::graphics::Sprite;
 use crate::component::physics::Position;
-use engine::entities::entity::Entities;
-use engine::events::spawner::Spawner;
-use engine::events::dispatcher::Dispatcher;
-use engine::events::event::{Event, Events, EventTrait};
-use engine::events::input::ButtonPressed;
+use crate::entities::load_map;
 use crate::game::flashlamps::setup_flashlamps;
-use engine::renderer::renderer::Renderer;
+use crate::game::hud::setup_hud;
 use crate::screens::screen::Screen;
 use derive::Event;
+use engine::entities::entity::Entities;
+use engine::events::dispatcher::Dispatcher;
+use engine::events::event::{Event, EventTrait, Events};
+use engine::events::input::ButtonPressed;
+use engine::events::spawner::Spawner;
+use engine::renderer::renderer::Renderer;
+use engine::renderer::spritefont::Alignment;
 use rust_libretro::types::JoypadState;
 use std::collections::VecDeque;
 use std::sync::Arc;
-use crate::entities::load_map;
 
 #[derive(Event)]
 pub struct StartLevel(pub String);
@@ -30,9 +32,19 @@ pub struct UpdateBackgroundTile {
     pub sprite: Sprite,
 }
 
+#[derive(Event)]
+pub struct UpdateBackgroundText {
+    pub x: i32,
+    pub y: i32,
+    pub font: &'static str,
+    pub text: String,
+    pub alignment: Alignment
+}
+
 enum RedrawBackgroundTask {
     RedrawBackground,
     UpdateBackgroundTile { x: i32, y: i32, sprite: Sprite },
+    UpdateBackgroundText { x: i32, y: i32, font: &'static str, text: String, alignment: Alignment },
 }
 
 pub struct Game {
@@ -64,7 +76,8 @@ impl Game {
             None => panic!("Map {map} could not be found")
         };
         events.fire(RedrawBackground);
-        setup_flashlamps(&self.assets, events);
+        setup_flashlamps(events);
+        setup_hud(events);
     }
 
     fn update_background(&mut self, renderer: &mut Renderer) {
@@ -76,6 +89,9 @@ impl Game {
                 RedrawBackgroundTask::UpdateBackgroundTile { x, y, sprite } => {
                     let Sprite(sprite) = sprite;
                     renderer.draw_background(self.assets.sprite(sprite), x, y);
+                },
+                RedrawBackgroundTask::UpdateBackgroundText { x, y, font, text, alignment } => {
+                    renderer.draw_background_text(self.assets.fonts.get(font).unwrap(), &text, x, y, alignment);
                 }
             };
         }
@@ -96,6 +112,16 @@ impl Screen for Game {
                     x: *x,
                     y: *y,
                     sprite: sprite.clone(),
+                })
+        });
+        event.apply(|UpdateBackgroundText { x, y, font, text, alignment}|{
+            self.render_tasks
+                .push_back(RedrawBackgroundTask::UpdateBackgroundText {
+                    x: *x,
+                    y: *y,
+                    font,
+                    text: text.clone(),
+                    alignment: alignment.clone()
                 })
         });
         event.apply(|RedrawBackground| {

@@ -2,18 +2,21 @@ use crate::renderer::sprite::Sprite;
 use crate::renderer::texture::Texture;
 use std::collections::HashMap;
 
+#[derive(Clone)]
 pub enum HorizontalAlignment {
     LEFT,
     CENTER,
     RIGHT,
 }
 
+#[derive(Clone)]
 pub enum VerticalAlignment {
     TOP,
     MIDDLE,
     BOTTOM,
 }
 
+#[derive(Clone)]
 pub struct Alignment {
     horizontal_alignment: HorizontalAlignment,
     vertical_alignment: VerticalAlignment,
@@ -64,8 +67,8 @@ impl SpriteFont {
 
         let y = match alignment.vertical_alignment {
             VerticalAlignment::TOP => y,
-            VerticalAlignment::MIDDLE => y + (self.glyph_height / 2) as i32,
-            VerticalAlignment::BOTTOM => y + self.glyph_height as i32,
+            VerticalAlignment::MIDDLE => y - (self.glyph_height / 2) as i32,
+            VerticalAlignment::BOTTOM => y - self.glyph_height as i32,
         };
 
         for glyph in text.chars() {

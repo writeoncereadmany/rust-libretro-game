@@ -37,6 +37,10 @@ impl Renderer {
         font.draw_text(&mut self.buffer, x, y, text, alignment);
     }
 
+    pub fn draw_background_text(&mut self, font: &SpriteFont, text: &str, x: i32, y: i32, alignment: Alignment) {
+        font.draw_text(&mut self.background, x, y, text, alignment);
+    }
+
     pub fn render(&self, ctx: &mut RunContext) {
         self.buffer.render(ctx);
     }
