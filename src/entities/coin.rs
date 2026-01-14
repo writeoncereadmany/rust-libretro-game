@@ -1,4 +1,3 @@
-use crate::assets::map::Spawn;
 use crate::component::graphics::{Animation, Phase, Sprite};
 use crate::component::physics::Position;
 use derive::Event;

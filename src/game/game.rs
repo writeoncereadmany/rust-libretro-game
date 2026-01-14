@@ -1,6 +1,5 @@
 use crate::app::application::GameOver;
 use crate::assets::assets::Assets;
-use crate::assets::map::Map;
 use crate::component::graphics::Sprite;
 use crate::component::physics::Position;
 use crate::entities::load_map;
@@ -10,7 +9,7 @@ use crate::screens::screen::Screen;
 use derive::Event;
 use engine::entities::entity::Entities;
 use engine::events::dispatcher::Dispatcher;
-use engine::events::event::{Event, EventTrait, Events};
+use engine::events::event::{Event, Events};
 use engine::events::input::ButtonPressed;
 use engine::events::spawner::Spawner;
 use engine::renderer::renderer::Renderer;
@@ -22,9 +21,6 @@ use tiled::TileId;
 
 #[derive(Event)]
 pub struct StartLevel(pub String);
-
-#[derive(Event)]
-pub struct RedrawBackground;
 
 #[derive(Event)]
 pub struct UpdateBackgroundSprite {
@@ -51,7 +47,6 @@ pub struct UpdateBackgroundText {
 }
 
 enum RedrawBackgroundTask {
-    RedrawBackground,
     UpdateBackgroundTile { x: i32, y: i32, tileset: String, tile: TileId },
     UpdateBackgroundSprite { x: i32, y: i32, sprite: Sprite },
     UpdateBackgroundText { x: i32, y: i32, font: &'static str, text: String, alignment: Alignment },
@@ -59,7 +54,6 @@ enum RedrawBackgroundTask {
 
 pub struct Game {
     assets: Arc<Assets>,
-    map: Option<Map>,
     world: Entities,
     dispatcher: Arc<Dispatcher>,
     spawner: Arc<Spawner>,
@@ -70,7 +64,6 @@ impl Game {
     pub fn new(assets: &Arc<Assets>, dispatcher: Arc<Dispatcher>, spawner: Arc<Spawner>) -> Self {
         Game {
             assets: assets.clone(),
-            map: None,
             world: Entities::new(),
             dispatcher,
             spawner,
@@ -81,11 +74,10 @@ impl Game {
     fn load_map(&mut self, map: &String, events: &mut Events) {
         events.clear_schedule();
 
-        match (self.assets.maps.get(map)) {
+        match self.assets.maps.get(map) {
             Some(map) => load_map(map, &self.spawner, events),
             None => panic!("Map {map} could not be found")
         };
-        events.fire(RedrawBackground);
         setup_flashlamps(events);
         setup_hud(events);
     }
@@ -93,9 +85,6 @@ impl Game {
     fn update_background(&mut self, renderer: &mut Renderer) {
         while let Some(task) = self.render_tasks.pop_front() {
             match task {
-                RedrawBackgroundTask::RedrawBackground => {
-                    self.map.as_ref().map(|map| map.draw_map(renderer, 12, 12));
-                }
                 RedrawBackgroundTask::UpdateBackgroundTile { x, y, tileset, tile } => {
                     if let Some(tilesheet) = self.assets.tilesheets.get(&tileset) {
                         renderer.draw_background(&tilesheet.tile(tile), x, y);
@@ -150,10 +139,6 @@ impl Screen for Game {
                     text: text.clone(),
                     alignment: alignment.clone()
                 })
-        });
-        event.apply(|RedrawBackground| {
-            self.render_tasks
-                .push_back(RedrawBackgroundTask::RedrawBackground)
         });
         event.dispatch(&self.dispatcher, &mut self.world, events)
     }

@@ -38,11 +38,11 @@ pub fn update_score(score: u32, events: &mut Events) {
 }
 
 fn simplify(score: u32) -> String {
-    if (score <= 99_999) {
+    if score <= 99_999 {
         score.to_string()
-    } else if (score <= 9_999_999) {
+    } else if score <= 9_999_999 {
         (score / 1_000).to_string() + "k"
-    } else if (score <= 99_999_999) {
+    } else if score <= 99_999_999 {
         format!("{:.1}m", score as f64 / 1_000_000.0)
     } else {
         (score / 1_000_000).to_string() + "m"

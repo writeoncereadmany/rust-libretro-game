@@ -1,5 +1,4 @@
 use crate::assets::assets::Assets;
-use crate::assets::map::Spawn;
 use crate::game::game::{Game, StartLevel};
 use crate::screens::screen::Screen;
 use crate::screens::title::TitleScreen;
@@ -65,7 +64,7 @@ impl Application {
         self.screen.draw(renderer);
     }
 
-    pub fn play(&mut self, ctx: &mut AudioContext) {}
+    pub fn play(&mut self, _ctx: &mut AudioContext) {}
 
     fn on_event(&mut self, event: &Event, events: &mut Events) {
         event.apply(|StartGame| {

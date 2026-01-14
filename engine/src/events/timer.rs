@@ -1,4 +1,4 @@
-use crate::events::event::{Event, Events};
+use crate::events::event::Event;
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, VecDeque};
 use std::time::{Duration, Instant};

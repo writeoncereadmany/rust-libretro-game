@@ -1,4 +1,3 @@
-use crate::assets::map::Map;
 use engine::renderer::indexed_texture::IndexedTexture;
 use engine::renderer::sprite::Sprite;
 use engine::renderer::spritefont::SpriteFont;

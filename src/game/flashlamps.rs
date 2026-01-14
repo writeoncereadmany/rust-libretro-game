@@ -1,8 +1,7 @@
-use std::time::Duration;
-use crate::assets::assets::Assets;
 use crate::component::graphics::Sprite;
-use engine::events::event::Events;
 use crate::game::game::UpdateBackgroundSprite;
+use engine::events::event::Events;
+use std::time::Duration;
 
 pub fn setup_flashlamps(events: &mut Events) {
     let mut flashlamps: Vec<(i32, i32)> = Vec::new();

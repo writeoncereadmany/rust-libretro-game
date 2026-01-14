@@ -12,7 +12,7 @@ pub fn load_map(map: &tiled::Map, spawner: &Spawner, events: &mut Events) {
                             events.fire(UpdateBackgroundTile {
                                 x: (x+1)*12, y: (y+1)*12, tileset: tile.get_tileset().name.clone(), tile: tile.id()
                             });
-                            if let Some(map_tile) = tile.get_tile() {
+                            if let Some(_map_tile) = tile.get_tile() {
                                 // add to collision data based on user type
                             }
                         }
