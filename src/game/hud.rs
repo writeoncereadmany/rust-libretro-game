@@ -1,5 +1,5 @@
 use crate::component::graphics::Sprite;
-use crate::game::game::{UpdateBackgroundText, UpdateBackgroundTile};
+use crate::game::game::{UpdateBackgroundText, UpdateBackgroundSprite};
 use engine::events::event::Events;
 use engine::renderer::spritefont::Alignment;
 use engine::renderer::spritefont::HorizontalAlignment::RIGHT;
@@ -20,14 +20,14 @@ pub fn update_bonus(bonus: u32, events: &mut Events) {
         _otherwise => "error"
     });
 
-    events.fire(UpdateBackgroundTile { x: 12*12, y: 0, sprite})
+    events.fire(UpdateBackgroundSprite { x: 12*12, y: 0, sprite})
 }
 
 pub fn update_score(score: u32, events: &mut Events) {
-    events.fire(UpdateBackgroundTile { x: 13*12, y: 0, sprite: Sprite("score_left") });
-    events.fire(UpdateBackgroundTile { x: 14*12, y: 0, sprite: Sprite("score_mid") });
-    events.fire(UpdateBackgroundTile { x: 15*12, y: 0, sprite: Sprite("score_mid") });
-    events.fire(UpdateBackgroundTile { x: 16*12, y: 0, sprite: Sprite("score_right") });
+    events.fire(UpdateBackgroundSprite { x: 13*12, y: 0, sprite: Sprite("score_left") });
+    events.fire(UpdateBackgroundSprite { x: 14*12, y: 0, sprite: Sprite("score_mid") });
+    events.fire(UpdateBackgroundSprite { x: 15*12, y: 0, sprite: Sprite("score_mid") });
+    events.fire(UpdateBackgroundSprite { x: 16*12, y: 0, sprite: Sprite("score_right") });
 
     events.fire(UpdateBackgroundText {
         x: 17*12 - 3,

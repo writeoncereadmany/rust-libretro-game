@@ -18,6 +18,7 @@ use engine::renderer::spritefont::Alignment;
 use rust_libretro::types::JoypadState;
 use std::collections::VecDeque;
 use std::sync::Arc;
+use tiled::TileId;
 
 #[derive(Event)]
 pub struct StartLevel(pub String);
@@ -26,10 +27,18 @@ pub struct StartLevel(pub String);
 pub struct RedrawBackground;
 
 #[derive(Event)]
-pub struct UpdateBackgroundTile {
+pub struct UpdateBackgroundSprite {
     pub x: i32,
     pub y: i32,
     pub sprite: Sprite,
+}
+
+#[derive(Event)]
+pub struct UpdateBackgroundTile {
+    pub x: i32,
+    pub y: i32,
+    pub tileset: String,
+    pub tile: TileId
 }
 
 #[derive(Event)]
@@ -43,7 +52,8 @@ pub struct UpdateBackgroundText {
 
 enum RedrawBackgroundTask {
     RedrawBackground,
-    UpdateBackgroundTile { x: i32, y: i32, sprite: Sprite },
+    UpdateBackgroundTile { x: i32, y: i32, tileset: String, tile: TileId },
+    UpdateBackgroundSprite { x: i32, y: i32, sprite: Sprite },
     UpdateBackgroundText { x: i32, y: i32, font: &'static str, text: String, alignment: Alignment },
 }
 
@@ -86,7 +96,15 @@ impl Game {
                 RedrawBackgroundTask::RedrawBackground => {
                     self.map.as_ref().map(|map| map.draw_map(renderer, 12, 12));
                 }
-                RedrawBackgroundTask::UpdateBackgroundTile { x, y, sprite } => {
+                RedrawBackgroundTask::UpdateBackgroundTile { x, y, tileset, tile } => {
+                    if let Some(tilesheet) = self.assets.tilesheets.get(&tileset) {
+                        renderer.draw_background(&tilesheet.tile(tile), x, y);
+                    }
+                    else {
+                        renderer.draw_background(self.assets.sprite("error"), x, y);
+                    }
+                },
+                RedrawBackgroundTask::UpdateBackgroundSprite { x, y, sprite } => {
                     let Sprite(sprite) = sprite;
                     renderer.draw_background(self.assets.sprite(sprite), x, y);
                 },
@@ -106,12 +124,21 @@ impl Screen for Game {
             }
         });
         event.apply(|StartLevel(map)| self.load_map(map, events));
-        event.apply(|UpdateBackgroundTile { x, y, sprite }| {
+        event.apply(|UpdateBackgroundSprite { x, y, sprite }| {
+            self.render_tasks
+                .push_back(RedrawBackgroundTask::UpdateBackgroundSprite {
+                    x: *x,
+                    y: *y,
+                    sprite: sprite.clone(),
+                })
+        });        
+        event.apply(|UpdateBackgroundTile { x, y, tileset, tile }| {
             self.render_tasks
                 .push_back(RedrawBackgroundTask::UpdateBackgroundTile {
                     x: *x,
                     y: *y,
-                    sprite: sprite.clone(),
+                    tileset: tileset.clone(),
+                    tile: *tile
                 })
         });
         event.apply(|UpdateBackgroundText { x, y, font, text, alignment}|{
