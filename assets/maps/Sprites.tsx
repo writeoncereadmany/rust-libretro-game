@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.2" name="Sprites" class="Sprite" tilewidth="12" tileheight="12" tilecount="88" columns="8">
+<tileset version="1.10" tiledversion="1.11.0" name="Sprites" class="Sprite" tilewidth="12" tileheight="12" tilecount="88" columns="8">
  <image source="../graphics/spritesheet.png" width="96" height="132"/>
  <tile id="0" type="error"/>
  <tile id="1" type="bell"/>
@@ -7,6 +7,8 @@
  <tile id="3" type="crumbling_1"/>
  <tile id="4" type="crumbling_2"/>
  <tile id="5" type="crumbling_3"/>
+ <tile id="6" type="bubble_1"/>
+ <tile id="7" type="bubble_2"/>
  <tile id="8" type="panda_doll"/>
  <tile id="9" type="panda_wallslide"/>
  <tile id="10" type="panda_ascend"/>
@@ -14,6 +16,7 @@
  <tile id="12" type="bubble_pop_1"/>
  <tile id="13" type="bubble_pop_2"/>
  <tile id="14" type="bubble_pop_3"/>
+ <tile id="15" type="bubble_3"/>
  <tile id="16" type="panda_stand"/>
  <tile id="17" type="panda_run_1"/>
  <tile id="18" type="panda_run_2"/>
@@ -25,9 +28,6 @@
  <tile id="24" type="panda_swim_up"/>
  <tile id="25" type="panda_swim_down"/>
  <tile id="28" type="grapes"/>
- <tile id="29" type="bubble_1"/>
- <tile id="30" type="bubble_2"/>
- <tile id="31" type="bubble_3"/>
  <tile id="32" type="redd_doll"/>
  <tile id="33" type="redd_wall_slide"/>
  <tile id="34" type="redd_ascend"/>
