@@ -1,12 +1,11 @@
 mod app;
-mod assets;
 mod game;
 mod screens;
 mod component;
 mod entities;
 
 use crate::app::application::Application;
-use crate::assets::assets::Assets;
+use engine::assets::Assets;
 use engine::renderer::renderer::Renderer;
 use rust_libretro::{
     contexts::*, core::Core, env_version, input_descriptors, proc::*, retro_core, sys::*, types::*,

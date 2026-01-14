@@ -1,7 +1,7 @@
-use engine::renderer::indexed_texture::IndexedTexture;
-use engine::renderer::sprite::Sprite;
-use engine::renderer::spritefont::SpriteFont;
-use engine::renderer::tilesheet::TileSheet;
+use crate::renderer::indexed_texture::IndexedTexture;
+use crate::renderer::sprite::Sprite;
+use crate::renderer::spritefont::SpriteFont;
+use crate::renderer::tilesheet::TileSheet;
 use std::collections::HashMap;
 use std::path::Path;
 use std::sync::Arc;

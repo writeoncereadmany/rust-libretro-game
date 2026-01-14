@@ -1,8 +1,8 @@
-use crate::assets::assets::Assets;
 use crate::game::game::{Game, StartLevel};
 use crate::screens::screen::Screen;
 use crate::screens::title::TitleScreen;
 use derive::Event;
+use engine::assets::Assets;
 use engine::events::dispatcher::Dispatcher;
 use engine::events::event::{Event, Events};
 use engine::events::input::fire_input_events;

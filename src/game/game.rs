@@ -1,5 +1,4 @@
 use crate::app::application::GameOver;
-use crate::assets::assets::Assets;
 use crate::component::graphics::Sprite;
 use crate::component::physics::Position;
 use crate::entities::load_map;
@@ -7,6 +6,7 @@ use crate::game::flashlamps::setup_flashlamps;
 use crate::game::hud::setup_hud;
 use crate::screens::screen::Screen;
 use derive::Event;
+use engine::assets::Assets;
 use engine::entities::entity::Entities;
 use engine::events::dispatcher::Dispatcher;
 use engine::events::event::{Event, Events};
