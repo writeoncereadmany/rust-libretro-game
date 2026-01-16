@@ -12,7 +12,7 @@ use engine::events::dispatcher::Dispatcher;
 use engine::events::event::{Event, Events};
 use engine::events::input::ButtonPressed;
 use engine::events::spawner::Spawner;
-use engine::renderer::renderer::Renderer;
+use engine::renderer::asset_renderer::AssetRenderer;
 use engine::renderer::spritefont::Alignment;
 use rust_libretro::types::JoypadState;
 use std::collections::VecDeque;
@@ -82,23 +82,18 @@ impl Game {
         setup_hud(events);
     }
 
-    fn update_background(&mut self, renderer: &mut Renderer) {
+    fn update_background(&mut self, renderer: &mut AssetRenderer) {
         while let Some(task) = self.render_tasks.pop_front() {
             match task {
                 RedrawBackgroundTask::UpdateBackgroundTile { x, y, tileset, tile } => {
-                    if let Some(tilesheet) = self.assets.tilesheets.get(&tileset) {
-                        renderer.draw_background(&tilesheet.tile(tile), x, y);
-                    }
-                    else {
-                        renderer.draw_background(self.assets.sprite("error"), x, y);
-                    }
+                    renderer.draw_background(&tileset, tile, x, y);
                 },
                 RedrawBackgroundTask::UpdateBackgroundSprite { x, y, sprite } => {
                     let Sprite(sprite) = sprite;
-                    renderer.draw_background(self.assets.sprite(sprite), x, y);
+                    renderer.draw_background_sprite(sprite, x, y);
                 },
                 RedrawBackgroundTask::UpdateBackgroundText { x, y, font, text, alignment } => {
-                    renderer.draw_background_text(self.assets.fonts.get(font).unwrap(), &text, x, y, alignment);
+                    renderer.draw_background_text(&text, font, x, y, alignment);
                 }
             };
         }
@@ -143,15 +138,14 @@ impl Screen for Game {
         event.dispatch(&self.dispatcher, &mut self.world, events)
     }
 
-    fn draw(&mut self, renderer: &mut Renderer) {
+    fn draw(&mut self, renderer: &mut AssetRenderer) {
         self.update_background(renderer);
         renderer.clear_sprites();
         self.world
             .collect()
             .iter()
             .for_each(|(Sprite(sprite), Position(x, y))| {
-                let r_sprite = self.assets.sprite(sprite);
-                renderer.draw_sprite(r_sprite, *x as i32, *y as i32, false)
+                renderer.draw_sprite(sprite, *x as i32, *y as i32, false)
             });
     }
 }

@@ -12,6 +12,7 @@ use rust_libretro::contexts::AudioContext;
 use rust_libretro::types::JoypadState;
 use std::sync::Arc;
 use std::time::Duration;
+use engine::renderer::asset_renderer::AssetRenderer;
 
 pub struct Application {
     assets: Arc<Assets>,
@@ -28,9 +29,7 @@ pub struct StartGame;
 pub struct GameOver;
 
 impl Application {
-    pub fn new(assets: Assets) -> Self {
-        let assets = Arc::new(assets);
-
+    pub fn new(assets: Arc<Assets>) -> Self {
         let mut dispatcher = Dispatcher::new();
         let mut spawner = Spawner::new();
 
@@ -60,7 +59,7 @@ impl Application {
         self.previous_joypad_state = input;
     }
 
-    pub fn draw(&mut self, renderer: &mut Renderer) {
+    pub fn draw(&mut self, renderer: &mut AssetRenderer) {
         self.screen.draw(renderer);
     }
 

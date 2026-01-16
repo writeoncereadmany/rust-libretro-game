@@ -13,8 +13,10 @@ use rust_libretro::{
 use std::ffi::c_uint;
 use std::ffi::CString;
 use std::slice;
+use std::sync::Arc;
 use tar::Archive;
 use engine::events::event::Events;
+use engine::renderer::asset_renderer::AssetRenderer;
 
 const WIDTH: c_uint = 360;
 const HEIGHT: c_uint = 240;
@@ -68,7 +70,7 @@ struct ExampleCore {
 
     application: Option<Application>,
     events: Events,
-    renderer: Renderer
+    renderer: Option<AssetRenderer>
 }
 
 retro_core!(ExampleCore {
@@ -76,7 +78,7 @@ retro_core!(ExampleCore {
     option_2: true,
 
     application: None,
-    renderer: Renderer::new(WIDTH, HEIGHT),
+    renderer: None,
     events: Events::new()
 });
 
@@ -135,7 +137,9 @@ impl Core for ExampleCore {
         let mut archive = Archive::new(data);
         let mut assets = Assets::new();
         assets.load_assets(&mut archive);
-        self.application = Some(Application::new(assets));
+        let assets = Arc::new(assets);
+        self.application = Some(Application::new(assets.clone()));
+        self.renderer = Some(AssetRenderer::new(Renderer::new(WIDTH, HEIGHT), assets.clone()));
 
         let gctx: GenericContext = ctx.into();
         gctx.enable_audio_callback();
@@ -169,10 +173,13 @@ impl Core for ExampleCore {
 
         if let Some(ref mut application) = self.application {
             application.update(input, delta_us.unwrap_or(16_666) as u64, &mut self.events);
-            application.draw(&mut self.renderer);
+            if let Some (ref mut renderer) = self.renderer {
+                application.draw(renderer);
+            }
         }
-
-        self.renderer.render(ctx);
+        if let Some (ref mut renderer) = self.renderer {
+            renderer.render(ctx);
+        }
     }
 
     fn on_write_audio(&mut self, ctx: &mut AudioContext) {
