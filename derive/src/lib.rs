@@ -19,12 +19,12 @@ pub fn derive_component(input: TokenStream) -> TokenStream {
 pub fn derive_variable(input: TokenStream) -> TokenStream {
     let DeriveInput { ident, .. } = parse_macro_input!(input);
     let output = quote! {
-        impl entity::Component for #ident {
+        impl engine::entities::entity::Component for #ident {
             fn get(entity: &engine::entities::entity::Entity) -> Option<Self> {
                 Some(entity.get::<#ident>()?.clone())
             }
         }
-        impl entity::Variable for #ident {
+        impl engine::entities::entity::Variable for #ident {
             fn set(self, entity: &mut engine::entities::entity::Entity) {
                 entity.set(self)
             }

@@ -4,5 +4,6 @@ pub mod physics;
 pub mod graphics;
 
 pub fn register(dispatcher: &mut Dispatcher) {
-    graphics::register(dispatcher)
+    graphics::register(dispatcher);
+    physics::register(dispatcher);
 }
