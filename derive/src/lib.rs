@@ -6,7 +6,7 @@ use syn::{parse_macro_input, DeriveInput};
 pub fn derive_component(input: TokenStream) -> TokenStream {
     let DeriveInput { ident, .. } = parse_macro_input!(input);
     let output = quote! {
-        impl entity::Component for #ident {
+        impl engine::entities::entity::Component for #ident {
             fn get(entity: &engine::entities::entity::Entity) -> Option<Self> {
                 Some(entity.get::<#ident>()?.clone())
             }
