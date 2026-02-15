@@ -1,3 +1,4 @@
+use crate::entities::entity::{Component, Entity, Id, Variable};
 use crate::shapes::collision::Collision;
 use crate::shapes::projection::{Projection, Projects};
 use crate::shapes::shape::Shape::{BBox, Circle};
@@ -8,6 +9,22 @@ use crate::shapes::vec2d::Vec2d;
 pub enum Shape {
     Circle(circle::Circle),
     BBox(bbox::BBox),
+}
+
+impl Component for Shape {
+    fn get(entity: &Entity) -> Option<Self> {
+        Some(entity.get::<Shape>()?.clone())
+    }
+}
+
+impl Variable for Shape {
+    fn set(self, entity: &mut Entity) { 
+        entity.set(self)
+    }
+    
+    fn remove(entity: &mut Entity) {
+        entity.remove::<Self>()
+    }
 }
 
 pub const BLOCK: Shape = BBox(bbox::BBox { left: 0.0, bottom: 0.0, right: 1.0, top: 1.0 });

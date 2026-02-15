@@ -10,8 +10,10 @@ pub trait Variable: Component {
     fn remove(entity: &mut Entity);
 }
 
+pub type EntityId = u64;
+
 #[derive(Clone)]
-pub struct Id(pub u64);
+pub struct Id(pub EntityId);
 
 impl Component for Id {
     fn get(entity: &Entity) -> Option<Self> {

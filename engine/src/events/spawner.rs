@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use tiled::Object;
 
 pub struct Spawner {
-    spawns: HashMap<String, fn(&tiled::Object, &mut Events)>
+    spawns: HashMap<String, fn(&Object, &mut Events)>
 }
 
 impl Spawner {
