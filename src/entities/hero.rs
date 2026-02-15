@@ -26,7 +26,7 @@ pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     dispatcher.register(listen_to_input);
 
     spawner.register("Hero", |spawn, events| {
-        events.fire(SpawnHero(spawn.x as f64, spawn.y as f64))
+        events.fire(SpawnHero(spawn.x, spawn.y))
     });
 }
 
@@ -51,8 +51,8 @@ fn listen_to_input(&InputState(joypad): &InputState, world: &mut Entities, _even
                 _otherwise => 0.0
             };
             let dy = match (joypad.contains(JoypadState::UP), joypad.contains(JoypadState::DOWN)) {
-                (true, false) => -VEL,
-                (false, true) => VEL,
+                (true, false) => VEL,
+                (false, true) => -VEL,
                 _otherwise => 0.0
             };
             Velocity(dx, dy)

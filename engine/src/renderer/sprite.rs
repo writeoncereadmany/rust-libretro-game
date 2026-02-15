@@ -24,7 +24,7 @@ impl Sprite {
         let src_y = self.bounds.y as i32;
 
         let dst_x = x;
-        let dst_y = y;
+        let dst_y = dst.height as i32 - y - self.bounds.height as i32;
 
         let src = &sheet.tile_sheet;
         let palette = &sheet.palette;

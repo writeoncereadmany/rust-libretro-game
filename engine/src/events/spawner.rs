@@ -3,7 +3,13 @@ use std::collections::HashMap;
 use tiled::Object;
 
 pub struct Spawner {
-    spawns: HashMap<String, fn(&Object, &mut Events)>
+    spawns: HashMap<String, fn(Spawn, &mut Events)>
+}
+
+pub struct Spawn<'a> {
+    pub x: f64,
+    pub y: f64,
+    pub object: &'a Object<'a>
 }
 
 impl Spawner {
@@ -11,13 +17,14 @@ impl Spawner {
         Spawner { spawns: HashMap::new() }
     }
 
-    pub fn spawn(&self, object: &tiled::Object, events: &mut Events) {
+    pub fn spawn(&self, object: &Object, events: &mut Events) {
         if let Some(user_type) = get_user_type(object) {
-            self.spawns.get(&user_type).map(|f| f(object, events));
+            let spawn = Spawn { x: object.x as f64, y: (19*12) as f64 - object.y as f64, object };
+            self.spawns.get(&user_type).map(|f| f(spawn, events));
         }
     }
 
-    pub fn register(&mut self, name: &str, spawner: fn(&tiled::Object, &mut Events)) {
+    pub fn register(&mut self, name: &str, spawner: fn(Spawn, &mut Events)) {
         self.spawns.insert(name.to_string(), spawner);
     }
 }

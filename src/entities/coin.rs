@@ -20,7 +20,7 @@ pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     dispatcher.register(pickup_coin);
 
     spawner.register("Coin", |spawn, events| {
-        events.fire(SpawnCoin(spawn.x as f64, spawn.y as f64))
+        events.fire(SpawnCoin(spawn.x, spawn.y))
     });
 }
 

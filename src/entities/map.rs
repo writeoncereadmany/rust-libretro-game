@@ -10,7 +10,7 @@ pub fn load_map(map: &tiled::Map, spawner: &Spawner, events: &mut Events) {
                     for y in 0..height as i32{
                         if let Some(tile) = tiles.get_tile(x, y) {
                             events.fire(UpdateBackgroundTile {
-                                x: (x+1)*12, y: (y+1)*12, tileset: tile.get_tileset().name.clone(), tile: tile.id()
+                                x: (x+1)*12, y: (18-y)*12, tileset: tile.get_tileset().name.clone(), tile: tile.id()
                             });
                             if let Some(_map_tile) = tile.get_tile() {
                                 // add to collision data based on user type
