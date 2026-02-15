@@ -7,6 +7,7 @@ use engine::events::event::Events;
 use engine::events::spawner::Spawner;
 use engine::shapes::shape::Shape;
 use crate::component::collisions::{Collision, Pickup};
+use crate::component::lifecycle::Destroy;
 
 #[derive(Event)]
 pub struct SpawnCoin(f64, f64);
@@ -14,13 +15,9 @@ pub struct SpawnCoin(f64, f64);
 #[derive(Constant, Clone)]
 pub struct Coin;
 
-#[derive(Event)]
-pub struct Destroy(EntityId);
-
 pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     dispatcher.register(spawn_coin);
     dispatcher.register(pickup_coin);
-    dispatcher.register(destroy);
 
     spawner.register("Coin", |spawn, events| {
         events.fire(SpawnCoin(spawn.x as f64, spawn.y as f64))
@@ -45,8 +42,4 @@ fn spawn_coin(&SpawnCoin(x, y): &SpawnCoin, world: &mut Entities, _events: &mut 
 
 fn pickup_coin(Collision(_hero, coin): &Collision, world: &mut Entities, events: &mut Events) {
     world.apply_to(coin, |(Coin)| events.fire(Destroy(*coin)));
-}
-
-fn destroy(Destroy(id): &Destroy, world: &mut Entities, _events: &mut Events) {
-    world.delete::<()>(id);
 }
