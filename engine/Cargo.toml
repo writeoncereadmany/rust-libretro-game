@@ -9,5 +9,6 @@ edition = "2024"
 png = "0.17.16"
 tar = "0.4.44"
 tiled = "0.15.0"
+googletest = "0.9.0"
 rust-libretro = {  version = "0.3.2", features = [ "unstable-env-commands" ] }
 itertools = "0.14.0"
