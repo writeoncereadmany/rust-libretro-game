@@ -1,6 +1,6 @@
-use crate::game::game::UpdateBackgroundTile;
 use engine::events::event::Events;
 use engine::events::spawner::Spawner;
+use engine::renderer::background_renderer::UpdateBackgroundTile;
 
 pub fn load_map(map: &tiled::Map, spawner: &Spawner, events: &mut Events) {
     for layer in map.layers() {

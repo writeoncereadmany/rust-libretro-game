@@ -3,6 +3,7 @@ use crate::component::graphics::{Layer, Sprite};
 use crate::component::physics::Position;
 use crate::entities::load_map;
 use crate::game::flashlamps::setup_flashlamps;
+use crate::game::hud;
 use crate::game::hud::setup_hud;
 use crate::screens::screen::Screen;
 use derive::Event;
@@ -13,12 +14,8 @@ use engine::events::event::{Event, Events};
 use engine::events::input::ButtonPressed;
 use engine::events::spawner::Spawner;
 use engine::renderer::asset_renderer::AssetRenderer;
-use engine::renderer::spritefont::Alignment;
 use rust_libretro::types::JoypadState;
-use std::collections::VecDeque;
 use std::sync::Arc;
-use tiled::TileId;
-use crate::game::hud;
 
 const GAME_WINDOW_START_X: i32 = 12;
 const GAME_WINDOW_TOP_Y: i32 = 19*12;
@@ -29,42 +26,11 @@ pub struct StartLevel(pub String);
 #[derive(Event)]
 pub struct Score(pub u32);
 
-#[derive(Event)]
-pub struct UpdateBackgroundSprite {
-    pub x: i32,
-    pub y: i32,
-    pub sprite: Sprite,
-}
-
-#[derive(Event)]
-pub struct UpdateBackgroundTile {
-    pub x: i32,
-    pub y: i32,
-    pub tileset: String,
-    pub tile: TileId
-}
-
-#[derive(Event)]
-pub struct UpdateBackgroundText {
-    pub x: i32,
-    pub y: i32,
-    pub font: &'static str,
-    pub text: String,
-    pub alignment: Alignment
-}
-
-enum RedrawBackgroundTask {
-    UpdateBackgroundTile { x: i32, y: i32, tileset: String, tile: TileId },
-    UpdateBackgroundSprite { x: i32, y: i32, sprite: Sprite },
-    UpdateBackgroundText { x: i32, y: i32, font: &'static str, text: String, alignment: Alignment },
-}
-
 pub struct Game {
     assets: Arc<Assets>,
     world: Entities,
     dispatcher: Arc<Dispatcher>,
     spawner: Arc<Spawner>,
-    render_tasks: VecDeque<RedrawBackgroundTask>,
     bonus: u32,
     score: u32
 }
@@ -76,7 +42,6 @@ impl Game {
             world: Entities::new(),
             dispatcher,
             spawner,
-            render_tasks: VecDeque::new(),
             bonus: 1,
             score: 0
         }
@@ -92,23 +57,6 @@ impl Game {
         };
         setup_flashlamps(events);
         setup_hud(events, self.score, self.bonus);
-    }
-
-    fn update_background(&mut self, renderer: &mut AssetRenderer) {
-        while let Some(task) = self.render_tasks.pop_front() {
-            match task {
-                RedrawBackgroundTask::UpdateBackgroundTile { x, y, tileset, tile } => {
-                    renderer.draw_background(&tileset, tile, x, y);
-                },
-                RedrawBackgroundTask::UpdateBackgroundSprite { x, y, sprite } => {
-                    let Sprite(sprite) = sprite;
-                    renderer.draw_background_sprite(sprite, x, y);
-                },
-                RedrawBackgroundTask::UpdateBackgroundText { x, y, font, text, alignment } => {
-                    renderer.draw_background_text(&text, font, x, y, alignment);
-                }
-            };
-        }
     }
 }
 
@@ -127,41 +75,10 @@ impl Screen for Game {
 
         event.apply(|StartLevel(map)| self.load_map(map, events));
 
-        event.apply(|UpdateBackgroundSprite { x, y, sprite }| {
-            self.render_tasks
-                .push_back(RedrawBackgroundTask::UpdateBackgroundSprite {
-                    x: *x,
-                    y: *y,
-                    sprite: sprite.clone(),
-                })
-        });
-
-        event.apply(|UpdateBackgroundTile { x, y, tileset, tile }| {
-            self.render_tasks
-                .push_back(RedrawBackgroundTask::UpdateBackgroundTile {
-                    x: *x,
-                    y: *y,
-                    tileset: tileset.clone(),
-                    tile: *tile
-                })
-        });
-
-        event.apply(|UpdateBackgroundText { x, y, font, text, alignment}|{
-            self.render_tasks
-                .push_back(RedrawBackgroundTask::UpdateBackgroundText {
-                    x: *x,
-                    y: *y,
-                    font,
-                    text: text.clone(),
-                    alignment: alignment.clone()
-                })
-        });
-
         event.dispatch(&self.dispatcher, &mut self.world, events)
     }
 
     fn draw(&mut self, renderer: &mut AssetRenderer) {
-        self.update_background(renderer);
         renderer.clear_sprites();
         let mut sprites : Vec<(Sprite, Position, Layer)> = self.world.collect();
         sprites.sort_by(|(_, _, Layer(l1)), (_, _, Layer(l2))| l1.cmp(l2));

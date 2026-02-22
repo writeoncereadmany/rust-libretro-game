@@ -2,21 +2,21 @@ use crate::renderer::sprite::Sprite;
 use crate::renderer::texture::Texture;
 use std::collections::HashMap;
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum HorizontalAlignment {
     LEFT,
     CENTER,
     RIGHT,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum VerticalAlignment {
     TOP,
     MIDDLE,
     BOTTOM,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct Alignment {
     horizontal_alignment: HorizontalAlignment,
     vertical_alignment: VerticalAlignment,

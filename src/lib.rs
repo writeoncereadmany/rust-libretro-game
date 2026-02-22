@@ -6,6 +6,8 @@ mod entities;
 
 use crate::app::application::Application;
 use engine::assets::Assets;
+use engine::events::event::Events;
+use engine::renderer::asset_renderer::AssetRenderer;
 use engine::renderer::renderer::Renderer;
 use rust_libretro::{
     contexts::*, core::Core, env_version, input_descriptors, proc::*, retro_core, sys::*, types::*,
@@ -15,8 +17,6 @@ use std::ffi::CString;
 use std::slice;
 use std::sync::Arc;
 use tar::Archive;
-use engine::events::event::Events;
-use engine::renderer::asset_renderer::AssetRenderer;
 
 const WIDTH: c_uint = 360;
 const HEIGHT: c_uint = 240;
@@ -172,9 +172,11 @@ impl Core for ExampleCore {
         }
 
         if let Some(ref mut application) = self.application {
-            application.update(input, delta_us.unwrap_or(16_666) as u64, &mut self.events);
-            if let Some (ref mut renderer) = self.renderer {
-                application.draw(renderer);
+            if let Some(ref mut renderer) = self.renderer {
+                application.update(input, delta_us.unwrap_or(16_666) as u64, renderer, &mut self.events);
+                if let Some(ref mut renderer) = self.renderer {
+                    application.draw(renderer);
+                }
             }
         }
         if let Some (ref mut renderer) = self.renderer {

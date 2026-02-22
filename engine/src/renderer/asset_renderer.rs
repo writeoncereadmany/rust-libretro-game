@@ -1,4 +1,6 @@
 use crate::assets::Assets;
+use crate::events::event::{Event, Events};
+use crate::renderer::background_renderer::{UpdateBackgroundSprite, UpdateBackgroundText, UpdateBackgroundTile};
 use crate::renderer::renderer::Renderer;
 use crate::renderer::spritefont::Alignment;
 use rust_libretro::contexts::RunContext;
@@ -50,5 +52,20 @@ impl AssetRenderer {
 
     pub fn clear_sprites(&mut self) {
         self.renderer.clear_sprites();
+    }
+
+    pub fn on_event(&mut self, event: &Event, _events: &mut Events) {
+
+        event.apply(|UpdateBackgroundSprite { x, y, sprite }| {
+            self.draw_background_sprite(sprite, *x, *y)
+        });
+
+        event.apply(|UpdateBackgroundTile { x, y, tileset, tile }| {
+            self.draw_background(&tileset, *tile, *x, *y)
+        });
+
+        event.apply(|UpdateBackgroundText { x, y, font, text, alignment}|{
+            self.draw_background_text(&text, font, *x, *y, *alignment)
+        });
     }
 }

@@ -7,12 +7,11 @@ use engine::events::dispatcher::Dispatcher;
 use engine::events::event::{Event, Events};
 use engine::events::input::fire_input_events;
 use engine::events::spawner::Spawner;
-use engine::renderer::renderer::Renderer;
+use engine::renderer::asset_renderer::AssetRenderer;
 use rust_libretro::contexts::AudioContext;
 use rust_libretro::types::JoypadState;
 use std::sync::Arc;
 use std::time::Duration;
-use engine::renderer::asset_renderer::AssetRenderer;
 
 pub struct Application {
     assets: Arc<Assets>,
@@ -45,13 +44,14 @@ impl Application {
         }
     }
 
-    pub fn update(&mut self, input: JoypadState, delta_time: u64, events: &mut Events) {
+    pub fn update(&mut self, input: JoypadState, delta_time: u64, renderer: &mut AssetRenderer, events: &mut Events) {
         let dt = Duration::from_micros(delta_time);
         events.elapse(dt);
         events.fire(dt);
         fire_input_events(input, self.previous_joypad_state, events);
 
         while let Some(event) = events.pop() {
+            renderer.on_event(&event, events);
             self.on_event(&event, events);
             self.screen.on_event(&event, events);
         }

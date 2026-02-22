@@ -1,6 +1,5 @@
-use crate::component::graphics::Sprite;
-use crate::game::game::UpdateBackgroundSprite;
 use engine::events::event::Events;
+use engine::renderer::background_renderer::UpdateBackgroundSprite;
 use std::time::Duration;
 
 pub fn setup_flashlamps(events: &mut Events) {
@@ -25,7 +24,7 @@ pub fn setup_flashlamps(events: &mut Events) {
         let (x, y) = (x * 12, y * 12);
         let fraction_of_fulltime = i as f64 / flashlamps.len() as f64;
         let fire_in = Duration::from_secs_f64(2.4 + (10.0 * fraction_of_fulltime));
-        events.fire(UpdateBackgroundSprite { x, y, sprite: Sprite("lamp_unlit") });
-        events.schedule(fire_in, UpdateBackgroundSprite {x, y, sprite: Sprite("lamp_green")});
+        events.fire(UpdateBackgroundSprite { x, y, sprite: "lamp_unlit".to_string() });
+        events.schedule(fire_in, UpdateBackgroundSprite {x, y, sprite: "lamp_green".to_string() });
     }
 }
