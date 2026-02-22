@@ -5,9 +5,11 @@ use engine::events::spawner::Spawner;
 mod coin;
 mod map;
 mod hero;
+mod flag;
 
 pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     coin::register(dispatcher, spawner);
+    flag::register(dispatcher, spawner);
     hero::register(dispatcher, spawner);
 }
 

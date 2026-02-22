@@ -81,6 +81,7 @@ impl Game {
 
     fn load_map(&mut self, map: &String, events: &mut Events) {
         events.clear_schedule();
+        self.world = Entities::new();
 
         match self.assets.maps.get(map) {
             Some(map) => load_map(map, &self.spawner, events),

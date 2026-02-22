@@ -1,6 +1,7 @@
 use core::any::*;
 use itertools::Itertools;
 use std::{collections::HashMap, marker::PhantomData};
+use crate::entities;
 
 pub trait Component: Any + Clone + Sized {
     fn get(entity : &Entity) -> Option<Self>;

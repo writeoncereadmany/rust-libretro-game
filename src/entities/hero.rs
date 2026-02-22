@@ -10,9 +10,7 @@ use rust_libretro::types::JoypadState;
 use engine::shapes::shape::Shape;
 use crate::component::collisions::Actor;
 
-const ACCEL:f64 = 100.0;
-const DECEL:f64 = 250.0;
-const VEL:f64 = 50.0;
+const VEL:f64 = 100.0;
 
 
 #[derive(Constant, Clone)]
@@ -37,7 +35,7 @@ fn spawn_hero(&SpawnHero(x, y): &SpawnHero, world: &mut Entities, _events: &mut 
             .with(Actor)
             .with(Sprite("panda_stand"))
             .with(Layer(10))
-            .with(Shape::bbox(0.0, -12.0, 12.0, 12.0))
+            .with(Shape::bbox(0.0, 0.0, 12.0, 12.0))
             .with(Velocity(0.0, 0.0))
             .with(Position(x, y)),
     );

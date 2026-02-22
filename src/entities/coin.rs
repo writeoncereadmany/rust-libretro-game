@@ -47,7 +47,7 @@ fn spawn_coin(&SpawnCoin(x, y): &SpawnCoin, world: &mut Entities, _events: &mut 
             .with(Sprite("coin_1"))
             .with(Layer(5))
             .with(Position(x, y))
-            .with(Shape::circle((6.0, -6.0), 4.0))
+            .with(Shape::circle((6.0, 6.0), 4.0))
     );
 }
 
