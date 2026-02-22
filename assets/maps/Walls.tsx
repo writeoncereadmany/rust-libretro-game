@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.0" name="Walls" tilewidth="12" tileheight="12" tilecount="120" columns="12">
+<tileset version="1.10" tiledversion="1.11.2" name="Walls" class="Tile" tilewidth="12" tileheight="12" tilecount="120" columns="12">
  <image source="../graphics/tilesheet.png" width="144" height="120"/>
  <tile id="0" type="Wall"/>
  <tile id="1" type="Wall"/>

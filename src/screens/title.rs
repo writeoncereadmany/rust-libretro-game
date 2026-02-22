@@ -27,7 +27,7 @@ impl Screen for TitleScreen {
     fn on_event(&mut self, event: &Event, events: &mut Events) {
         event.apply(|ButtonPressed(button)| {
             if button == &JoypadState::START {
-                events.fire(StartGame)
+                events.fire(StartGame())
             }
         });
     }

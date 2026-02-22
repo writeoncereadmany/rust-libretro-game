@@ -23,10 +23,10 @@ pub struct Application {
 }
 
 #[derive(Event)]
-pub struct StartGame;
+pub struct StartGame();
 
 #[derive(Event)]
-pub struct GameOver;
+pub struct GameOver();
 
 impl Application {
     pub fn new(assets: Arc<Assets>) -> Self {
@@ -66,11 +66,11 @@ impl Application {
     pub fn play(&mut self, _ctx: &mut AudioContext) {}
 
     fn on_event(&mut self, event: &Event, events: &mut Events) {
-        event.apply(|StartGame| {
+        event.apply(|StartGame()| {
             self.screen = Box::new(Game::new(&self.assets, self.dispatcher.clone(), self.spawner.clone()));
             events.fire(StartLevel("start".to_string()));
         });
-        event.apply(|GameOver| {
+        event.apply(|GameOver()| {
             self.screen = Box::new(TitleScreen::new(&self.assets))
         });
     }

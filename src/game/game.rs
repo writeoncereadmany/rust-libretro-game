@@ -113,7 +113,7 @@ impl Screen for Game {
     fn on_event(&mut self, event: &Event, events: &mut Events) {
         event.apply(|ButtonPressed(button)| {
             if button == &JoypadState::START {
-                events.fire(GameOver)
+                events.fire(GameOver())
             }
         });
 
@@ -123,6 +123,7 @@ impl Screen for Game {
         });
 
         event.apply(|StartLevel(map)| self.load_map(map, events));
+
         event.apply(|UpdateBackgroundSprite { x, y, sprite }| {
             self.render_tasks
                 .push_back(RedrawBackgroundTask::UpdateBackgroundSprite {
@@ -130,7 +131,8 @@ impl Screen for Game {
                     y: *y,
                     sprite: sprite.clone(),
                 })
-        });        
+        });
+
         event.apply(|UpdateBackgroundTile { x, y, tileset, tile }| {
             self.render_tasks
                 .push_back(RedrawBackgroundTask::UpdateBackgroundTile {
@@ -140,6 +142,7 @@ impl Screen for Game {
                     tile: *tile
                 })
         });
+
         event.apply(|UpdateBackgroundText { x, y, font, text, alignment}|{
             self.render_tasks
                 .push_back(RedrawBackgroundTask::UpdateBackgroundText {
@@ -150,6 +153,7 @@ impl Screen for Game {
                     alignment: alignment.clone()
                 })
         });
+
         event.dispatch(&self.dispatcher, &mut self.world, events)
     }
 
