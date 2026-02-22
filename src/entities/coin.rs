@@ -1,5 +1,5 @@
 use std::time::Duration;
-use crate::component::graphics::{Animation, Phase, Sprite};
+use crate::component::graphics::{Animation, Layer, Phase, Sprite};
 use crate::component::physics::Position;
 use derive::{Constant, Event};
 use engine::entities::entity::{Entities, entity, EntityId};
@@ -44,6 +44,7 @@ fn spawn_coin(&SpawnCoin(x, y): &SpawnCoin, world: &mut Entities, _events: &mut 
             })
             .with(Phase((-0.005 * x + 0.015 * y) % 1.0))
             .with(Sprite("coin_1"))
+            .with(Layer(5))
             .with(Position(x, y))
             .with(Shape::circle((6.0, -6.0), 4.0))
     );
@@ -58,6 +59,7 @@ fn spawn_sparkle(&SpawnSparkle(x, y): &SpawnSparkle, world: &mut Entities, event
             })
             .with(Phase(0.0))
             .with(Sprite("sparkle_small"))
+            .with(Layer(5))
             .with(Position(x, y))
     );
     events.schedule(Duration::from_secs_f64(0.35), Destroy(entity_id));

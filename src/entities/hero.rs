@@ -1,4 +1,4 @@
-use crate::component::graphics::Sprite;
+use crate::component::graphics::{Layer, Sprite};
 use crate::component::physics::{Position, Velocity};
 use derive::{Constant, Event, Variable};
 use engine::entities::entity::{entity, Entities};
@@ -36,6 +36,7 @@ fn spawn_hero(&SpawnHero(x, y): &SpawnHero, world: &mut Entities, _events: &mut 
             .with(Hero)
             .with(Actor)
             .with(Sprite("panda_stand"))
+            .with(Layer(10))
             .with(Shape::bbox(0.0, -12.0, 12.0, 12.0))
             .with(Velocity(0.0, 0.0))
             .with(Position(x, y)),

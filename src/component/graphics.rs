@@ -9,6 +9,9 @@ use engine::events::event::Events;
 pub struct Sprite(pub &'static str);
 
 #[derive(Clone, Constant)]
+pub struct Layer(pub u32);
+
+#[derive(Clone, Constant)]
 pub struct Animation {
     pub sprites: Vec<&'static str>,
     pub period: f64
