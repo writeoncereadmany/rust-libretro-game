@@ -18,9 +18,13 @@ use rust_libretro::types::JoypadState;
 use std::collections::VecDeque;
 use std::sync::Arc;
 use tiled::TileId;
+use crate::game::hud;
 
 #[derive(Event)]
 pub struct StartLevel(pub String);
+
+#[derive(Event)]
+pub struct Score(pub u32);
 
 #[derive(Event)]
 pub struct UpdateBackgroundSprite {
@@ -58,6 +62,8 @@ pub struct Game {
     dispatcher: Arc<Dispatcher>,
     spawner: Arc<Spawner>,
     render_tasks: VecDeque<RedrawBackgroundTask>,
+    bonus: u32,
+    score: u32
 }
 
 impl Game {
@@ -68,6 +74,8 @@ impl Game {
             dispatcher,
             spawner,
             render_tasks: VecDeque::new(),
+            bonus: 1,
+            score: 0
         }
     }
 
@@ -79,7 +87,7 @@ impl Game {
             None => panic!("Map {map} could not be found")
         };
         setup_flashlamps(events);
-        setup_hud(events);
+        setup_hud(events, self.score, self.bonus);
     }
 
     fn update_background(&mut self, renderer: &mut AssetRenderer) {
@@ -107,6 +115,12 @@ impl Screen for Game {
                 events.fire(GameOver)
             }
         });
+
+        event.apply(|Score(score)| {
+            self.score += score * self.bonus;
+            hud::update_score(self.score, events);
+        });
+
         event.apply(|StartLevel(map)| self.load_map(map, events));
         event.apply(|UpdateBackgroundSprite { x, y, sprite }| {
             self.render_tasks

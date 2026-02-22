@@ -5,9 +5,9 @@ use engine::renderer::spritefont::Alignment;
 use engine::renderer::spritefont::HorizontalAlignment::RIGHT;
 use engine::renderer::spritefont::VerticalAlignment::MIDDLE;
 
-pub fn setup_hud(events: &mut Events) {
-    update_bonus(1, events);
-    update_score(0, events);
+pub fn setup_hud(events: &mut Events, score: u32, bonus: u32) {
+    update_bonus(bonus, events);
+    update_score(score, events);
 }
 
 pub fn update_bonus(bonus: u32, events: &mut Events) {

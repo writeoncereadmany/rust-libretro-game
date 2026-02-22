@@ -9,6 +9,7 @@ use engine::events::spawner::Spawner;
 use engine::shapes::shape::Shape;
 use crate::component::collisions::{Collision, Pickup};
 use crate::component::lifecycle::Destroy;
+use crate::game::game::Score;
 
 #[derive(Event)]
 pub struct SpawnCoin(f64, f64);
@@ -73,5 +74,6 @@ fn pickup_coin(Collision(first, second): &Collision, world: &mut Entities, event
 fn collect_coin(PickupCoin(coin): &PickupCoin, world: &mut Entities, events: &mut Events) {
     if let Some(Position(x, y)) = world.delete(coin) {
         events.fire(SpawnSparkle(x, y));
+        events.fire(Score(5));
     }
 }
