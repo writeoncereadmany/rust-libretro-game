@@ -7,7 +7,7 @@ use engine::renderer::spritefont::VerticalAlignment::MIDDLE;
 
 pub fn setup_hud(events: &mut Events) {
     update_bonus(1, events);
-    update_score(12345678, events);
+    update_score(0, events);
 }
 
 pub fn update_bonus(bonus: u32, events: &mut Events) {
@@ -20,18 +20,18 @@ pub fn update_bonus(bonus: u32, events: &mut Events) {
         _otherwise => "error"
     });
 
-    events.fire(UpdateBackgroundSprite { x: 12*12, y: 0, sprite})
+    events.fire(UpdateBackgroundSprite { x: 12*12, y: 19*12, sprite})
 }
 
 pub fn update_score(score: u32, events: &mut Events) {
-    events.fire(UpdateBackgroundSprite { x: 13*12, y: 0, sprite: Sprite("score_left") });
-    events.fire(UpdateBackgroundSprite { x: 14*12, y: 0, sprite: Sprite("score_mid") });
-    events.fire(UpdateBackgroundSprite { x: 15*12, y: 0, sprite: Sprite("score_mid") });
-    events.fire(UpdateBackgroundSprite { x: 16*12, y: 0, sprite: Sprite("score_right") });
+    events.fire(UpdateBackgroundSprite { x: 13*12, y: 19*12, sprite: Sprite("score_left") });
+    events.fire(UpdateBackgroundSprite { x: 14*12, y: 19*12, sprite: Sprite("score_mid") });
+    events.fire(UpdateBackgroundSprite { x: 15*12, y: 19*12, sprite: Sprite("score_mid") });
+    events.fire(UpdateBackgroundSprite { x: 16*12, y: 19*12, sprite: Sprite("score_right") });
 
     events.fire(UpdateBackgroundText {
         x: 17*12 - 3,
-        y: 6,
+        y: 19*12 + 6,
         font: "Spritefont_Medium",
         text: simplify(score),
         alignment: Alignment::aligned(RIGHT, MIDDLE)});

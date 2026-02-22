@@ -6,19 +6,19 @@ use std::time::Duration;
 pub fn setup_flashlamps(events: &mut Events) {
     let mut flashlamps: Vec<(i32, i32)> = Vec::new();
     for x in 17..30 {
-        flashlamps.push((x, 0))
+        flashlamps.push((x, 19))
     }
     for y in 1..19 {
-        flashlamps.push((29, y))
+        flashlamps.push((29, 19-y))
     }
     for x in 0..30 {
-        flashlamps.push((29 - x, 19))
+        flashlamps.push((29 - x, 0))
     }
     for y in 1..19 {
-        flashlamps.push((0, 19 - y))
+        flashlamps.push((0, y))
     }
     for x in 0..12 {
-        flashlamps.push((x, 0))
+        flashlamps.push((x, 19))
     }
 
     for (i, (x, y)) in flashlamps.iter().enumerate() {
