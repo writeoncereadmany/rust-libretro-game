@@ -20,6 +20,9 @@ use std::sync::Arc;
 use tiled::TileId;
 use crate::game::hud;
 
+const GAME_WINDOW_START_X: i32 = 12;
+const GAME_WINDOW_TOP_Y: i32 = 19*12;
+
 #[derive(Event)]
 pub struct StartLevel(pub String);
 
@@ -164,7 +167,7 @@ impl Screen for Game {
         sprites.sort_by(|(_, _, Layer(l1)), (_, _, Layer(l2))| l1.cmp(l2));
         sprites.iter()
             .for_each(|(Sprite(sprite), Position(x, y), Layer(_layer))| {
-                renderer.draw_sprite(sprite, *x as i32, *y as i32, false)
+                renderer.draw_sprite(sprite, *x as i32 + GAME_WINDOW_START_X, *y as i32 + GAME_WINDOW_TOP_Y, false)
             });
     }
 }

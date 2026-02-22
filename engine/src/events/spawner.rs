@@ -19,7 +19,8 @@ impl Spawner {
 
     pub fn spawn(&self, object: &Object, events: &mut Events) {
         if let Some(user_type) = get_user_type(object) {
-            let spawn = Spawn { x: object.x as f64, y: (19*12) as f64 - object.y as f64, object };
+            // tiled goes from top-bottom, we want to go bottom-top, so invert y
+            let spawn = Spawn { x: object.x as f64, y: -object.y as f64, object };
             self.spawns.get(&user_type).map(|f| f(spawn, events));
         }
     }
