@@ -1,4 +1,5 @@
-mkdir -p package
+mkdir -p package-pi
 
-cp target/release/libpandamonium.so package/
-cp pandamonium.tar package/
+cp target/release/libpandamonium.so package-pi/pandamonium-libretro.so
+cp pandamonium-libretro.info package-pi/
+cp pandamonium.panda package-pi/

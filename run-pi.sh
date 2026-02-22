@@ -1,1 +1,1 @@
-retroarch -f -L target/release/libpandamonium.so pandamonium.tar
+retroarch -f -L target/release/libpandamonium.so pandamonium.panda
