@@ -1,15 +1,15 @@
-use std::time::Duration;
-use crate::component::graphics::{Animation, Layer, Phase, Sprite};
+use crate::component::collisions::{Collision, Pickup};
+use crate::component::graphics::{Animation, Phase, Sprite};
+use crate::component::lifecycle::Destroy;
 use crate::component::physics::Position;
+use crate::game::game::Score;
 use derive::{Constant, Event};
-use engine::entities::entity::{Entities, entity, EntityId};
+use engine::entities::entity::{entity, Entities, EntityId};
 use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use engine::events::spawner::Spawner;
 use engine::shapes::shape::Shape;
-use crate::component::collisions::{Collision, Pickup};
-use crate::component::lifecycle::Destroy;
-use crate::game::game::Score;
+use std::time::Duration;
 
 #[derive(Event)]
 pub struct SpawnCoin(f64, f64);
@@ -41,11 +41,11 @@ fn spawn_coin(&SpawnCoin(x, y): &SpawnCoin, world: &mut Entities, _events: &mut 
             .with(Pickup)
             .with(Animation {
                 sprites: vec!["coin_1", "coin_2", "coin_3", "coin_4"],
+                layer: 5,
                 period: 0.5,
             })
             .with(Phase((-0.005 * x + 0.015 * y) % 1.0))
-            .with(Sprite("coin_1"))
-            .with(Layer(5))
+            .with(Sprite("coin_1", 5))
             .with(Position(x, y))
             .with(Shape::circle((6.0, 6.0), 4.0))
     );
@@ -56,11 +56,11 @@ fn spawn_sparkle(&SpawnSparkle(x, y): &SpawnSparkle, world: &mut Entities, event
         entity()
             .with(Animation {
                 sprites: vec!["sparkle_small", "sparkle_big", "sparkle_small"],
+                layer: 5,
                 period: 0.35,
             })
             .with(Phase(0.0))
-            .with(Sprite("sparkle_small"))
-            .with(Layer(5))
+            .with(Sprite("sparkle_small", 5))
             .with(Position(x, y))
     );
     events.schedule(Duration::from_secs_f64(0.35), Destroy(entity_id));

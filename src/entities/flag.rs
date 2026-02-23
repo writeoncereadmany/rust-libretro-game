@@ -1,5 +1,5 @@
 use crate::component::collisions::{Collision, Pickup};
-use crate::component::graphics::{Animation, Layer, Phase, Sprite};
+use crate::component::graphics::{Animation, Phase, Sprite};
 use crate::component::physics::Position;
 use crate::game::game::StartLevel;
 use derive::{Constant, Event};
@@ -51,11 +51,11 @@ fn spawn_flag(SpawnFlag(x, y, dest): &SpawnFlag, world: &mut Entities, _events: 
             .with(Pickup)
             .with(Animation {
                 sprites: vec!["flag_blue_1", "flag_blue_2"],
+                layer: 5,
                 period: 0.2,
             })
             .with(Phase(0.0))
-            .with(Sprite("flag_blue_1"))
-            .with(Layer(5))
+            .with(Sprite("flag_blue_1", 5))
             .with(Position(*x, *y))
             .with(NextLevel(dest.clone()))
             .with(Shape::bbox(0.0, 0.0, 12.0, 12.0))
@@ -63,8 +63,7 @@ fn spawn_flag(SpawnFlag(x, y, dest): &SpawnFlag, world: &mut Entities, _events: 
 
     world.spawn(
         entity()
-            .with(Sprite("flagpole_silver"))
-            .with(Layer(3))
+            .with(Sprite("flagpole_silver", 3))
             .with(Position(*x, *y))
     );
 }

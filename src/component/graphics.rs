@@ -6,14 +6,12 @@ use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 
 #[derive(Clone, Variable)]
-pub struct Sprite(pub &'static str);
-
-#[derive(Clone, Constant)]
-pub struct Layer(pub u32);
+pub struct Sprite(pub &'static str, pub u32);
 
 #[derive(Clone, Constant)]
 pub struct Animation {
     pub sprites: Vec<&'static str>,
+    pub layer: u32,
     pub period: f64
 }
 
@@ -25,9 +23,9 @@ pub fn register(dispatcher: &mut Dispatcher) {
 }
 
 fn update_phase(dt: &Duration, world: &mut Entities, _events: &mut Events) {
-    world.apply(|(Animation { sprites, period }, Phase(p))| {
+    world.apply(|(Animation { sprites, layer, period }, Phase(p))| {
         let new_phase = p + (dt.as_secs_f64() / period) % 1.0;
         let new_sprite_index = (new_phase * sprites.len() as f64) as usize % sprites.len();
-        (Phase(new_phase), Sprite(sprites[new_sprite_index]))
+        (Phase(new_phase), Sprite(sprites[new_sprite_index], layer))
     })
 }

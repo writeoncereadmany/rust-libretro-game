@@ -1,5 +1,5 @@
 use crate::app::application::GameOver;
-use crate::component::graphics::{Layer, Sprite};
+use crate::component::graphics::Sprite;
 use crate::component::physics::Position;
 use crate::entities::load_map;
 use crate::game::flashlamps::setup_flashlamps;
@@ -80,10 +80,10 @@ impl Screen for Game {
 
     fn draw(&mut self, renderer: &mut AssetRenderer) {
         renderer.clear_sprites();
-        let mut sprites : Vec<(Sprite, Position, Layer)> = self.world.collect();
-        sprites.sort_by(|(_, _, Layer(l1)), (_, _, Layer(l2))| l1.cmp(l2));
+        let mut sprites : Vec<(Sprite, Position)> = self.world.collect();
+        sprites.sort_by(|(Sprite(_, l1), _), (Sprite(_, l2), _)| l1.cmp(l2));
         sprites.iter()
-            .for_each(|(Sprite(sprite), Position(x, y), Layer(_layer))| {
+            .for_each(|(Sprite(sprite, _), Position(x, y))| {
                 renderer.draw_sprite(sprite, *x as i32 + GAME_WINDOW_START_X, *y as i32 + GAME_WINDOW_TOP_Y, false)
             });
     }
