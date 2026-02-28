@@ -4,13 +4,20 @@ use engine::entities::entity::{Entities, EntityId};
 use engine::entities::entity::Id;
 use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
+use engine::shapes::collision::Collision;
 use engine::shapes::shape::Shape;
+use engine::shapes::vec2d::{Vec2d, UNIT_X, UNIT_Y};
+use crate::entities::map::{overlapping, Tile};
+use crate::entities::map::Tile::LEDGE;
 
 #[derive(Event)]
 pub struct CheckCollisions;
 
 #[derive(Event)]
-pub struct Collision(pub EntityId, pub EntityId);
+pub struct ResolveCollisions;
+
+#[derive(Event)]
+pub struct Collided(pub EntityId, pub EntityId);
 
 #[derive(Constant, Clone)]
 pub struct Actor;
@@ -24,15 +31,41 @@ pub fn register(dispatcher: &mut Dispatcher) {
 
 pub fn handle_collisions(_ : &CheckCollisions, world: &mut Entities, events: &mut Events)
 {
+    let tile_maps = world.collect();
+
+    world.apply(|(Actor, Id(hero_id), hero_shape, hero_position@Position(x, y), hero_translation@Translation(tx, ty))| {
+        let collidables = overlapping(&tile_maps, &hero_shape, &hero_position, &hero_translation);
+
+        let mut mtx = tx;
+        let mut mty = ty;
+        // let mut push_x = 0.0;
+        // let mut push_y = 0.0;
+        let starting_shape = hero_shape.translate(&(x, y));
+        let mut iterations = 0;
+        while let Some(next_collision) = next_collision(&starting_shape, &collidables, &(mtx, mty)) {
+
+            iterations += 1;
+
+            let (px, py) = next_collision.push;
+            mtx += px;
+            mty += py;
+            // push_x += px;
+            // push_y += py;
+        }
+        Translation(mtx, mty)
+    });
+
     world.for_each_pair(|(Actor, Id(hero_id), hero_shape, hero_position, hero_translation), 
                          (Pickup, Id(pickup_id), pickup_shape, pickup_position, pickup_translation)|
         {
             if collides(hero_shape, hero_position, hero_translation, pickup_shape, pickup_position, pickup_translation)
             {
-                events.fire(Collision(*hero_id, *pickup_id));
+                events.fire(Collided(*hero_id, *pickup_id));
             }
         }
-    )
+    );
+
+    events.fire(ResolveCollisions);
 }
 
 fn collides(moving: &Shape, &Position(mx, my): &Position, &Translation(mtx, mty): &Translation,
@@ -46,4 +79,25 @@ fn collides(moving: &Shape, &Position(mx, my): &Position, &Translation(mtx, mty)
     else {  
         moving.intersects_moving(&other, &(mtx, mty))
     }
+}
+
+fn next_collision(shape: &Shape, collidables: &Vec<(Shape, Tile)>, translation: &(f64, f64)) -> Option<Collision> {
+    let mut collisions: Vec<Collision> = collidables.iter()
+        .map(|(collidable, tile)| {
+            if let Some(collision) = shape.collides(collidable, translation) {
+                if tile == &LEDGE && (collision.push.dot(&UNIT_X).abs() > 1e-6 || collision.push.dot(&UNIT_Y) < 0.0)  {
+                    None
+                }
+                else {
+                    Some(collision)
+                }
+            } else {
+                None
+            }
+        })
+        .flatten()
+        .collect();
+
+    collisions.sort_unstable_by(|c1, c2| c1.dt.total_cmp(&c2.dt).reverse());
+    collisions.pop()
 }

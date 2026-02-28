@@ -1,4 +1,4 @@
-use crate::component::collisions::{Collision, Pickup};
+use crate::component::collisions::{Collided, Pickup};
 use crate::component::graphics::{Animation, Phase, Sprite};
 use crate::component::physics::Position;
 use crate::game::game::StartLevel;
@@ -69,7 +69,7 @@ fn spawn_flag(SpawnFlag(x, y, dest): &SpawnFlag, world: &mut Entities, _events: 
 }
 
 
-fn pickup_flag(Collision(first, second): &Collision, world: &mut Entities, events: &mut Events) {
+fn pickup_flag(Collided(first, second): &Collided, world: &mut Entities, events: &mut Events) {
     world.apply_to(first, |Flag()| events.fire(PickupFlag(*first)));
     world.apply_to(second, |Flag()| events.fire(PickupFlag(*second)));
 }

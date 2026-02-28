@@ -1,4 +1,4 @@
-use crate::component::collisions::{Collision, Pickup};
+use crate::component::collisions::{Collided, Pickup};
 use crate::component::graphics::{Animation, Phase, Sprite};
 use crate::component::lifecycle::Destroy;
 use crate::component::physics::Position;
@@ -66,7 +66,7 @@ fn spawn_sparkle(&SpawnSparkle(x, y): &SpawnSparkle, world: &mut Entities, event
     events.schedule(Duration::from_secs_f64(0.35), Destroy(entity_id));
 }
 
-fn pickup_coin(Collision(first, second): &Collision, world: &mut Entities, events: &mut Events) {
+fn pickup_coin(Collided(first, second): &Collided, world: &mut Entities, events: &mut Events) {
     world.apply_to(first, |Coin()| events.fire(PickupCoin(*first)));
     world.apply_to(second, |Coin()| events.fire(PickupCoin(*second)));
 }
