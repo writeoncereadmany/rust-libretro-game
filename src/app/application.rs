@@ -27,6 +27,12 @@ pub struct StartGame();
 #[derive(Event)]
 pub struct GameOver();
 
+#[derive(Event)]
+pub struct BeforeUpdate();
+
+#[derive(Event)]
+pub struct AfterUpdate();
+
 impl Application {
     pub fn new(assets: Arc<Assets>) -> Self {
         let mut dispatcher = Dispatcher::new();
@@ -46,17 +52,31 @@ impl Application {
 
     pub fn update(&mut self, input: JoypadState, delta_time: u64, renderer: &mut AssetRenderer, events: &mut Events) {
         let dt = Duration::from_micros(delta_time);
-        events.elapse(dt);
-        events.fire(dt);
-        fire_input_events(input, self.previous_joypad_state, events);
 
+        events.fire(BeforeUpdate());
+        self.process_events(renderer, events);
+        
+        fire_input_events(input, self.previous_joypad_state, events);
+        self.process_events(renderer, events);
+        
+        events.elapse(dt);
+        self.process_events(renderer, events);
+        
+        events.fire(dt);
+        self.process_events(renderer, events);
+
+        events.fire(AfterUpdate());
+        self.process_events(renderer, events);
+
+        self.previous_joypad_state = input;
+    }
+
+    fn process_events(&mut self, renderer: &mut AssetRenderer, events: &mut Events) {
         while let Some(event) = events.pop() {
             renderer.on_event(&event, events);
             self.on_event(&event, events);
             self.screen.on_event(&event, events);
         }
-
-        self.previous_joypad_state = input;
     }
 
     pub fn draw(&mut self, renderer: &mut AssetRenderer) {

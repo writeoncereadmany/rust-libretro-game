@@ -45,7 +45,7 @@ fn spawn_coin(&SpawnCoin(x, y): &SpawnCoin, world: &mut Entities, _events: &mut 
                 period: 0.5,
             })
             .with(Phase((-0.005 * x + 0.015 * y) % 1.0))
-            .with(Sprite("coin_1", 5))
+            .with(Sprite::sprite("coin_1", 5))
             .with(Position(x, y))
             .with(Shape::circle((6.0, 6.0), 4.0))
     );
@@ -60,7 +60,7 @@ fn spawn_sparkle(&SpawnSparkle(x, y): &SpawnSparkle, world: &mut Entities, event
                 period: 0.35,
             })
             .with(Phase(0.0))
-            .with(Sprite("sparkle_small", 5))
+            .with(Sprite::sprite("sparkle_small", 5))
             .with(Position(x, y))
     );
     events.schedule(Duration::from_secs_f64(0.35), Destroy(entity_id));

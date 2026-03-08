@@ -81,10 +81,10 @@ impl Screen for Game {
     fn draw(&mut self, renderer: &mut AssetRenderer) {
         renderer.clear_sprites();
         let mut sprites : Vec<(Sprite, Position)> = self.world.collect();
-        sprites.sort_by(|(Sprite(_, l1), _), (Sprite(_, l2), _)| l1.cmp(l2));
+        sprites.sort_by(|(Sprite(_, l1, _), _), (Sprite(_, l2, _), _)| l1.cmp(l2));
         sprites.iter()
-            .for_each(|(Sprite(sprite, _), Position(x, y))| {
-                renderer.draw_sprite(sprite, x.round() as i32 + GAME_WINDOW_START_X, y.round() as i32 + GAME_WINDOW_TOP_Y, false)
+            .for_each(|(Sprite(sprite, _, flip_x), Position(x, y))| {
+                renderer.draw_sprite(sprite, x.round() as i32 + GAME_WINDOW_START_X, y.round() as i32 + GAME_WINDOW_TOP_Y, *flip_x)
             });
     }
 }

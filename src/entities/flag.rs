@@ -55,7 +55,7 @@ fn spawn_flag(SpawnFlag(x, y, dest): &SpawnFlag, world: &mut Entities, _events: 
                 period: 0.2,
             })
             .with(Phase(0.0))
-            .with(Sprite("flag_blue_1", 5))
+            .with(Sprite::sprite("flag_blue_1", 5))
             .with(Position(*x, *y))
             .with(NextLevel(dest.clone()))
             .with(Shape::bbox(0.0, 0.0, 12.0, 12.0))
@@ -63,7 +63,7 @@ fn spawn_flag(SpawnFlag(x, y, dest): &SpawnFlag, world: &mut Entities, _events: 
 
     world.spawn(
         entity()
-            .with(Sprite("flagpole_silver", 3))
+            .with(Sprite::sprite("flagpole_silver", 3))
             .with(Position(*x, *y))
     );
 }
