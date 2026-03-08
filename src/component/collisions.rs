@@ -19,6 +19,9 @@ pub struct ResolveCollisions;
 #[derive(Event)]
 pub struct Collided(pub EntityId, pub EntityId);
 
+#[derive(Event)]
+pub struct Push(pub EntityId, pub (f64, f64));
+
 #[derive(Constant, Clone)]
 pub struct Actor;
 
@@ -38,20 +41,17 @@ pub fn handle_collisions(_ : &CheckCollisions, world: &mut Entities, events: &mu
 
         let mut mtx = tx;
         let mut mty = ty;
-        // let mut push_x = 0.0;
-        // let mut push_y = 0.0;
+        let mut push_x = 0.0;
+        let mut push_y = 0.0;
         let starting_shape = hero_shape.translate(&(x, y));
-        let mut iterations = 0;
         while let Some(next_collision) = next_collision(&starting_shape, &collidables, &(mtx, mty)) {
-
-            iterations += 1;
-
             let (px, py) = next_collision.push;
             mtx += px;
             mty += py;
-            // push_x += px;
-            // push_y += py;
+            push_x += px;
+            push_y += py;
         }
+        events.fire(Push(hero_id, (push_x, push_y)));
         Translation(mtx, mty)
     });
 

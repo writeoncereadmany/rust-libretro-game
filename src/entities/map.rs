@@ -89,9 +89,9 @@ pub fn overlapping_map(Tilemap(width, height, tilemap): &Tilemap, shape: &Shape,
     let Projection { min: min_y, max: max_y } = translated_shape.project_moving(&(tx, ty), &UNIT_Y);
 
     let min_tile_x = (min_x / *width as f64).floor() as i32;
-    let max_tile_x = (max_x / *width as f64).ceil() as i32;
+    let max_tile_x = (max_x / *width as f64).floor() as i32;
     let min_tile_y = (min_y / *height as f64).floor() as i32;
-    let max_tile_y = (max_y / *height as f64).ceil() as i32;
+    let max_tile_y = (max_y / *height as f64).floor() as i32;
 
     for x in min_tile_x ..= max_tile_x {
         for y in min_tile_y ..= max_tile_y {
