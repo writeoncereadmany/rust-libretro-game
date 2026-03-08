@@ -82,8 +82,11 @@ fn listen_to_button_press(
     world: &mut Entities,
     _events: &mut Events,
 ) {
-    world.apply(|(Hero(), Velocity(dx, dy))| match button {
-        JoypadState::A => Velocity(dx, 325.0),
+    world.apply(|(Hero(), hero_state, Velocity(dx, dy))| match button {
+        JoypadState::A => match hero_state {
+            HeroState::GROUNDED => Velocity(dx, 325.0),
+            _otherwise => Velocity(dx, dy)
+            }
         _otherwise => Velocity(dx, dy),
     })
 }
@@ -109,8 +112,21 @@ fn update_sprite(_update: &AfterUpdate, world: &mut Entities, events: &mut Event
         }
     });
     world.apply(
-        |(Hero(), status, facing, Position(_x, _y), Velocity(_dx, dy))| match status {
-            HeroState::GROUNDED => Sprite::sprite_ex("panda_stand", 10, flip(facing)),
+        |(Hero(), status, facing, Position(x, _y), Velocity(dx, dy))| match status {
+            HeroState::GROUNDED => {
+                if dx == 0.0 {
+                    Sprite::sprite_ex("panda_stand", 10, flip(facing))
+                } else {
+                    let frame = (x as i32 / 8) % 4;
+                    match frame {
+                        0 => Sprite::sprite_ex("panda_run_1", 10, flip(facing)),
+                        1 => Sprite::sprite_ex("panda_run_2", 10, flip(facing)),
+                        2 => Sprite::sprite_ex("panda_run_3", 10, flip(facing)),
+                        3 => Sprite::sprite_ex("panda_run_2", 10, flip(facing)),
+                        _ => Sprite::sprite("error", 10),
+                    }
+                }
+            },
             HeroState::AIRBORNE => {
                 if dy > 0.0 {
                     Sprite::sprite_ex("panda_ascend", 10, flip(facing))
