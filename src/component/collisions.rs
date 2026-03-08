@@ -1,4 +1,4 @@
-use crate::component::physics::{Position, Translation};
+use crate::component::physics::{Position, Translation, Velocity};
 use derive::{Constant, Event};
 use engine::entities::entity::{Entities, EntityId};
 use engine::entities::entity::Id;
@@ -30,6 +30,7 @@ pub struct Pickup;
 
 pub fn register(dispatcher: &mut Dispatcher) {
     dispatcher.register(handle_collisions);
+    dispatcher.register(handle_push);
 }
 
 pub fn handle_collisions(_ : &CheckCollisions, world: &mut Entities, events: &mut Events)
@@ -100,4 +101,17 @@ fn next_collision(shape: &Shape, collidables: &Vec<(Shape, Tile)>, translation: 
 
     collisions.sort_unstable_by(|c1, c2| c1.dt.total_cmp(&c2.dt).reverse());
     collisions.pop()
+}
+
+
+fn handle_push(Push(entityId, (px, py)): &Push, world: &mut Entities, _events: &mut Events) {
+    world.apply_to(entityId, |Velocity(dx, dy)| Velocity(limit(&dx, px), limit(&dy, py)));
+}
+
+fn limit (velocity: &f64, push: &f64) -> f64 {
+    if (velocity < &0.0 && push > &0.0) || (velocity > &0.0 && push < &0.0) {
+        0.0
+    } else {
+        *velocity
+    }
 }

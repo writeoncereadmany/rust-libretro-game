@@ -7,6 +7,8 @@ use std::time::Duration;
 
 const QUANTIZATION_FACTOR: f64 = 1024.0;
 
+const GRAVITY: f64 = 1200.0;
+
 #[derive(Clone, Variable)]
 pub struct Position(pub f64, pub f64);
 
@@ -17,6 +19,9 @@ pub struct Velocity(pub f64, pub f64);
 pub struct Acceleration(pub f64, pub f64);
 
 #[derive(Clone, Variable)]
+pub struct Gravity();
+
+#[derive(Clone, Variable)]
 pub struct Translation(pub f64, pub f64);
 
 #[derive(Clone, Event)]
@@ -25,17 +30,18 @@ pub struct QuantizeEvent();
 pub fn register(dispatcher: &mut Dispatcher) {
     dispatcher.register(integrate);
     dispatcher.register(resolve_collisions);
-    dispatcher.register(quantize)
+    dispatcher.register(quantize);
 }
 
-pub fn integrate(dt: &Duration, world: &mut Entities, events: &mut Events) {
+fn integrate(dt: &Duration, world: &mut Entities, events: &mut Events) {
     let dt = dt.as_secs_f64();
-    world.apply(|(Acceleration(ddx, ddy), Velocity(dx, dy))| Velocity (dx + (ddx * dt), dy + (ddy * dt)));
-    world.apply(|(Velocity(dx, dy))| Translation (dx * dt, dy * dt));
+    world.apply(|(Gravity(), Acceleration(ddx, ddy))| Acceleration(ddx, ddy - GRAVITY));
+    world.apply(|(Acceleration(ddx, ddy), Velocity(dx, dy))| (Acceleration(0.0, 0.0), Velocity (dx + (ddx * dt), dy + (ddy * dt))));
+    world.apply(|Velocity(dx, dy)| Translation (dx * dt, dy * dt));
     events.fire(CheckCollisions);
 }
 
-pub fn resolve_collisions(_ : &ResolveCollisions, world: &mut Entities, events: &mut Events) {
+fn resolve_collisions(_ : &ResolveCollisions, world: &mut Entities, events: &mut Events) {
     world.apply(|(Position(x, y), Translation(tx, ty))| { Position(x + tx, y + ty)});
     events.fire(QuantizeEvent());
 }
