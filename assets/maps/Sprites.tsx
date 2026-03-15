@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.0" name="Sprites" class="Sprite" tilewidth="12" tileheight="12" tilecount="88" columns="8">
+<tileset version="1.10" tiledversion="1.11.2" name="Sprites" class="Sprite" tilewidth="12" tileheight="12" tilecount="88" columns="8">
  <image source="../graphics/spritesheet.png" width="96" height="132"/>
  <tile id="0" type="error"/>
  <tile id="1" type="bell"/>
@@ -27,6 +27,7 @@
  <tile id="23" type="ball_red"/>
  <tile id="24" type="panda_swim_up"/>
  <tile id="25" type="panda_swim_down"/>
+ <tile id="26" type="panda_skid"/>
  <tile id="28" type="grapes"/>
  <tile id="32" type="redd_doll"/>
  <tile id="33" type="redd_wall_slide"/>
@@ -46,6 +47,7 @@
  <tile id="47" type="flashbulb_4"/>
  <tile id="48" type="redd_swim_up"/>
  <tile id="49" type="redd_swim_down"/>
+ <tile id="51" type="redd_skid"/>
  <tile id="52" type="coin_1"/>
  <tile id="53" type="coin_2"/>
  <tile id="54" type="coin_3"/>
