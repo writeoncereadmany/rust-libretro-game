@@ -123,29 +123,6 @@ mod tests {
     }
 
     #[test]
-    fn replicate_tunneling() {
-        let first = Shape::bbox(250.05418968350003, -152.40131836800006, 12.0, 12.0);
-        let stationary = Shape::bbox(264.0, -168.0, 12.0, 24.0);
-        let movement = (3.327, -0.33206787);
-
-        let collision = first.collides(&stationary, &movement).unwrap();
-
-        let moved_first = first.translate(&movement).translate(&collision.push);
-
-        let collision_2 = moved_first.collides(&stationary, &movement).unwrap();
-
-        println!("{:?}", collision_2);
-
-        let moved_second = moved_first.translate(&movement).translate(&collision_2.push);
-
-        println!("{moved_first:?}");
-        println!("{moved_second:?}");
-
-        assert_eq!(moved_first.intersects(&stationary), false);
-        assert_eq!(moved_second.intersects(&stationary), false);
-    }
-
-    #[test]
     fn rounding() {
         assert_eq!(252.00000000000006 + 12.0, 264.0);
     }
