@@ -1,3 +1,7 @@
 target
 *.tiled-session
 /.idea/dictionaries/project.xml
+*.iml
+.gitignore
+modules.xml
+vcs.xml
