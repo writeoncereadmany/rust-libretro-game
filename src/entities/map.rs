@@ -1,15 +1,14 @@
-use std::cmp::{max, min};
+use crate::component::physics::{Position, Translation};
 use derive::{Constant, Event};
 use engine::entities::entity::{entity, Entities};
 use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use engine::events::spawner::Spawner;
 use engine::renderer::background_renderer::UpdateBackgroundTile;
-use std::collections::HashMap;
 use engine::shapes::projection::{Projection, Projects};
 use engine::shapes::shape::Shape;
 use engine::shapes::vec2d::{UNIT_X, UNIT_Y};
-use crate::component::physics::{Position, Translation};
+use std::collections::HashMap;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Tile {
@@ -42,7 +41,7 @@ pub fn load_map(map: &tiled::Map, spawner: &Spawner, events: &mut Events) {
                                 x: (x+1)*12, y: (18-y)*12, tileset: tile.get_tileset().name.clone(), tile: tile.id()
                             });
                             if let Some(map_tile) = tile.get_tile() {
-                                if let (Some(user_type)) = &map_tile.user_type {
+                                if let Some(user_type) = &map_tile.user_type {
                                     match user_type.as_str() {
                                         "Wall" => {
                                             tile_map.insert((x, -y - 1), Tile::WALL);

@@ -115,8 +115,8 @@ fn next_collision(shape: &Shape, collidables: &Vec<(Shape, Tile)>, translation: 
 }
 
 
-fn handle_push(Push(entityId, (px, py)): &Push, world: &mut Entities, _events: &mut Events) {
-    world.apply_to(entityId, |Velocity(dx, dy)| Velocity(limit(&dx, px), limit(&dy, py)));
+fn handle_push(Push(entity_id, (px, py)): &Push, world: &mut Entities, _events: &mut Events) {
+    world.apply_to(entity_id, |Velocity(dx, dy)| Velocity(limit(&dx, px), limit(&dy, py)));
 }
 
 fn limit (velocity: &f64, push: &f64) -> f64 {

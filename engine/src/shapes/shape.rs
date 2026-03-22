@@ -1,9 +1,9 @@
-use crate::entities::entity::{Component, Entity, Id, Variable};
+use crate::entities::entity::{Component, Entity, Variable};
 use crate::shapes::collision::Collision;
 use crate::shapes::projection::{Projection, Projects};
 use crate::shapes::shape::Shape::{BBox, Circle};
-use crate::shapes::{bbox, bbox_circle, circle};
 use crate::shapes::vec2d::Vec2d;
+use crate::shapes::{bbox, bbox_circle, circle};
 
 #[derive(Clone, Debug)]
 pub enum Shape {

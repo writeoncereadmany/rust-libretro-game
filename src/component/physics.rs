@@ -5,8 +5,6 @@ use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use std::time::Duration;
 
-const QUANTIZATION_FACTOR: f64 = 1024.0;
-
 const GRAVITY: f64 = 1200.0;
 
 #[derive(Clone, Variable)]
@@ -41,6 +39,6 @@ fn integrate(dt: &Duration, world: &mut Entities, events: &mut Events) {
     events.fire(CheckCollisions);
 }
 
-fn resolve_collisions(_ : &ResolveCollisions, world: &mut Entities, events: &mut Events) {
+fn resolve_collisions(_ : &ResolveCollisions, world: &mut Entities, _events: &mut Events) {
     world.apply(|(Position(x, y), Translation(tx, ty))| { Position(x + tx, y + ty)});
 }

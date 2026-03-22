@@ -1,25 +1,19 @@
 use crate::app::application::StartGame;
 use crate::screens::screen::Screen;
-use engine::assets::Assets;
 use engine::events::event::{Event, Events};
 use engine::events::input::ButtonPressed;
 use engine::renderer::asset_renderer::AssetRenderer;
-use engine::renderer::renderer::Renderer;
 use engine::renderer::spritefont::Alignment;
 use engine::renderer::spritefont::HorizontalAlignment::CENTER;
 use engine::renderer::spritefont::VerticalAlignment::MIDDLE;
 use rust_libretro::types::JoypadState;
-use std::sync::Arc;
 
 pub struct TitleScreen {
-    assets: Arc<Assets>,
 }
 
 impl TitleScreen {
-    pub fn new(assets: &Arc<Assets>) -> Self {
-        TitleScreen {
-            assets: assets.clone(),
-        }
+    pub fn new() -> Self {
+        TitleScreen { }
     }
 }
 

@@ -76,8 +76,8 @@ pub fn collision_on_axis<A: Projects, B: Projects>(a: &A, b: &B, dv: &(f64, f64)
     }
 }
 
+#[cfg(test)]
 mod tests {
-    use crate::shapes::shape::Shape;
     use super::*;
 
     #[test]

@@ -46,7 +46,7 @@ impl Application {
             dispatcher: Arc::new(dispatcher),
             spawner: Arc::new(spawner),
             previous_joypad_state: JoypadState::empty(),
-            screen: Box::new(TitleScreen::new(&assets))
+            screen: Box::new(TitleScreen::new())
         }
     }
 
@@ -91,7 +91,7 @@ impl Application {
             events.fire(StartLevel("start".to_string()));
         });
         event.apply(|GameOver()| {
-            self.screen = Box::new(TitleScreen::new(&self.assets))
+            self.screen = Box::new(TitleScreen::new())
         });
     }
 }

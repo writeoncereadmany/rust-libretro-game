@@ -110,7 +110,7 @@ fn listen_to_button_press(
     world: &mut Entities,
     events: &mut Events,
 ) {
-    world.apply(|(Hero(), hero_state, Velocity(dx, dy))| match button {
+    world.apply(|(Hero(), hero_state)| match button {
         JoypadState::A => match hero_state {
             HeroState::GROUNDED => events.fire(Jump()),
             _otherwise => (),
@@ -188,7 +188,7 @@ fn on_push(Push(entity_id, (_px, py)): &Push, world: &mut Entities, _events: &mu
 }
 
 fn clamp_to_screen(_: &AfterUpdate, world: &mut Entities, _events: &mut Events) {
-    world.apply(|(Hero(), pos@Position(x, y), vel@Velocity(dx, dy))| {
+    world.apply(|(Hero(), pos@Position(x, y), vel@Velocity(_, dy))| {
         if x < 0.0 || x > 324.0 {
             (Position(x.clamp(0.0, 324.0), y), Velocity(0.0, dy))
         } else {
@@ -197,7 +197,7 @@ fn clamp_to_screen(_: &AfterUpdate, world: &mut Entities, _events: &mut Events) 
     })
 }
 
-fn update_sprite(_update: &AfterUpdate, world: &mut Entities, events: &mut Events) {
+fn update_sprite(_update: &AfterUpdate, world: &mut Entities, _events: &mut Events) {
     world.apply(|(Hero(), facing, Velocity(dx, _))| {
         if dx > 0.0 {
             DirectionFacing::RIGHT
