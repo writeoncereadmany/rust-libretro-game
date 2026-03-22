@@ -11,7 +11,7 @@ use engine::shapes::shape::Shape;
 use engine::shapes::vec2d::{UNIT_X, UNIT_Y};
 use crate::component::physics::{Position, Translation};
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Tile {
     WALL,
     LEDGE

@@ -28,6 +28,8 @@ pub struct Actor;
 #[derive(Constant, Clone)]
 pub struct Pickup;
 
+const EPSILON: f64 = 1e-8;
+
 pub fn register(dispatcher: &mut Dispatcher) {
     dispatcher.register(handle_collisions);
     dispatcher.register(handle_push);
@@ -47,8 +49,8 @@ pub fn handle_collisions(_ : &CheckCollisions, world: &mut Entities, events: &mu
         let starting_shape = hero_shape.translate(&(x, y));
         while let Some(next_collision) = next_collision(&starting_shape, &collidables, &(mtx, mty)) {
             let (px, py) = next_collision.push;
-            mtx += px;
-            mty += py;
+            mtx += px + EPSILON.copysign(px);
+            mty += py + EPSILON.copysign(py);
             push_x += px;
             push_y += py;
         }

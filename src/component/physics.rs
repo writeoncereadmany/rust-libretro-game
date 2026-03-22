@@ -1,5 +1,5 @@
 use crate::component::collisions::{CheckCollisions, ResolveCollisions};
-use derive::{Constant, Event, Variable};
+use derive::{Constant, Variable};
 use engine::entities::entity::Entities;
 use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
@@ -27,13 +27,9 @@ pub struct Translation(pub f64, pub f64);
 #[derive(Clone, Constant)]
 pub struct VelocityCap(pub f64, pub f64);
 
-#[derive(Clone, Event)]
-pub struct QuantizeEvent();
-
 pub fn register(dispatcher: &mut Dispatcher) {
     dispatcher.register(integrate);
     dispatcher.register(resolve_collisions);
-    dispatcher.register(quantize);
 }
 
 fn integrate(dt: &Duration, world: &mut Entities, events: &mut Events) {
@@ -47,13 +43,4 @@ fn integrate(dt: &Duration, world: &mut Entities, events: &mut Events) {
 
 fn resolve_collisions(_ : &ResolveCollisions, world: &mut Entities, events: &mut Events) {
     world.apply(|(Position(x, y), Translation(tx, ty))| { Position(x + tx, y + ty)});
-    events.fire(QuantizeEvent());
-}
-
-fn quantize(_ : &QuantizeEvent, world: &mut Entities, _events: &mut Events) {
-    world.apply(|Position(x, y)| Position(quant(x), quant(y)));
-}
-
-fn quant(x: f64) -> f64 {
-    (x * QUANTIZATION_FACTOR).round() / QUANTIZATION_FACTOR
 }

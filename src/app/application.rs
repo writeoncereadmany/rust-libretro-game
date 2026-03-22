@@ -55,13 +55,13 @@ impl Application {
 
         events.fire(BeforeUpdate());
         self.process_events(renderer, events);
-        
+
         fire_input_events(input, self.previous_joypad_state, events);
         self.process_events(renderer, events);
-        
+
         events.elapse(dt);
         self.process_events(renderer, events);
-        
+
         events.fire(dt);
         self.process_events(renderer, events);
 
