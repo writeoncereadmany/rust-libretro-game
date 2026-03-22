@@ -11,6 +11,7 @@ use engine::events::input::{ButtonPressed, InputState};
 use engine::events::spawner::Spawner;
 use engine::shapes::shape::Shape;
 use rust_libretro::types::JoypadState;
+use crate::entities::radial::SpawnRadials;
 
 const RUN_ACCEL: f64 = 500.0;
 const SKID_ACCEL: f64 = 800.0;
@@ -48,10 +49,14 @@ enum MovementIntent {
 struct SpawnHero(f64, f64);
 
 #[derive(Event)]
+struct SpawnRadialAndDelayedHero(f64, f64);
+
+#[derive(Event)]
 struct Jump();
 
 pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     dispatcher.register(spawn_hero);
+    dispatcher.register(spawn_radial_and_delayed_hero);
     dispatcher.register(listen_to_input_state);
     dispatcher.register(listen_to_button_press);
     dispatcher.register(jump);
@@ -63,8 +68,13 @@ pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     dispatcher.register(update_sprite);
 
     spawner.register("Hero", |spawn, events| {
-        events.fire(SpawnHero(spawn.x, spawn.y))
+        events.fire(SpawnRadialAndDelayedHero(spawn.x, spawn.y))
     });
+}
+
+fn spawn_radial_and_delayed_hero(&SpawnRadialAndDelayedHero(x, y): &SpawnRadialAndDelayedHero, _world: &mut Entities, events: &mut Events) {
+    events.fire(SpawnRadials(x, y, vec!["ball_blue", "ball_white"], 8));
+    events.schedule(Duration::from_secs_f64(2.4), SpawnHero(x, y));
 }
 
 fn spawn_hero(&SpawnHero(x, y): &SpawnHero, world: &mut Entities, _events: &mut Events) {

@@ -6,12 +6,14 @@ mod coin;
 mod hero;
 mod flag;
 pub mod map;
+mod radial;
 
 pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     coin::register(dispatcher, spawner);
     flag::register(dispatcher, spawner);
     hero::register(dispatcher, spawner);
     map::register(dispatcher, spawner);
+    radial::register(dispatcher, spawner);
 }
 
 pub fn load_map(map: &tiled::Map, spawner: &Spawner, events: &mut Events) {
