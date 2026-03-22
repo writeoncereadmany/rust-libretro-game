@@ -1,3 +1,4 @@
+use std::time::Duration;
 use crate::app::application::{AfterUpdate, BeforeUpdate};
 use crate::component::collisions::{Actor, Push};
 use crate::component::graphics::Sprite;
@@ -15,12 +16,14 @@ const RUN_ACCEL: f64 = 500.0;
 const SKID_ACCEL: f64 = 800.0;
 const SLOW_ACCEL: f64 = 250.0;
 const STATIC_FRICTION_THRESHOLD: f64 = 5.0;
+const ASCENT_DURATION: f64 = 0.15;
+const POST_JUMP_ACCEL: f64 = 1500.0;
 
 #[derive(Constant, Clone)]
 struct Hero();
 
-#[derive(Event)]
-struct SpawnHero(f64, f64);
+#[derive(Variable, Clone)]
+struct AscentRemaining(f64);
 
 #[derive(Variable, Clone)]
 enum HeroState {
@@ -41,13 +44,22 @@ enum MovementIntent {
     RIGHT
 }
 
+#[derive(Event)]
+struct SpawnHero(f64, f64);
+
+#[derive(Event)]
+struct Jump();
+
 pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     dispatcher.register(spawn_hero);
     dispatcher.register(listen_to_input_state);
     dispatcher.register(listen_to_button_press);
+    dispatcher.register(jump);
+    dispatcher.register(post_jump);
     dispatcher.register(check_static_friction);
     dispatcher.register(apply_movement);
     dispatcher.register(on_push);
+    dispatcher.register(clamp_to_screen);
     dispatcher.register(update_sprite);
 
     spawner.register("Hero", |spawn, events| {
@@ -87,22 +99,50 @@ fn listen_to_input_state(
             (false, true) => MovementIntent::RIGHT,
             _otherwise => MovementIntent::NEUTRAL,
         }
-    })
+    });
+    world.apply(|(Hero(), asc@AscentRemaining(_))| {
+       if joypad.contains(JoypadState::A) { Some(asc) } else { None }
+    });
 }
 
 fn listen_to_button_press(
     &ButtonPressed(button): &ButtonPressed,
     world: &mut Entities,
-    _events: &mut Events,
+    events: &mut Events,
 ) {
     world.apply(|(Hero(), hero_state, Velocity(dx, dy))| match button {
         JoypadState::A => match hero_state {
-            HeroState::GROUNDED => Velocity(dx, 325.0),
-            _otherwise => Velocity(dx, dy)
+            HeroState::GROUNDED => events.fire(Jump()),
+            _otherwise => (),
             }
-        _otherwise => Velocity(dx, dy),
+        _otherwise => (),
     })
 }
+
+fn jump(
+    _: &Jump,
+    world: &mut Entities,
+    _events: &mut Events,
+) {
+    world.apply(|(Hero(), Velocity(dx, _dy))| {
+        (Velocity(dx, 150.0), AscentRemaining(ASCENT_DURATION))
+    })
+}
+
+fn post_jump(
+    dt: &Duration,
+    world: &mut Entities,
+    _events: &mut Events,
+) {
+    world.apply(|(Hero(), AscentRemaining(at), acc@Acceleration(ddx, ddy))| {
+        if at > 0.0 {
+            (Some(AscentRemaining(at - dt.as_secs_f64())), Acceleration(ddx, ddy + POST_JUMP_ACCEL))
+        } else {
+            (None, acc)
+        }
+    })
+}
+
 
 fn check_static_friction(_: &BeforeUpdate, world: &mut Entities, _events: &mut Events) {
     world.apply(|(Hero(), movement_intent, Velocity(dx, dy))| {
@@ -145,6 +185,16 @@ fn on_push(Push(entity_id, (_px, py)): &Push, world: &mut Entities, _events: &mu
             HeroState::AIRBORNE
         }
     });
+}
+
+fn clamp_to_screen(_: &AfterUpdate, world: &mut Entities, _events: &mut Events) {
+    world.apply(|(Hero(), pos@Position(x, y), vel@Velocity(dx, dy))| {
+        if x < 0.0 || x > 324.0 {
+            (Position(x.clamp(0.0, 324.0), y), Velocity(0.0, dy))
+        } else {
+            (pos, vel)
+        }
+    })
 }
 
 fn update_sprite(_update: &AfterUpdate, world: &mut Entities, events: &mut Events) {
