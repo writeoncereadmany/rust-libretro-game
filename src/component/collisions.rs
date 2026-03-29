@@ -48,9 +48,9 @@ pub fn handle_collisions(_ : &CheckCollisions, world: &mut Entities, events: &mu
         let mut push_y = 0.0;
         let starting_shape = hero_shape.translate(&(x, y));
         while let Some(next_collision) = next_collision(&starting_shape, &collidables, &(mtx, mty)) {
-            let (px, py) = next_collision.push;
-            mtx += extend(px);
-            mty += extend(py);
+            let (px, py) = extend2(&next_collision.push);
+            mtx += px;
+            mty += py;
             push_x += px;
             push_y += py;
         }
@@ -71,13 +71,8 @@ pub fn handle_collisions(_ : &CheckCollisions, world: &mut Entities, events: &mu
     events.fire(ResolveCollisions);
 }
 
-fn extend(val: f64) -> f64 {
-    if val.abs() > EPSILON
-    {
-        val + EPSILON.copysign(val)
-    } else {
-        val
-    }
+fn extend2(val: &(f64, f64) ) -> (f64, f64) {
+    val.plus(&val.unit().scale(&EPSILON))
 }
 
 fn collides(moving: &Shape, &Position(mx, my): &Position, &Translation(mtx, mty): &Translation,
