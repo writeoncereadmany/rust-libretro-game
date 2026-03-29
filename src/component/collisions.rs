@@ -7,7 +7,7 @@ use engine::events::event::Events;
 use engine::shapes::collision::Collision;
 use engine::shapes::shape::Shape;
 use engine::shapes::vec2d::{Vec2d, UNIT_X, UNIT_Y};
-use crate::entities::map::{overlapping, Tile};
+use crate::entities::map::{overlapping, Tile, Tilemap};
 use crate::entities::map::Tile::LEDGE;
 
 #[derive(Event)]
@@ -37,7 +37,7 @@ pub fn register(dispatcher: &mut Dispatcher) {
 
 pub fn handle_collisions(_ : &CheckCollisions, world: &mut Entities, events: &mut Events)
 {
-    let tile_maps = world.collect();
+    let tile_maps: Vec<(Id, Tilemap)> = world.collect();
 
     world.apply(|(Actor, Id(hero_id), hero_shape, hero_position@Position(x, y), hero_translation@Translation(tx, ty))| {
         let collidables = overlapping(&tile_maps, &hero_shape, &hero_position, &hero_translation);
@@ -47,12 +47,13 @@ pub fn handle_collisions(_ : &CheckCollisions, world: &mut Entities, events: &mu
         let mut push_x = 0.0;
         let mut push_y = 0.0;
         let starting_shape = hero_shape.translate(&(x, y));
-        while let Some(next_collision) = next_collision(&starting_shape, &collidables, &(mtx, mty)) {
-            let (px, py) = extend2(&next_collision.push);
+        while let Some((entity_id, next_collision)) = next_collision(&starting_shape, &collidables, &(mtx, mty)) {
+            let (px, py) = extend(&next_collision.push);
             mtx += px;
             mty += py;
             push_x += px;
             push_y += py;
+           events.fire(Collided(hero_id, entity_id));
         }
         events.fire(Push(hero_id, (push_x, push_y)));
         Translation(mtx, mty)
@@ -71,7 +72,7 @@ pub fn handle_collisions(_ : &CheckCollisions, world: &mut Entities, events: &mu
     events.fire(ResolveCollisions);
 }
 
-fn extend2(val: &(f64, f64) ) -> (f64, f64) {
+fn extend(val: &(f64, f64) ) -> (f64, f64) {
     val.plus(&val.unit().scale(&EPSILON))
 }
 
@@ -88,15 +89,15 @@ fn collides(moving: &Shape, &Position(mx, my): &Position, &Translation(mtx, mty)
     }
 }
 
-fn next_collision(shape: &Shape, collidables: &Vec<(Shape, Tile)>, translation: &(f64, f64)) -> Option<Collision> {
-    let mut collisions: Vec<Collision> = collidables.iter()
-        .map(|(collidable, tile)| {
+fn next_collision(shape: &Shape, collidables: &Vec<(EntityId, Shape, Tile)>, translation: &(f64, f64)) -> Option<(EntityId, Collision)> {
+    let mut collisions: Vec<(EntityId, Collision)> = collidables.iter()
+        .map(|(id, collidable, tile)| {
             if let Some(collision) = shape.collides(collidable, translation) {
                 if tile == &LEDGE && (collision.push.dot(&UNIT_X).abs() > 1e-6 || collision.push.dot(&UNIT_Y) < 0.0)  {
                     None
                 }
                 else {
-                    Some(collision)
+                    Some((*id, collision))
                 }
             } else {
                 None
@@ -105,7 +106,7 @@ fn next_collision(shape: &Shape, collidables: &Vec<(Shape, Tile)>, translation: 
         .flatten()
         .collect();
 
-    collisions.sort_unstable_by(|c1, c2| c1.dt.total_cmp(&c2.dt).reverse());
+    collisions.sort_unstable_by(|(_, c1), (_, c2)| c1.dt.total_cmp(&c2.dt).reverse());
     collisions.pop()
 }
 

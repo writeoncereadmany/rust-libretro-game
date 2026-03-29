@@ -1,6 +1,6 @@
 use crate::component::physics::{Position, Translation};
 use derive::{Constant, Event};
-use engine::entities::entity::{entity, Entities};
+use engine::entities::entity::{entity, Entities, EntityId, Id};
 use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use engine::events::spawner::Spawner;
@@ -73,14 +73,14 @@ fn spawn_map(SpawnTilemap(tilemap): &SpawnTilemap, world: &mut Entities, _events
     world.spawn(entity().with(tilemap.clone()));
 }
 
-pub fn overlapping(tile_maps: &Vec<Tilemap>, shape: &Shape, position: &Position, translation: &Translation) -> Vec<(Shape, Tile)> {
+pub fn overlapping(tile_maps: &Vec<(Id, Tilemap)>, shape: &Shape, position: &Position, translation: &Translation) -> Vec<(EntityId, Shape, Tile)> {
     tile_maps.iter()
-        .map(|tilemap| overlapping_map(tilemap, shape, position, translation))
+        .map(|(Id(entity_id), tilemap)| overlapping_map(*entity_id, tilemap, shape, position, translation))
         .flatten()
         .collect()
 }
 
-pub fn overlapping_map(Tilemap(width, height, tilemap): &Tilemap, shape: &Shape, &Position(x, y): &Position, &Translation(tx, ty): &Translation) -> Vec<(Shape, Tile)> {
+pub fn overlapping_map(entity_id: EntityId, Tilemap(width, height, tilemap): &Tilemap, shape: &Shape, &Position(x, y): &Position, &Translation(tx, ty): &Translation) -> Vec<(EntityId, Shape, Tile)> {
     let mut overlapping = Vec::new();
 
     let translated_shape = shape.translate(&(x, y));
@@ -95,7 +95,7 @@ pub fn overlapping_map(Tilemap(width, height, tilemap): &Tilemap, shape: &Shape,
     for x in min_tile_x ..= max_tile_x {
         for y in min_tile_y ..= max_tile_y {
             if let Some(tile) = tilemap.get(&(x, y)) {
-            overlapping.push((Shape::bbox((x * width) as f64, (y * height) as f64, *width as f64, *height as f64), *tile))
+            overlapping.push((entity_id, Shape::bbox((x * width) as f64, (y * height) as f64, *width as f64, *height as f64), *tile))
             }
         }
     }
