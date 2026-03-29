@@ -7,8 +7,8 @@ use engine::events::event::Events;
 use engine::shapes::collision::Collision;
 use engine::shapes::shape::Shape;
 use engine::shapes::vec2d::{Vec2d, UNIT_X, UNIT_Y};
-use crate::entities::map::{overlapping, Tile, Tilemap};
-use crate::entities::map::Tile::LEDGE;
+use crate::entities::map::{overlapping, CollisionType, Tilemap};
+use crate::entities::map::CollisionType::LEDGE;
 
 #[derive(Event)]
 pub struct CheckCollisions;
@@ -38,9 +38,12 @@ pub fn register(dispatcher: &mut Dispatcher) {
 pub fn handle_collisions(_ : &CheckCollisions, world: &mut Entities, events: &mut Events)
 {
     let tile_maps: Vec<(Id, Tilemap)> = world.collect();
+    let obstacles: Vec<(Id, Shape, CollisionType, Position)> = world.collect();
+    let translated_obstacles: Vec<(EntityId, Shape, CollisionType)> = obstacles.iter()
+        .map(|(Id(entity_id), shape, tile, Position(x, y))| (*entity_id, shape.translate(&(*x, *y)), *tile)).collect();
 
     world.apply(|(Actor, Id(hero_id), hero_shape, hero_position@Position(x, y), hero_translation@Translation(tx, ty))| {
-        let collidables = overlapping(&tile_maps, &hero_shape, &hero_position, &hero_translation);
+        let collidables = overlapping(&tile_maps, &hero_shape, &hero_position, &hero_translation).iter().chain(translated_obstacles.iter()).map(|item| item.clone()).collect();
 
         let mut mtx = tx;
         let mut mty = ty;
@@ -89,7 +92,7 @@ fn collides(moving: &Shape, &Position(mx, my): &Position, &Translation(mtx, mty)
     }
 }
 
-fn next_collision(shape: &Shape, collidables: &Vec<(EntityId, Shape, Tile)>, translation: &(f64, f64)) -> Option<(EntityId, Collision)> {
+fn next_collision(shape: &Shape, collidables: &Vec<(EntityId, Shape, CollisionType)>, translation: &(f64, f64)) -> Option<(EntityId, Collision)> {
     let mut collisions: Vec<(EntityId, Collision)> = collidables.iter()
         .map(|(id, collidable, tile)| {
             if let Some(collision) = shape.collides(collidable, translation) {

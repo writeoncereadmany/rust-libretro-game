@@ -10,14 +10,14 @@ use engine::shapes::shape::Shape;
 use engine::shapes::vec2d::{UNIT_X, UNIT_Y};
 use std::collections::HashMap;
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum Tile {
+#[derive(Constant, Clone, Copy, PartialEq, Eq, Debug)]
+pub enum CollisionType {
     WALL,
     LEDGE
 }
 
 #[derive(Constant, Clone)]
-pub struct Tilemap(i32, i32, HashMap<(i32, i32), Tile>);
+pub struct Tilemap(i32, i32, HashMap<(i32, i32), CollisionType>);
 
 #[derive(Event, Clone)]
 struct SpawnTilemap(Tilemap);
@@ -29,7 +29,7 @@ pub fn register(dispatcher: &mut Dispatcher, _spawner: &mut Spawner) {
 
 pub fn load_map(map: &tiled::Map, spawner: &Spawner, events: &mut Events) {
 
-    let mut tile_map : HashMap<(i32, i32), Tile> = HashMap::new();
+    let mut tile_map : HashMap<(i32, i32), CollisionType> = HashMap::new();
 
     for layer in map.layers() {
         if let Some(tiles) = layer.as_tile_layer() {
@@ -44,10 +44,10 @@ pub fn load_map(map: &tiled::Map, spawner: &Spawner, events: &mut Events) {
                                 if let Some(user_type) = &map_tile.user_type {
                                     match user_type.as_str() {
                                         "Wall" => {
-                                            tile_map.insert((x, -y - 1), Tile::WALL);
+                                            tile_map.insert((x, -y - 1), CollisionType::WALL);
                                         },
                                         "Ledge" => {
-                                            tile_map.insert((x, -y - 1), Tile::LEDGE);
+                                            tile_map.insert((x, -y - 1), CollisionType::LEDGE);
                                         },
                                         _otherwise => {}
                                     };
@@ -73,14 +73,14 @@ fn spawn_map(SpawnTilemap(tilemap): &SpawnTilemap, world: &mut Entities, _events
     world.spawn(entity().with(tilemap.clone()));
 }
 
-pub fn overlapping(tile_maps: &Vec<(Id, Tilemap)>, shape: &Shape, position: &Position, translation: &Translation) -> Vec<(EntityId, Shape, Tile)> {
+pub fn overlapping(tile_maps: &Vec<(Id, Tilemap)>, shape: &Shape, position: &Position, translation: &Translation) -> Vec<(EntityId, Shape, CollisionType)> {
     tile_maps.iter()
         .map(|(Id(entity_id), tilemap)| overlapping_map(*entity_id, tilemap, shape, position, translation))
         .flatten()
         .collect()
 }
 
-pub fn overlapping_map(entity_id: EntityId, Tilemap(width, height, tilemap): &Tilemap, shape: &Shape, &Position(x, y): &Position, &Translation(tx, ty): &Translation) -> Vec<(EntityId, Shape, Tile)> {
+pub fn overlapping_map(entity_id: EntityId, Tilemap(width, height, tilemap): &Tilemap, shape: &Shape, &Position(x, y): &Position, &Translation(tx, ty): &Translation) -> Vec<(EntityId, Shape, CollisionType)> {
     let mut overlapping = Vec::new();
 
     let translated_shape = shape.translate(&(x, y));
