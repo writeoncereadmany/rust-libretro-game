@@ -80,4 +80,8 @@
  <tile id="81" type="lamp_green"/>
  <tile id="82" type="lamp_amber"/>
  <tile id="83" type="lamp_red"/>
+ <tile id="84" type="silver_coin_1"/>
+ <tile id="85" type="silver_coin_2"/>
+ <tile id="86" type="silver_coin_3"/>
+ <tile id="87" type="silver_coin_4"/>
 </tileset>
