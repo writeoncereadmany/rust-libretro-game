@@ -22,7 +22,7 @@ const POST_JUMP_ACCEL: f64 = 1500.0;
 const WALL_STICK: f64 = 100.0;
 
 #[derive(Constant, Clone)]
-struct Hero();
+pub struct Hero();
 
 #[derive(Variable, Clone)]
 struct AscentRemaining(f64);

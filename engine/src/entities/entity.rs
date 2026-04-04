@@ -254,12 +254,22 @@ impl Entities {
     }
 
 
-    pub fn apply_to<T: Component, O: Variable>(&mut self, id: &u64, mut f: impl FnMut(T) -> O)
+    pub fn apply_to<T: Component, O: Variable>(&mut self, id: &EntityId, mut f: impl FnMut(T) -> O)
     {
         if let Some(entity) = self.entities.get_mut(id) {
             if let Some(i) = T::get(entity) {
                 let val = f(i);
                 val.set(entity);
+            }
+        }
+    }
+
+    pub fn apply_to_pair<T1: Component, T2: Component>(
+        &mut self, id_1: &EntityId, id_2: &EntityId, mut f: impl FnMut(T1, T2) -> ()
+    ) {
+        if let (Some(entity_1), Some(entity_2)) = (self.entities.get(id_1), self.entities.get(id_2)) {
+            if let (Some(i_1), Some(i_2))  = (T1::get(entity_1), T2::get(entity_2)) {
+                f(i_1, i_2);
             }
         }
     }

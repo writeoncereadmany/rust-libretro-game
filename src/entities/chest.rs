@@ -10,6 +10,7 @@ use engine::events::spawner::Spawner;
 use engine::shapes::shape::Shape;
 use crate::component::collisions::{Actor, Collided, Pickup};
 use crate::entities::coin::{Coin, PickupCoin, SpawnSparkle};
+use crate::entities::hero::Hero;
 use crate::game::game::Score;
 
 #[derive(Event)]
@@ -81,8 +82,8 @@ pub fn unlock(_: &Unlock, world: &mut Entities, events: &mut Events) {
 }
 
 fn pickup_ruby(Collided(first, second): &Collided, world: &mut Entities, events: &mut Events) {
-    world.apply_to(first, |Ruby()| events.fire(PickupRuby(*first)));
-    world.apply_to(second, |Ruby()| events.fire(PickupRuby(*second)));
+    world.apply_to_pair(first, second, |Ruby(), Hero()| events.fire(PickupRuby(*first)));
+    world.apply_to_pair(second, first, |Ruby(), Hero()| events.fire(PickupRuby(*second)));
 }
 
 fn collect_ruby(PickupRuby(ruby): &PickupRuby, world: &mut Entities, events: &mut Events) {
