@@ -19,6 +19,7 @@ const SLOW_ACCEL: f64 = 250.0;
 const STATIC_FRICTION_THRESHOLD: f64 = 5.0;
 const ASCENT_DURATION: f64 = 0.15;
 const POST_JUMP_ACCEL: f64 = 1500.0;
+const WALL_STICK: f64 = 100.0;
 
 #[derive(Constant, Clone)]
 struct Hero();
@@ -28,8 +29,10 @@ struct AscentRemaining(f64);
 
 #[derive(Variable, Clone)]
 enum HeroState {
-    GROUNDED,
-    AIRBORNE,
+    Grounded,
+    Airborne,
+    WallDragLeft,
+    WallDragRight
 }
 
 #[derive(Variable, Clone)]
@@ -54,12 +57,16 @@ struct SpawnRadialAndDelayedHero(f64, f64);
 #[derive(Event)]
 struct Jump();
 
+#[derive(Event)]
+struct WallJump(DirectionFacing);
+
 pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     dispatcher.register(spawn_hero);
     dispatcher.register(spawn_radial_and_delayed_hero);
     dispatcher.register(listen_to_input_state);
     dispatcher.register(listen_to_button_press);
     dispatcher.register(jump);
+    dispatcher.register(wall_jump);
     dispatcher.register(post_jump);
     dispatcher.register(check_static_friction);
     dispatcher.register(apply_movement);
@@ -81,7 +88,7 @@ fn spawn_hero(&SpawnHero(x, y): &SpawnHero, world: &mut Entities, _events: &mut 
     world.spawn(
         entity()
             .with(Hero())
-            .with(HeroState::GROUNDED)
+            .with(HeroState::Grounded)
             .with(DirectionFacing::RIGHT)
             .with(MovementIntent::NEUTRAL)
             .with(Gravity())
@@ -122,7 +129,9 @@ fn listen_to_button_press(
 ) {
     world.apply(|(Hero(), hero_state)| match button {
         JoypadState::A => match hero_state {
-            HeroState::GROUNDED => events.fire(Jump()),
+            HeroState::Grounded => events.fire(Jump()),
+            HeroState::WallDragLeft => events.fire(WallJump(DirectionFacing::RIGHT)),
+            HeroState::WallDragRight => events.fire(WallJump(DirectionFacing::LEFT)),
             _otherwise => (),
             }
         _otherwise => (),
@@ -136,6 +145,19 @@ fn jump(
 ) {
     world.apply(|(Hero(), Velocity(dx, _dy))| {
         (Velocity(dx, 150.0), AscentRemaining(ASCENT_DURATION))
+    })
+}
+
+fn wall_jump(
+    WallJump(facing): &WallJump,
+    world: &mut Entities,
+    _events: &mut Events,
+) {
+    world.apply(|(Hero(), Velocity(dx, _dy))| {
+        match facing {
+            DirectionFacing::LEFT => (Velocity(-200.0, 150.0), AscentRemaining(ASCENT_DURATION)),
+            DirectionFacing::RIGHT => (Velocity(200.0, 150.0), AscentRemaining(ASCENT_DURATION))
+        }
     })
 }
 
@@ -172,27 +194,49 @@ fn check_static_friction(_: &BeforeUpdate, world: &mut Entities, _events: &mut E
 fn apply_movement(_: &BeforeUpdate, world: &mut Entities, _events: &mut Events)
 {
     world.apply(
-        |(Hero(), movement_intent, Acceleration(ddx, ddy), Velocity(dx, _))|
+        |(Hero(), movement_intent, hero_state, Acceleration(ddx, ddy), Velocity(dx, _))|
             {
-                let h_accel = match movement_intent {
-                    MovementIntent::LEFT =>
-                        if dx > 0.0 { -SKID_ACCEL } else { -RUN_ACCEL },
-                    MovementIntent::RIGHT =>
-                        if dx < 0.0 { SKID_ACCEL } else { RUN_ACCEL },
-                    MovementIntent::NEUTRAL =>
-                        if dx > 0.0 { -SLOW_ACCEL } else if dx < 0.0 { SLOW_ACCEL } else { 0.0 },
-                };
+                let h_accel = match (hero_state, movement_intent) {
+                    (HeroState::WallDragLeft, MovementIntent::LEFT) => {
+                        -RUN_ACCEL
+                    },
+                    (HeroState::WallDragLeft, MovementIntent::RIGHT) => {
+                        -WALL_STICK
+                    },
+                    (HeroState::WallDragLeft, MovementIntent::NEUTRAL) => {
+                        RUN_ACCEL
+                    },
+                    (HeroState::WallDragRight, MovementIntent::LEFT) => {
+                        -RUN_ACCEL
+                    },
+                    (HeroState::WallDragRight, MovementIntent::RIGHT) => {
+                        WALL_STICK
+                    },
+                    (HeroState::WallDragRight, MovementIntent::NEUTRAL) => {
+                        RUN_ACCEL
+                    },
+                    (_otherwise, MovementIntent::LEFT) =>
+                                if dx > 0.0 { -SKID_ACCEL } else { -RUN_ACCEL },
+                    (_otherwise, MovementIntent::RIGHT) =>
+                                if dx < 0.0 { SKID_ACCEL } else { RUN_ACCEL },
+                    (_otherwise, MovementIntent::NEUTRAL) =>
+                                if dx > 0.0 { -SLOW_ACCEL } else if dx < 0.0 { SLOW_ACCEL } else { 0.0 },
+                    };
                 Acceleration(ddx + h_accel, ddy)
             }
     );
 }
 
-fn on_push(Push(entity_id, (_px, py)): &Push, world: &mut Entities, _events: &mut Events) {
+fn on_push(Push(entity_id, (px, py)): &Push, world: &mut Entities, _events: &mut Events) {
     world.apply_to(entity_id, |Hero()| {
         if py > &0.0 {
-            HeroState::GROUNDED
+            HeroState::Grounded
+        } else if px < &0.0 {
+            HeroState::WallDragRight
+        } else if px > &0.0 {
+            HeroState::WallDragLeft
         } else {
-            HeroState::AIRBORNE
+            HeroState::Airborne
         }
     });
 }
@@ -219,7 +263,7 @@ fn update_sprite(_update: &AfterUpdate, world: &mut Entities, _events: &mut Even
     });
     world.apply(
         |(Hero(), status, facing, movement_intent, Position(x, _y), Velocity(dx, dy))| match status {
-            HeroState::GROUNDED => {
+            HeroState::Grounded => {
                 if dx == 0.0 {
                     Sprite::sprite_ex("panda_stand", 10, flip(&facing))
                 } else {
@@ -238,12 +282,18 @@ fn update_sprite(_update: &AfterUpdate, world: &mut Entities, _events: &mut Even
                     }
                 }
             },
-            HeroState::AIRBORNE => {
+            HeroState::Airborne => {
                 if dy > 0.0 {
                     Sprite::sprite_ex("panda_ascend", 10, flip(&facing))
                 } else {
                     Sprite::sprite_ex("panda_descend", 10, flip(&facing))
                 }
+            },
+            HeroState::WallDragLeft => {
+                Sprite::sprite_ex("panda_wallslide", 10, false)
+            },
+            HeroState::WallDragRight => {
+                Sprite::sprite_ex("panda_wallslide", 10, true)
             }
         },
     );
