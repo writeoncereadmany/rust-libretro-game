@@ -31,7 +31,7 @@ fn spawn_key(&SpawnKey(x, y): &SpawnKey, world: &mut Entities, _events: &mut Eve
     world.spawn(
         entity()
             .with(Key())
-            .with(Pickup)
+            .with(Pickup())
             .with(Sprite::sprite("key", 5))
             .with(Position(x, y))
             .with(Shape::bbox(0.0, 0.0, 12.0, 12.0))

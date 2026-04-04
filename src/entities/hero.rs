@@ -92,7 +92,7 @@ fn spawn_hero(&SpawnHero(x, y): &SpawnHero, world: &mut Entities, _events: &mut 
             .with(DirectionFacing::RIGHT)
             .with(MovementIntent::NEUTRAL)
             .with(Gravity())
-            .with(Actor)
+            .with(Actor())
             .with(Sprite::sprite("panda_stand", 10))
             .with(Shape::bbox(0.0, 0.0, 12.0, 12.0))
             .with(Acceleration(0.0, 0.0))

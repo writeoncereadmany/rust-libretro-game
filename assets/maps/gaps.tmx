@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-up" width="28" height="18" tilewidth="12" tileheight="12" infinite="0" nextlayerid="9" nextobjectid="44">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-up" width="28" height="18" tilewidth="12" tileheight="12" infinite="0" nextlayerid="9" nextobjectid="46">
  <properties>
   <property name="next_level" value="start"/>
  </properties>
@@ -86,5 +86,7 @@
   <object id="41" gid="125" x="84" y="192" width="12" height="12"/>
   <object id="42" gid="125" x="72" y="192" width="12" height="12"/>
   <object id="43" gid="126" x="216" y="168" width="12" height="12"/>
+  <object id="44" gid="124" x="120" y="144" width="12" height="12"/>
+  <object id="45" gid="124" x="36" y="168" width="12" height="12"/>
  </objectgroup>
 </map>

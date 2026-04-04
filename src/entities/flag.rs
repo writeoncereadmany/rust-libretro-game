@@ -57,7 +57,7 @@ fn spawn_flag(SpawnFlag(x, y, dest): &SpawnFlag, world: &mut Entities, _events: 
     world.spawn(
         entity()
             .with(Flag())
-            .with(Pickup)
+            .with(Pickup())
             .with(Animation {
                 sprites: vec!["flag_blue_1", "flag_blue_2"],
                 layer: 5,

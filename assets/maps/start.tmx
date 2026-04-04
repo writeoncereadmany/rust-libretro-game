@@ -76,10 +76,5 @@
   <object id="25" gid="122" x="204" y="144" width="12" height="12"/>
   <object id="26" gid="122" x="192" y="144" width="12" height="12"/>
   <object id="27" gid="122" x="240" y="156" width="12" height="12"/>
-  <object id="30" gid="124" x="168" y="156" width="12" height="12">
-   <properties>
-    <property name="contents" value="Ruby"/>
-   </properties>
-  </object>
  </objectgroup>
 </map>

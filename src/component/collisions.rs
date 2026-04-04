@@ -23,10 +23,10 @@ pub struct Collided(pub EntityId, pub EntityId);
 pub struct Push(pub EntityId, pub (f64, f64));
 
 #[derive(Constant, Clone)]
-pub struct Actor;
+pub struct Actor();
 
 #[derive(Constant, Clone)]
-pub struct Pickup;
+pub struct Pickup();
 
 const EPSILON: f64 = 1e-8;
 
@@ -42,7 +42,7 @@ pub fn handle_collisions(_ : &CheckCollisions, world: &mut Entities, events: &mu
     let translated_obstacles: Vec<(EntityId, Shape, CollisionType)> = obstacles.iter()
         .map(|(Id(entity_id), shape, tile, Position(x, y))| (*entity_id, shape.translate(&(*x, *y)), *tile)).collect();
 
-    world.apply(|(Actor, Id(hero_id), hero_shape, hero_position@Position(x, y), hero_translation@Translation(tx, ty))| {
+    world.apply(|(Actor(), Id(hero_id), hero_shape, hero_position@Position(x, y), hero_translation@Translation(tx, ty))| {
         let collidables = overlapping(&tile_maps, &hero_shape, &hero_position, &hero_translation).iter().chain(translated_obstacles.iter()).map(|item| item.clone()).collect();
 
         let mut mtx = tx;
@@ -62,12 +62,14 @@ pub fn handle_collisions(_ : &CheckCollisions, world: &mut Entities, events: &mu
         Translation(mtx, mty)
     });
 
-    world.for_each_pair(|(Actor, Id(hero_id), hero_shape, hero_position, hero_translation), 
-                         (Pickup, Id(pickup_id), pickup_shape, pickup_position, pickup_translation)|
+    world.for_each_pair(|(Actor(), Id(actor_id), hero_shape, hero_position, hero_translation),
+                         (Pickup(), Id(pickup_id), pickup_shape, pickup_position, pickup_translation)|
         {
-            if collides(hero_shape, hero_position, hero_translation, pickup_shape, pickup_position, pickup_translation)
-            {
-                events.fire(Collided(*hero_id, *pickup_id));
+            if actor_id != pickup_id {
+                if collides(hero_shape, hero_position, hero_translation, pickup_shape, pickup_position, pickup_translation)
+                {
+                    events.fire(Collided(*actor_id, *pickup_id));
+                }
             }
         }
     );

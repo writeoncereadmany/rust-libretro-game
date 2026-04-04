@@ -39,7 +39,7 @@ fn spawn_coin(&SpawnCoin(x, y): &SpawnCoin, world: &mut Entities, _events: &mut 
     world.spawn(
         entity()
             .with(Coin())
-            .with(Pickup)
+            .with(Pickup())
             .with(Animation {
                 sprites: vec!["coin_1", "coin_2", "coin_3", "coin_4"],
                 layer: 5,
