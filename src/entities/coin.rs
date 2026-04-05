@@ -11,12 +11,10 @@ use engine::events::spawner::Spawner;
 use engine::shapes::shape::Shape;
 use std::time::Duration;
 use crate::component::time::{Period, Phase};
+use crate::entities::sparkle::SpawnSparkle;
 
 #[derive(Event)]
 pub struct SpawnCoin(f64, f64);
-
-#[derive(Event)]
-pub struct SpawnSparkle(f64, f64);
 
 #[derive(Event)]
 pub struct PickupCoin(EntityId);
@@ -26,7 +24,6 @@ pub struct Coin();
 
 pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     dispatcher.register(spawn_coin);
-    dispatcher.register(spawn_sparkle);
     dispatcher.register(pickup_coin);
     dispatcher.register(collect_coin);
 
@@ -50,21 +47,6 @@ fn spawn_coin(&SpawnCoin(x, y): &SpawnCoin, world: &mut Entities, _events: &mut 
             .with(Position(x, y))
             .with(Shape::circle((6.0, 6.0), 4.0))
     );
-}
-
-fn spawn_sparkle(&SpawnSparkle(x, y): &SpawnSparkle, world: &mut Entities, events: &mut Events) {
-    let entity_id = world.spawn(
-        entity()
-            .with(Animation {
-                sprites: vec!["sparkle_small", "sparkle_big", "sparkle_small"],
-                layer: 5,
-            })
-            .with(Period(0.35))
-            .with(Phase(0.0))
-            .with(Sprite::sprite("sparkle_small", 5))
-            .with(Position(x, y))
-    );
-    events.schedule(Duration::from_secs_f64(0.35), Destroy(entity_id));
 }
 
 fn pickup_coin(Collided(first, second): &Collided, world: &mut Entities, events: &mut Events) {

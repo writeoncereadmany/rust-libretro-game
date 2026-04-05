@@ -11,6 +11,7 @@ mod crumbler;
 mod lockbox;
 mod key;
 mod chest;
+mod sparkle;
 
 pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     chest::register(dispatcher, spawner);

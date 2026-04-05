@@ -9,8 +9,8 @@ use engine::events::event::Events;
 use engine::events::spawner::Spawner;
 use engine::shapes::shape::Shape;
 use crate::component::collisions::{Actor, Collided, Pickup};
-use crate::entities::coin::{Coin, PickupCoin, SpawnSparkle};
 use crate::entities::hero::Hero;
+use crate::entities::sparkle::SpawnSparkle;
 use crate::game::game::Score;
 
 #[derive(Event)]
@@ -88,6 +88,7 @@ fn pickup_ruby(Collided(first, second): &Collided, world: &mut Entities, events:
 
 fn collect_ruby(PickupRuby(ruby): &PickupRuby, world: &mut Entities, events: &mut Events) {
     if let Some(Position(x, y)) = world.delete(ruby) {
+        events.fire(SpawnSparkle(x, y));
         events.fire(Score(100));
     }
 }
