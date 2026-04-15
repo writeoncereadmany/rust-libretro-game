@@ -48,6 +48,7 @@ pub fn fire_input_events(current_input: JoypadState, old_input: JoypadState, eve
     fire_presses_and_releases(JoypadState::RIGHT, current_input, old_input, events);
     fire_presses_and_releases(JoypadState::A, current_input, old_input, events);
     fire_presses_and_releases(JoypadState::START, current_input, old_input, events);
+    fire_presses_and_releases(JoypadState::SELECT, current_input, old_input, events);
 }
 
 fn fire_presses_and_releases(

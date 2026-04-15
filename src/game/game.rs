@@ -32,7 +32,8 @@ pub struct Game {
     dispatcher: Arc<Dispatcher>,
     spawner: Arc<Spawner>,
     bonus: u32,
-    score: u32
+    score: u32,
+    paused: bool
 }
 
 impl Game {
@@ -43,7 +44,8 @@ impl Game {
             dispatcher,
             spawner,
             bonus: 1,
-            score: 0
+            score: 0,
+            paused: false
         }
     }
 
@@ -63,11 +65,24 @@ impl Game {
 impl Screen for Game {
     fn on_event(&mut self, event: &Event, events: &mut Events) {
         event.apply(|ButtonPressed(button)| {
+            if button == &JoypadState::SELECT {
+                self.paused = !self.paused;
+            }
+        });
+        
+        event.apply(|ButtonPressed(button)| {
             if button == &JoypadState::START {
                 events.fire(GameOver())
             }
         });
-
+        
+        if self.paused
+        {
+            return;
+        }
+        
+        event.apply(|dt| events.elapse("Game", *dt));
+        
         event.apply(|Score(score)| {
             self.score += score * self.bonus;
             hud::update_score(self.score, events);

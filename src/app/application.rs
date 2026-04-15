@@ -53,13 +53,13 @@ impl Application {
     pub fn update(&mut self, input: JoypadState, delta_time: u64, renderer: &mut AssetRenderer, events: &mut Events) {
         let dt = Duration::from_micros(delta_time);
 
-        events.fire(BeforeUpdate());
-        self.process_events(renderer, events);
-
         fire_input_events(input, self.previous_joypad_state, events);
         self.process_events(renderer, events);
 
-        events.elapse("Game", dt);
+        events.fire(BeforeUpdate());
+        self.process_events(renderer, events);
+
+        events.elapse("Application", dt);
         self.process_events(renderer, events);
 
         events.fire(dt);
