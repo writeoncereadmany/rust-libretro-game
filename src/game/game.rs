@@ -26,6 +26,12 @@ pub struct StartLevel(pub String);
 #[derive(Event)]
 pub struct Score(pub u32);
 
+#[derive(Event)]
+pub struct Pause();
+
+#[derive(Event)]
+pub struct Unpause();
+
 pub struct Game {
     assets: Arc<Assets>,
     world: Entities,
@@ -69,6 +75,9 @@ impl Screen for Game {
                 self.paused = !self.paused;
             }
         });
+        
+        event.apply(|Pause()| { self.paused = true; });
+        event.apply(|Unpause()| { self.paused = false; });
         
         event.apply(|ButtonPressed(button)| {
             if button == &JoypadState::START {

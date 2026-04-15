@@ -3,7 +3,7 @@ use crate::component::collisions::{Collided, Pickup};
 use crate::component::graphics::{Animation, Sprite};
 use crate::component::physics::Position;
 use crate::component::time::{Period, Phase};
-use crate::game::game::StartLevel;
+use crate::game::game::{Pause, StartLevel, Unpause};
 use derive::{Constant, Event};
 use engine::entities::entity::{entity, Entities, EntityId};
 use engine::events::dispatcher::Dispatcher;
@@ -86,6 +86,8 @@ fn pickup_flag(Collided(first, second): &Collided, world: &mut Entities, events:
 
 fn collect_flag(PickupFlag(flag): &PickupFlag, world: &mut Entities, events: &mut Events) {
     if let Some(NextLevel(destination)) = world.delete(flag) {
-        events.fire(StartLevel(destination));
+        events.fire(Pause());
+        events.schedule("Application", Duration::from_secs_f64(0.5), Unpause());
+        events.schedule("Application", Duration::from_secs_f64(0.5), StartLevel(destination));
     }
 }
