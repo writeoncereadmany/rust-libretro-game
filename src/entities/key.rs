@@ -2,7 +2,7 @@ use crate::component::collisions::{Collided, Pickup};
 use crate::component::graphics::Sprite;
 use crate::component::physics::Position;
 use derive::{Constant, Event};
-use engine::entities::entity::{entity, Entities, Id};
+use engine::entities::entity::{entity, Entities};
 use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use engine::events::spawner::Spawner;

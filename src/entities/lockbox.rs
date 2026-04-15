@@ -4,7 +4,7 @@ use crate::component::physics::Position;
 use crate::entities::key::Unlock;
 use crate::entities::map::CollisionType;
 use derive::{Constant, Event};
-use engine::entities::entity::{entity, Entities, EntityId, Id};
+use engine::entities::entity::{entity, Entities, Id};
 use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use engine::events::spawner::Spawner;

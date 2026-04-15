@@ -59,7 +59,7 @@ pub fn spawn_open_chest(&SpawnOpenChest(x, y): &SpawnOpenChest, world: &mut Enti
     );
 }
 
-pub fn spawn_ruby(&SpawnOpenChest(x, y): &SpawnOpenChest, world: &mut Entities, _events: &mut Events) {
+pub fn spawn_ruby(&SpawnRuby(x, y): &SpawnRuby, world: &mut Entities, _events: &mut Events) {
     world.spawn(entity()
         .with(Ruby())
         .with(Sprite::sprite("ruby", 5))

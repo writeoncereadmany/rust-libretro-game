@@ -23,6 +23,7 @@ pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     lockbox::register(dispatcher, spawner);
     map::register(dispatcher, spawner);
     radial::register(dispatcher, spawner);
+    sparkle::register(dispatcher, spawner);
 }
 
 pub fn load_map(map: &tiled::Map, spawner: &Spawner, events: &mut Events) {

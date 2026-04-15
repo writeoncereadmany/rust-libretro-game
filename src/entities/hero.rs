@@ -153,7 +153,7 @@ fn wall_jump(
     world: &mut Entities,
     _events: &mut Events,
 ) {
-    world.apply(|(Hero(), Velocity(dx, _dy))| {
+    world.apply(|(Hero(), Velocity(_dx, _dy))| {
         match facing {
             DirectionFacing::LEFT => (Velocity(-200.0, 150.0), AscentRemaining(ASCENT_DURATION)),
             DirectionFacing::RIGHT => (Velocity(200.0, 150.0), AscentRemaining(ASCENT_DURATION))
