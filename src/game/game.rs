@@ -48,7 +48,7 @@ impl Game {
     }
 
     fn load_map(&mut self, map: &String, events: &mut Events) {
-        events.clear_schedule();
+        events.clear_schedule("Game");
         self.world = Entities::new();
 
         match self.assets.maps.get(map) {

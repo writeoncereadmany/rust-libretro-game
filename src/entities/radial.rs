@@ -49,7 +49,7 @@ fn spawn_radial(x: f64, y: f64, sprite: &'static str, theta: f64, entities: &mut
         .with(Age(0.0))
     );
 
-    events.schedule(Duration::from_millis(2800), Destroy(radial_id));
+    events.schedule("Game", Duration::from_millis(2800), Destroy(radial_id));
 }
 
 fn radial_events(_event: &AfterUpdate, entities: &mut Entities, _events: &mut Events)

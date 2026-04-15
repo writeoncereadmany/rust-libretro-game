@@ -36,7 +36,7 @@ pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
 
     spawner.register("Flag", |spawn, events| {
         events.fire(SpawnRadials(spawn.x, spawn.y, vec!["ball_blue"], 8));
-        events.schedule(Duration::from_secs_f64(2.4), SpawnFlag(spawn.x, spawn.y, destination(&spawn).unwrap_or("start".to_string())));
+        events.schedule("Game", Duration::from_secs_f64(2.4), SpawnFlag(spawn.x, spawn.y, destination(&spawn).unwrap_or("start".to_string())));
         events.fire(SpawnFlagpole(spawn.x, spawn.y,));
     });
 }

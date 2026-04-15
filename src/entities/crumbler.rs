@@ -53,7 +53,7 @@ pub fn spawn_crumbling(&SpawnCrumbling(x, y): &SpawnCrumbling, world: &mut Entit
         .with(CollisionType::WALL)
         .with(Position(x, y))
     );
-    events.schedule(Duration::from_secs_f64(CRUMBLER_LIFESPAN), Destroy(crumbling_id))
+    events.schedule("Game", Duration::from_secs_f64(CRUMBLER_LIFESPAN), Destroy(crumbling_id))
 }
 
 pub fn crumble(Collided(entity_1, entity_2): &Collided, world: &mut Entities, events: &mut Events) {

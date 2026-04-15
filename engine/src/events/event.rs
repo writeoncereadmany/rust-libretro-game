@@ -2,7 +2,7 @@ use crate::entities::entity::Entities;
 use crate::events::dispatcher::Dispatcher;
 use crate::events::timer::Timer;
 use std::any::Any;
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 use std::time::Duration;
 
 pub trait EventTrait {
@@ -33,7 +33,7 @@ impl Event {
         event.as_any().downcast_ref()
     }
 
-    pub fn apply<E:EventTrait + 'static, O>(&self, f: impl FnMut(&E) -> O) -> Option<O> {
+    pub fn apply<E: EventTrait + 'static, O>(&self, f: impl FnMut(&E) -> O) -> Option<O> {
         self.unwrap().map(f)
     }
 
@@ -45,26 +45,37 @@ impl Event {
 
 pub struct Events {
     events: VecDeque<Event>,
-    timer: Timer
+    timers: HashMap<&'static str, Timer>,
 }
 
 impl Events {
-
     pub fn new() -> Self {
-        Events { events: VecDeque::new(), timer: Timer::new() }
+        Events {
+            events: VecDeque::new(),
+            timers: HashMap::new(),
+        }
     }
 
-    pub fn schedule<E: EventTrait + 'static>(&mut self, fires_in: Duration, event: E) {
-        self.timer.schedule(fires_in, Event::new(event));
+    pub fn schedule<E: EventTrait + 'static>(
+        &mut self,
+        timer_name: &'static str,
+        fires_in: Duration,
+        event: E,
+    ) {
+        if !self.timers.contains_key(timer_name) {
+            self.timers.insert(timer_name, Timer::new());
+        }
+        self.timers.get_mut(timer_name).map(|t| t.schedule(fires_in, Event::new(event)));
     }
 
-    pub fn clear_schedule(&mut self) {
-        self.timer.clear_schedule();
+    pub fn clear_schedule(&mut self, timer_name: &'static str) {
+        self.timers.get_mut(timer_name).map(|t| t.clear_schedule());
     }
 
-    pub fn elapse(&mut self, dt: Duration) {
-        let timer = &mut self.timer;
-        timer.elapse(&dt, &mut self.events);
+    pub fn elapse(&mut self, timer_name: &'static str, dt: Duration) {
+        if let Some(timer) = &mut self.timers.get_mut(timer_name) {
+            timer.elapse(&dt, &mut self.events);            
+        };
     }
 
     pub fn fire<E: EventTrait + 'static>(&mut self, event: E) {

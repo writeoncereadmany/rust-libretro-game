@@ -59,7 +59,7 @@ impl Application {
         fire_input_events(input, self.previous_joypad_state, events);
         self.process_events(renderer, events);
 
-        events.elapse(dt);
+        events.elapse("Game", dt);
         self.process_events(renderer, events);
 
         events.fire(dt);

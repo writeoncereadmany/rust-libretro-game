@@ -28,6 +28,6 @@ fn spawn_sparkle(&SpawnSparkle(x, y): &SpawnSparkle, world: &mut Entities, event
             .with(Sprite::sprite("sparkle_small", 5))
             .with(Position(x, y))
     );
-    events.schedule(Duration::from_secs_f64(0.35), Destroy(entity_id));
+    events.schedule("Game", Duration::from_secs_f64(0.35), Destroy(entity_id));
 }
 

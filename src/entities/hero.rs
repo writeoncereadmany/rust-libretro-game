@@ -81,7 +81,7 @@ pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
 
 fn spawn_radial_and_delayed_hero(&SpawnRadialAndDelayedHero(x, y): &SpawnRadialAndDelayedHero, _world: &mut Entities, events: &mut Events) {
     events.fire(SpawnRadials(x, y, vec!["ball_blue", "ball_white"], 8));
-    events.schedule(Duration::from_secs_f64(2.4), SpawnHero(x, y));
+    events.schedule("Game", Duration::from_secs_f64(2.4), SpawnHero(x, y));
 }
 
 fn spawn_hero(&SpawnHero(x, y): &SpawnHero, world: &mut Entities, _events: &mut Events) {

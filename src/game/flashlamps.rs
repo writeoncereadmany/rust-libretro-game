@@ -25,6 +25,6 @@ pub fn setup_flashlamps(events: &mut Events) {
         let fraction_of_fulltime = i as f64 / flashlamps.len() as f64;
         let fire_in = Duration::from_secs_f64(2.4 + (10.0 * fraction_of_fulltime));
         events.fire(UpdateBackgroundSprite { x, y, sprite: "lamp_unlit".to_string() });
-        events.schedule(fire_in, UpdateBackgroundSprite {x, y, sprite: "lamp_green".to_string() });
+        events.schedule("Game", fire_in, UpdateBackgroundSprite {x, y, sprite: "lamp_green".to_string() });
     }
 }
