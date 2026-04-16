@@ -4,12 +4,12 @@ use engine::renderer::spritefont::Alignment;
 use engine::renderer::spritefont::HorizontalAlignment::RIGHT;
 use engine::renderer::spritefont::VerticalAlignment::MIDDLE;
 
-pub fn setup_hud(events: &mut Events, score: u32, bonus: u32) {
+pub fn setup_hud(events: &mut Events, score: &u32, bonus: &u32) {
     update_bonus(bonus, events);
     update_score(score, events);
 }
 
-pub fn update_bonus(bonus: u32, events: &mut Events) {
+pub fn update_bonus(bonus: &u32, events: &mut Events) {
     let sprite = match bonus {
         1 => "bonus_1",
         2 => "bonus_2",
@@ -22,7 +22,7 @@ pub fn update_bonus(bonus: u32, events: &mut Events) {
     events.fire(UpdateHudSprite { x: 12*12, y: 19*12, sprite})
 }
 
-pub fn update_score(score: u32, events: &mut Events) {
+pub fn update_score(score: &u32, events: &mut Events) {
     events.fire(UpdateHudSprite { x: 13*12, y: 19*12, sprite: "score_left".to_string() });
     events.fire(UpdateHudSprite { x: 14*12, y: 19*12, sprite: "score_mid".to_string() });
     events.fire(UpdateHudSprite { x: 15*12, y: 19*12, sprite: "score_mid".to_string() });
@@ -36,13 +36,13 @@ pub fn update_score(score: u32, events: &mut Events) {
         alignment: Alignment::aligned(RIGHT, MIDDLE)});
 }
 
-fn simplify(score: u32) -> String {
-    if score <= 99_999 {
+fn simplify(score: &u32) -> String {
+    if score <= &99_999 {
         score.to_string()
-    } else if score <= 9_999_999 {
+    } else if score <= &9_999_999 {
         (score / 1_000).to_string() + "k"
-    } else if score <= 99_999_999 {
-        format!("{:.1}m", score as f64 / 1_000_000.0)
+    } else if score <= &99_999_999 {
+        format!("{:.1}m", *score as f64 / 1_000_000.0)
     } else {
         (score / 1_000_000).to_string() + "m"
     }

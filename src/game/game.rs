@@ -4,7 +4,7 @@ use crate::component::physics::Position;
 use crate::entities::load_map;
 use crate::game::flashlamps::setup_flashlamps;
 use crate::game::hud;
-use crate::game::hud::setup_hud;
+use crate::game::hud::{setup_hud, update_bonus};
 use crate::screens::screen::Screen;
 use derive::Event;
 use engine::assets::Assets;
@@ -18,12 +18,16 @@ use rust_libretro::types::JoypadState;
 use std::sync::Arc;
 use std::time::Duration;
 use engine::events::timer::TimerId;
+use crate::entities::coin::Coin;
 
 const GAME_WINDOW_START_X: i32 = 12;
 const GAME_WINDOW_TOP_Y: i32 = 19*12;
 
 #[derive(Event)]
 pub struct StartLevel(pub String);
+
+#[derive(Event)]
+pub struct CompleteLevel(pub String);
 
 #[derive(Event)]
 pub struct Failed();
@@ -76,7 +80,7 @@ impl Game {
         self.current_level = map.clone();
 
         setup_flashlamps(events);
-        setup_hud(events, self.score, self.bonus);
+        setup_hud(events, &self.score, &self.bonus);
         self.game_over_timer = events.schedule("Game", Duration::from_secs_f64(12.4), Failed());
     }
 }
@@ -107,16 +111,29 @@ impl Screen for Game {
 
         event.apply(|Score(score)| {
             self.score += score * self.bonus;
-            hud::update_score(self.score, events);
+            hud::update_score(&self.score, events);
         });
 
         event.apply(|StartLevel(map)| self.load_map(map, events));
+
         event.apply(|Failed()| {
+            self.bonus = 1;
             events.cancel("Application", &self.game_over_timer);
             events.fire(Pause());
 
             events.schedule("Application", Duration::from_secs_f64(1.0), Unpause());
             events.schedule("Application", Duration::from_secs_f64(1.0), StartLevel(self.current_level.clone()));
+        });
+
+        event.apply(|CompleteLevel(map)| {
+            if self.world.collect::<Coin>().is_empty() {
+                self.bonus = (self.bonus + 1).min(5);
+                update_bonus(&self.bonus, events);
+            }
+            events.fire(Pause());
+            events.schedule("Application", Duration::from_secs_f64(0.5), Unpause());
+            events.schedule("Application", Duration::from_secs_f64(1.0), StartLevel(map.clone()));
+
         });
 
         event.dispatch(&self.dispatcher, &mut self.world, events)

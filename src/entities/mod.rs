@@ -2,7 +2,7 @@ use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use engine::events::spawner::Spawner;
 
-mod coin;
+pub mod coin;
 mod hero;
 mod flag;
 pub mod map;
