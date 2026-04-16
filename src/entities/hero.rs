@@ -1,17 +1,18 @@
-use std::time::Duration;
 use crate::app::application::{AfterUpdate, BeforeUpdate};
 use crate::component::collisions::{Actor, Push};
 use crate::component::graphics::Sprite;
 use crate::component::physics::{Acceleration, Gravity, Position, Velocity, VelocityCap};
+use crate::entities::radial::SpawnRadials;
+use crate::game::game::Failed;
 use derive::{Constant, Event, Variable};
-use engine::entities::entity::{Entities, entity};
+use engine::entities::entity::{entity, Entities};
 use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use engine::events::input::{ButtonPressed, InputState};
 use engine::events::spawner::Spawner;
 use engine::shapes::shape::Shape;
 use rust_libretro::types::JoypadState;
-use crate::entities::radial::SpawnRadials;
+use std::time::Duration;
 
 const RUN_ACCEL: f64 = 500.0;
 const SKID_ACCEL: f64 = 800.0;
@@ -241,8 +242,12 @@ fn on_push(Push(entity_id, (px, py)): &Push, world: &mut Entities, _events: &mut
     });
 }
 
-fn clamp_to_screen(_: &AfterUpdate, world: &mut Entities, _events: &mut Events) {
+fn clamp_to_screen(_: &AfterUpdate, world: &mut Entities, events: &mut Events) {
     world.apply(|(Hero(), pos@Position(x, y), vel@Velocity(_, dy))| {
+        if y < -240.0 {
+            events.fire(Failed());
+        }
+
         if x < 0.0 || x > 324.0 {
             (Position(x.clamp(0.0, 324.0), y), Velocity(0.0, dy))
         } else {

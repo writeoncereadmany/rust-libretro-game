@@ -1,6 +1,7 @@
 use crate::app::application::GameOver;
 use crate::component::graphics::Sprite;
 use crate::component::physics::Position;
+use crate::entities::coin::Coin;
 use crate::entities::load_map;
 use crate::game::flashlamps::setup_flashlamps;
 use crate::game::hud;
@@ -13,12 +14,11 @@ use engine::events::dispatcher::Dispatcher;
 use engine::events::event::{Event, Events};
 use engine::events::input::ButtonPressed;
 use engine::events::spawner::Spawner;
+use engine::events::timer::TimerId;
 use engine::renderer::asset_renderer::AssetRenderer;
 use rust_libretro::types::JoypadState;
 use std::sync::Arc;
 use std::time::Duration;
-use engine::events::timer::TimerId;
-use crate::entities::coin::Coin;
 
 const GAME_WINDOW_START_X: i32 = 12;
 const GAME_WINDOW_TOP_Y: i32 = 19*12;
@@ -70,6 +70,8 @@ impl Game {
 
     fn load_map(&mut self, map: &String, events: &mut Events) {
         events.clear_schedule("Game");
+        events.fire(Unpause());
+
         self.world = Entities::new();
 
         match self.assets.maps.get(map) {
@@ -95,6 +97,7 @@ impl Screen for Game {
 
         event.apply(|Pause()| { self.paused = true; });
         event.apply(|Unpause()| { self.paused = false; });
+        event.apply(|StartLevel(map)| self.load_map(map, events));
 
         event.apply(|ButtonPressed(button)| {
             if button == &JoypadState::START {
@@ -102,27 +105,22 @@ impl Screen for Game {
             }
         });
 
-        if self.paused
-        {
-            return;
-        }
-
-        event.apply(|dt| events.elapse("Game", *dt));
-
         event.apply(|Score(score)| {
             self.score += score * self.bonus;
             hud::update_score(&self.score, events);
         });
 
-        event.apply(|StartLevel(map)| self.load_map(map, events));
-
         event.apply(|Failed()| {
-            self.bonus = 1;
             events.cancel("Application", &self.game_over_timer);
             events.fire(Pause());
 
-            events.schedule("Application", Duration::from_secs_f64(1.0), Unpause());
-            events.schedule("Application", Duration::from_secs_f64(1.0), StartLevel(self.current_level.clone()));
+            if self.bonus == 1 {
+                events.schedule("Application", Duration::from_secs_f64(1.0), GameOver());
+            }
+            else {
+                self.bonus = 1;
+                events.schedule("Application", Duration::from_secs_f64(1.0), StartLevel(self.current_level.clone()));
+            }
         });
 
         event.apply(|CompleteLevel(map)| {
@@ -130,13 +128,16 @@ impl Screen for Game {
                 self.bonus = (self.bonus + 1).min(5);
                 update_bonus(&self.bonus, events);
             }
+            events.cancel("Application", &self.game_over_timer);
             events.fire(Pause());
-            events.schedule("Application", Duration::from_secs_f64(0.5), Unpause());
             events.schedule("Application", Duration::from_secs_f64(1.0), StartLevel(map.clone()));
-
         });
 
-        event.dispatch(&self.dispatcher, &mut self.world, events)
+        if !self.paused
+        {
+            event.apply(|dt| events.elapse("Game", *dt));
+            event.dispatch(&self.dispatcher, &mut self.world, events);
+        }
     }
 
     fn draw(&mut self, renderer: &mut AssetRenderer) {
