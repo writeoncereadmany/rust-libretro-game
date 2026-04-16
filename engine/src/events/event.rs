@@ -1,6 +1,6 @@
 use crate::entities::entity::Entities;
 use crate::events::dispatcher::Dispatcher;
-use crate::events::timer::Timer;
+use crate::events::timer::{Timer, TimerId};
 use std::any::Any;
 use std::collections::{HashMap, VecDeque};
 use std::time::Duration;
@@ -61,11 +61,15 @@ impl Events {
         timer_name: &'static str,
         fires_in: Duration,
         event: E,
-    ) {
+    ) -> TimerId {
         if !self.timers.contains_key(timer_name) {
             self.timers.insert(timer_name, Timer::new());
         }
-        self.timers.get_mut(timer_name).map(|t| t.schedule(fires_in, Event::new(event)));
+        self.timers.get_mut(timer_name).unwrap().schedule(fires_in, Event::new(event))
+    }
+    
+    pub fn cancel(&mut self, timer_name: &'static str, timer_id: &TimerId) {
+        self.timers.get_mut(timer_name).map(|t| t.cancel(timer_id));
     }
 
     pub fn clear_schedule(&mut self, timer_name: &'static str) {
@@ -74,7 +78,7 @@ impl Events {
 
     pub fn elapse(&mut self, timer_name: &'static str, dt: Duration) {
         if let Some(timer) = &mut self.timers.get_mut(timer_name) {
-            timer.elapse(&dt, &mut self.events);            
+            timer.elapse(&dt, &mut self.events);
         };
     }
 

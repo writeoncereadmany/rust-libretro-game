@@ -16,12 +16,17 @@ use engine::events::spawner::Spawner;
 use engine::renderer::asset_renderer::AssetRenderer;
 use rust_libretro::types::JoypadState;
 use std::sync::Arc;
+use std::time::Duration;
+use engine::events::timer::TimerId;
 
 const GAME_WINDOW_START_X: i32 = 12;
 const GAME_WINDOW_TOP_Y: i32 = 19*12;
 
 #[derive(Event)]
 pub struct StartLevel(pub String);
+
+#[derive(Event)]
+pub struct Failed();
 
 #[derive(Event)]
 pub struct Score(pub u32);
@@ -39,7 +44,9 @@ pub struct Game {
     spawner: Arc<Spawner>,
     bonus: u32,
     score: u32,
-    paused: bool
+    paused: bool,
+    game_over_timer: TimerId,
+    current_level: String
 }
 
 impl Game {
@@ -51,7 +58,9 @@ impl Game {
             spawner,
             bonus: 1,
             score: 0,
-            paused: false
+            paused: false,
+            game_over_timer: TimerId::MAX,
+            current_level: String::new()
         }
     }
 
@@ -63,8 +72,12 @@ impl Game {
             Some(map) => load_map(map, &self.spawner, events),
             None => panic!("Map {map} could not be found")
         };
+
+        self.current_level = map.clone();
+
         setup_flashlamps(events);
         setup_hud(events, self.score, self.bonus);
+        self.game_over_timer = events.schedule("Game", Duration::from_secs_f64(12.4), Failed());
     }
 }
 
@@ -75,29 +88,36 @@ impl Screen for Game {
                 self.paused = !self.paused;
             }
         });
-        
+
         event.apply(|Pause()| { self.paused = true; });
         event.apply(|Unpause()| { self.paused = false; });
-        
+
         event.apply(|ButtonPressed(button)| {
             if button == &JoypadState::START {
                 events.fire(GameOver())
             }
         });
-        
+
         if self.paused
         {
             return;
         }
-        
+
         event.apply(|dt| events.elapse("Game", *dt));
-        
+
         event.apply(|Score(score)| {
             self.score += score * self.bonus;
             hud::update_score(self.score, events);
         });
 
         event.apply(|StartLevel(map)| self.load_map(map, events));
+        event.apply(|Failed()| {
+            events.cancel("Application", &self.game_over_timer);
+            events.fire(Pause());
+
+            events.schedule("Application", Duration::from_secs_f64(1.0), Unpause());
+            events.schedule("Application", Duration::from_secs_f64(1.0), StartLevel(self.current_level.clone()));
+        });
 
         event.dispatch(&self.dispatcher, &mut self.world, events)
     }
