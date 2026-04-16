@@ -20,7 +20,7 @@ use tar::Archive;
 
 const WIDTH: c_uint = 360;
 const HEIGHT: c_uint = 240;
-const PIXEL_FORMAT: PixelFormat = PixelFormat::RGB565;
+const PIXEL_FORMAT: PixelFormat = PixelFormat::XRGB1555;
 
 const INPUT_DESCRIPTORS: &[retro_input_descriptor] = &input_descriptors!(
     { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP, "Up" },
