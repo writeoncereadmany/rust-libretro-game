@@ -25,7 +25,17 @@ pub fn setup_flashlamps(events: &mut Events) {
         let fraction_of_fulltime = i as f64 / flashlamps.len() as f64;
         let refire_amber = ((0.5 - fraction_of_fulltime) * 0.25) + 0.5;
         let refire_red = ((0.75 - fraction_of_fulltime) * 0.25) + 0.75;
+        let distance_from_center = (1.0 - ((fraction_of_fulltime - 0.5).abs() * 2.0)) * 0.6;
         events.fire(UpdateHudSprite { x, y, sprite: "lamp_unlit".to_string() });
+
+        events.schedule("Game", Duration::from_secs_f64(distance_from_center), UpdateHudSprite {x, y, sprite: "lamp_red".to_string() });
+        events.schedule("Game", Duration::from_secs_f64(distance_from_center + 0.2), UpdateHudSprite {x, y, sprite: "lamp_unlit".to_string() });
+
+        events.schedule("Game", Duration::from_secs_f64(distance_from_center + 0.8), UpdateHudSprite {x, y, sprite: "lamp_amber".to_string() });
+        events.schedule("Game", Duration::from_secs_f64(distance_from_center + 1.0), UpdateHudSprite {x, y, sprite: "lamp_unlit".to_string() });
+
+        events.schedule("Game", Duration::from_secs_f64(distance_from_center + 1.6), UpdateHudSprite {x, y, sprite: "lamp_green".to_string() });
+        events.schedule("Game", Duration::from_secs_f64(distance_from_center + 1.8), UpdateHudSprite {x, y, sprite: "lamp_unlit".to_string() });
 
         if fraction_of_fulltime < 0.5 {
             events.schedule("Game", fire_at(fraction_of_fulltime), UpdateHudSprite {x, y, sprite: "lamp_green".to_string() });
