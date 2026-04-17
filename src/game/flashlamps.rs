@@ -23,8 +23,23 @@ pub fn setup_flashlamps(events: &mut Events) {
     for (i, (x, y)) in flashlamps.iter().enumerate() {
         let (x, y) = (x * 12, y * 12);
         let fraction_of_fulltime = i as f64 / flashlamps.len() as f64;
-        let fire_in = Duration::from_secs_f64(2.4 + (10.0 * fraction_of_fulltime));
+        let refire_amber = ((0.5 - fraction_of_fulltime) * 0.25) + 0.5;
+        let refire_red = ((0.75 - fraction_of_fulltime) * 0.25) + 0.75;
         events.fire(UpdateHudSprite { x, y, sprite: "lamp_unlit".to_string() });
-        events.schedule("Game", fire_in, UpdateHudSprite {x, y, sprite: "lamp_green".to_string() });
+
+        if fraction_of_fulltime < 0.5 {
+            events.schedule("Game", fire_at(fraction_of_fulltime), UpdateHudSprite {x, y, sprite: "lamp_green".to_string() });
+            events.schedule("Game", fire_at(refire_amber), UpdateHudSprite {x, y, sprite: "lamp_amber".to_string() });
+            events.schedule("Game", fire_at(refire_red), UpdateHudSprite {x, y, sprite: "lamp_red".to_string() });
+        } else if fraction_of_fulltime < 0.75 {
+            events.schedule("Game", fire_at(fraction_of_fulltime), UpdateHudSprite {x, y, sprite: "lamp_amber".to_string() });
+            events.schedule("Game", fire_at(refire_red), UpdateHudSprite {x, y, sprite: "lamp_red".to_string() });
+        } else {
+            events.schedule("Game", fire_at(fraction_of_fulltime), UpdateHudSprite {x, y, sprite: "lamp_red".to_string() });
+        }
     }
+}
+
+fn fire_at(fraction_of_fulltime: f64) -> Duration {
+    Duration::from_secs_f64(2.4 + (10.0 * fraction_of_fulltime))
 }
