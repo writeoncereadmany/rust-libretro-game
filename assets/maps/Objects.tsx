@@ -18,4 +18,7 @@
  <tile id="14" type="Grapes"/>
  <tile id="15" type="Bubble"/>
  <tile id="16" type="Crumbler"/>
+ <tile id="17" type="Orange"/>
+ <tile id="18" type="Strawberry"/>
+ <tile id="19" type="Kiwi"/>
 </tileset>

@@ -12,12 +12,14 @@ mod lockbox;
 mod key;
 mod chest;
 mod sparkle;
+mod fruit;
 
 pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     chest::register(dispatcher, spawner);
     coin::register(dispatcher, spawner);
     crumbler::register(dispatcher, spawner);
     flag::register(dispatcher, spawner);
+    fruit::register(dispatcher, spawner);
     hero::register(dispatcher, spawner);
     key::register(dispatcher, spawner);
     lockbox::register(dispatcher, spawner);

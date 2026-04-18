@@ -27,6 +27,15 @@ const GAME_WINDOW_TOP_Y: i32 = 19*12;
 pub struct StartLevel(pub String);
 
 #[derive(Event)]
+pub struct IncreaseMultiplier();
+
+#[derive(Event)]
+pub struct BuyMetamultiplier();
+
+#[derive(Event)]
+pub struct BuyBonus();
+
+#[derive(Event)]
 pub struct CompleteLevel(pub String);
 
 #[derive(Event)]
@@ -47,6 +56,7 @@ pub struct Game {
     dispatcher: Arc<Dispatcher>,
     spawner: Arc<Spawner>,
     bonus: u32,
+    metamultiplier: u32,
     score: u32,
     paused: bool,
     game_over_timer: TimerId,
@@ -61,6 +71,7 @@ impl Game {
             dispatcher,
             spawner,
             bonus: 1,
+            metamultiplier: 1,
             score: 0,
             paused: false,
             game_over_timer: TimerId::MAX,
@@ -123,11 +134,30 @@ impl Screen for Game {
             }
         });
 
-        event.apply(|CompleteLevel(map)| {
-            if self.world.collect::<Coin>().is_empty() {
-                self.bonus = (self.bonus + 1).min(5);
-                update_bonus(&self.bonus, events);
+        event.apply(|IncreaseMultiplier()| {
+            self.bonus = (self.bonus + 1).clamp(1, 5);
+            update_bonus(&self.bonus, events);
+        });
+
+        event.apply(|BuyMetamultiplier()| {
+            if (self.bonus == 5) {
+                self.metamultiplier += 1;
             }
+            self.bonus = 1;
+        });
+
+        event.apply(|BuyBonus()| {
+            match self.bonus {
+                5 => events.fire(Score(10_000)),
+                4 => events.fire(Score(5_000)),
+                3 => events.fire(Score(2_000)),
+                2 => events.fire(Score(1_000)),
+                _otherwise => events.fire(Score(100))
+            }
+            self.bonus = 1;
+        });
+
+        event.apply(|CompleteLevel(map)| {
             events.cancel("Application", &self.game_over_timer);
             events.fire(Pause());
             events.schedule("Application", Duration::from_secs_f64(1.0), StartLevel(map.clone()));
