@@ -1,11 +1,10 @@
 use crate::app::application::GameOver;
 use crate::component::graphics::Sprite;
 use crate::component::physics::Position;
-use crate::entities::coin::Coin;
 use crate::entities::load_map;
 use crate::game::flashlamps::setup_flashlamps;
 use crate::game::hud;
-use crate::game::hud::{setup_hud, update_bonus};
+use crate::game::hud::{setup_hud, update_bonus, update_metamultiplier};
 use crate::screens::screen::Screen;
 use derive::Event;
 use engine::assets::Assets;
@@ -93,7 +92,7 @@ impl Game {
         self.current_level = map.clone();
 
         setup_flashlamps(events);
-        setup_hud(events, &self.score, &self.bonus);
+        setup_hud(events, &self.score, &self.bonus, &self.metamultiplier);
         self.game_over_timer = events.schedule("Game", Duration::from_secs_f64(12.4), Failed());
     }
 }
@@ -117,7 +116,7 @@ impl Screen for Game {
         });
 
         event.apply(|Score(score)| {
-            self.score += score * self.bonus;
+            self.score += score * self.bonus * self.metamultiplier;
             hud::update_score(&self.score, events);
         });
 
@@ -140,10 +139,12 @@ impl Screen for Game {
         });
 
         event.apply(|BuyMetamultiplier()| {
-            if (self.bonus == 5) {
+            if self.bonus == 5 {
                 self.metamultiplier += 1;
+                update_metamultiplier(&self.metamultiplier, events)
             }
             self.bonus = 1;
+            update_bonus(&self.bonus, events);
         });
 
         event.apply(|BuyBonus()| {

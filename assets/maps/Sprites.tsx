@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.0" name="Sprites" class="Sprite" tilewidth="12" tileheight="12" tilecount="88" columns="8">
- <image source="../graphics/spritesheet.png" width="96" height="132"/>
+<tileset version="1.10" tiledversion="1.11.0" name="Sprites" class="Sprite" tilewidth="12" tileheight="12" tilecount="96" columns="8">
+ <image source="../graphics/spritesheet.png" width="96" height="144"/>
  <tile id="0" type="error"/>
  <tile id="1" type="bell"/>
  <tile id="2" type="crumbler"/>
@@ -87,4 +87,5 @@
  <tile id="85" type="silver_coin_2"/>
  <tile id="86" type="silver_coin_3"/>
  <tile id="87" type="silver_coin_4"/>
+ <tile id="88" type="bonus_blank"/>
 </tileset>

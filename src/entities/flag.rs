@@ -87,7 +87,8 @@ fn pickup_flag(Collided(first, second): &Collided, world: &mut Entities, events:
 
 fn collect_flag(PickupFlag(flag): &PickupFlag, world: &mut Entities, events: &mut Events) {
     if let Some(NextLevel(destination)) = world.delete(flag) {
-        if (world.collect::<Coin>().is_empty())
+        events.fire(IncreaseMultiplier());
+        if world.collect::<Coin>().is_empty()
         {
             events.fire(IncreaseMultiplier());
         }

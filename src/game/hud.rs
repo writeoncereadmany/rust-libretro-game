@@ -4,14 +4,23 @@ use engine::renderer::spritefont::Alignment;
 use engine::renderer::spritefont::HorizontalAlignment::RIGHT;
 use engine::renderer::spritefont::VerticalAlignment::MIDDLE;
 
-pub fn setup_hud(events: &mut Events, score: &u32, bonus: &u32) {
+pub fn setup_hud(events: &mut Events, score: &u32, bonus: &u32, metamultiplier: &u32) {
     update_bonus(bonus, events);
+    update_metamultiplier(metamultiplier, events);
     update_score(score, events);
 }
 
 pub fn update_bonus(bonus: &u32, events: &mut Events) {
+    update_bonus_sprite(12, bonus, "bonus_1", events);
+}
+
+pub fn update_metamultiplier(bonus: &u32, events: &mut Events) {
+    update_bonus_sprite(11, bonus, "bonus_blank", events);
+}
+
+fn update_bonus_sprite(x: i32, &bonus: &u32, no_bonus_sprite: &'static str, events: &mut Events) {
     let sprite = match bonus {
-        1 => "bonus_1",
+        1 => no_bonus_sprite,
         2 => "bonus_2",
         3 => "bonus_3",
         4 => "bonus_4",
@@ -19,7 +28,7 @@ pub fn update_bonus(bonus: &u32, events: &mut Events) {
         _otherwise => "error"
     }.to_string();
 
-    events.fire(UpdateHudSprite { x: 12*12, y: 19*12, sprite})
+    events.fire(UpdateHudSprite { x: x*12, y: 19*12, sprite})
 }
 
 pub fn update_score(score: &u32, events: &mut Events) {

@@ -16,7 +16,7 @@ pub fn setup_flashlamps(events: &mut Events) {
     for y in 1..19 {
         flashlamps.push((0, y))
     }
-    for x in 0..12 {
+    for x in 0..11 {
         flashlamps.push((x, 19))
     }
 
