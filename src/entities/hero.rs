@@ -15,8 +15,8 @@ use rust_libretro::types::JoypadState;
 use std::time::Duration;
 
 const RUN_ACCEL: f64 = 500.0;
-const SKID_ACCEL: f64 = 800.0;
-const SLOW_ACCEL: f64 = 250.0;
+const SKID_ACCEL: f64 = 1200.0;
+const SLOW_ACCEL: f64 = 500.0;
 const STATIC_FRICTION_THRESHOLD: f64 = 5.0;
 const ASCENT_DURATION: f64 = 0.15;
 const POST_JUMP_ACCEL: f64 = 1500.0;
