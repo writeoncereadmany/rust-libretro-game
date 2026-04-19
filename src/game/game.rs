@@ -95,6 +95,11 @@ impl Game {
         setup_hud(events, &self.score, &self.bonus, &self.metamultiplier);
         self.game_over_timer = events.schedule("Game", Duration::from_secs_f64(12.4), Failed());
     }
+
+    fn set_bonus(&mut self, bonus: u32, events: &mut Events) {
+        self.bonus = bonus;
+        update_bonus(&self.bonus, events);
+    }
 }
 
 impl Screen for Game {
@@ -128,14 +133,13 @@ impl Screen for Game {
                 events.schedule("Application", Duration::from_secs_f64(1.0), GameOver());
             }
             else {
-                self.bonus = 1;
+                self.set_bonus(1, events);
                 events.schedule("Application", Duration::from_secs_f64(1.0), StartLevel(self.current_level.clone()));
             }
         });
 
         event.apply(|IncreaseMultiplier()| {
-            self.bonus = (self.bonus + 1).clamp(1, 5);
-            update_bonus(&self.bonus, events);
+            self.set_bonus((self.bonus + 1).clamp(1, 5), events);
         });
 
         event.apply(|BuyMetamultiplier()| {
@@ -143,8 +147,7 @@ impl Screen for Game {
                 self.metamultiplier += 1;
                 update_metamultiplier(&self.metamultiplier, events)
             }
-            self.bonus = 1;
-            update_bonus(&self.bonus, events);
+            self.set_bonus(1, events);
         });
 
         event.apply(|BuyBonus()| {
@@ -155,7 +158,7 @@ impl Screen for Game {
                 2 => events.fire(Score(1_000)),
                 _otherwise => events.fire(Score(100))
             }
-            self.bonus = 1;
+            self.set_bonus(1, events);
         });
 
         event.apply(|CompleteLevel(map)| {
