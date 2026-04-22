@@ -1,4 +1,4 @@
-use crate::component::collisions::{Collided, Pickup};
+use crate::component::collisions::{Collided, Interactable};
 use crate::component::graphics::Sprite;
 use crate::component::physics::Position;
 use derive::{Constant, Event};
@@ -31,7 +31,7 @@ fn spawn_key(&SpawnKey(x, y): &SpawnKey, world: &mut Entities, _events: &mut Eve
     world.spawn(
         entity()
             .with(Key())
-            .with(Pickup())
+            .with(Interactable())
             .with(Sprite::sprite("key", 5))
             .with(Position(x, y))
             .with(Shape::bbox(0.0, 0.0, 12.0, 12.0))

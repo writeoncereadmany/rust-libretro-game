@@ -8,7 +8,7 @@ use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use engine::events::spawner::Spawner;
 use engine::shapes::shape::Shape;
-use crate::component::collisions::{Actor, Collided, Pickup};
+use crate::component::collisions::{Actor, Collided, Interactable};
 use crate::entities::hero::Hero;
 use crate::entities::sparkle::SpawnSparkle;
 use crate::game::game::Score;
@@ -69,7 +69,7 @@ pub fn spawn_ruby(&SpawnRuby(x, y): &SpawnRuby, world: &mut Entities, _events: &
         .with(Shape::bbox(0.0, 0.0, 12.0, 12.0))
         .with(Gravity())
         .with(Actor())
-        .with(Pickup())
+        .with(Interactable())
     );
 }
 

@@ -13,6 +13,7 @@ use engine::events::spawner::Spawner;
 use engine::shapes::shape::Shape;
 use rust_libretro::types::JoypadState;
 use std::time::Duration;
+use crate::entities::spring::Sprung;
 
 const RUN_ACCEL: f64 = 500.0;
 const SKID_ACCEL: f64 = 1200.0;
@@ -67,6 +68,7 @@ pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     dispatcher.register(listen_to_input_state);
     dispatcher.register(listen_to_button_press);
     dispatcher.register(jump);
+    dispatcher.register(sprung);
     dispatcher.register(wall_jump);
     dispatcher.register(post_jump);
     dispatcher.register(check_static_friction);
@@ -146,6 +148,16 @@ fn jump(
 ) {
     world.apply(|(Hero(), Velocity(dx, _dy))| {
         (Velocity(dx, 150.0), AscentRemaining(ASCENT_DURATION))
+    })
+}
+
+fn sprung(
+    Sprung(id): &Sprung,
+    world: &mut Entities,
+    _events: &mut Events,
+) {
+    world.apply_to(id, |(Hero(), Velocity(dx, _dy))| {
+        (Velocity(dx, 500.0), AscentRemaining(0.0), HeroState::Airborne)
     })
 }
 

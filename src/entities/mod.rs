@@ -13,6 +13,7 @@ mod key;
 mod chest;
 mod sparkle;
 mod fruit;
+pub mod spring;
 
 pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     chest::register(dispatcher, spawner);
@@ -26,6 +27,7 @@ pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     map::register(dispatcher, spawner);
     radial::register(dispatcher, spawner);
     sparkle::register(dispatcher, spawner);
+    spring::register(dispatcher, spawner);
 }
 
 pub fn load_map(map: &tiled::Map, spawner: &Spawner, events: &mut Events) {

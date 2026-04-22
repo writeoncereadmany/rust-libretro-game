@@ -26,7 +26,7 @@ pub struct Push(pub EntityId, pub (f64, f64));
 pub struct Actor();
 
 #[derive(Constant, Clone)]
-pub struct Pickup();
+pub struct Interactable();
 
 const EPSILON: f64 = 1e-8;
 
@@ -63,12 +63,12 @@ pub fn handle_collisions(_ : &CheckCollisions, world: &mut Entities, events: &mu
     });
 
     world.for_each_pair(|(Actor(), Id(actor_id), hero_shape, hero_position, hero_translation),
-                         (Pickup(), Id(pickup_id), pickup_shape, pickup_position, pickup_translation)|
+                         (Interactable(), Id(interactable_id), pickup_shape, pickup_position, pickup_translation)|
         {
-            if actor_id != pickup_id {
+            if actor_id != interactable_id {
                 if collides(hero_shape, hero_position, hero_translation, pickup_shape, pickup_position, pickup_translation)
                 {
-                    events.fire(Collided(*actor_id, *pickup_id));
+                    events.fire(Collided(*actor_id, *interactable_id));
                 }
             }
         }

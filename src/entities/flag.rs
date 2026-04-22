@@ -1,4 +1,4 @@
-use crate::component::collisions::{Collided, Pickup};
+use crate::component::collisions::{Collided, Interactable};
 use crate::component::graphics::{Animation, Sprite};
 use crate::component::physics::Position;
 use crate::component::time::{Period, Phase};
@@ -58,7 +58,7 @@ fn spawn_flag(SpawnFlag(x, y, dest): &SpawnFlag, world: &mut Entities, _events: 
     world.spawn(
         entity()
             .with(Flag())
-            .with(Pickup())
+            .with(Interactable())
             .with(Animation {
                 sprites: vec!["flag_blue_1", "flag_blue_2"],
                 layer: 5,

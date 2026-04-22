@@ -1,4 +1,4 @@
-use crate::component::collisions::{Collided, Pickup};
+use crate::component::collisions::{Collided, Interactable};
 use crate::component::graphics::Sprite;
 use crate::component::physics::Position;
 use crate::entities::coin::RespawnGhostCoins;
@@ -64,7 +64,7 @@ fn spawn_fruit(&SpawnFruit(x, y, fruit): &SpawnFruit, world: &mut Entities, _eve
         entity()
             .with(Fruit())
             .with(fruit)
-            .with(Pickup())
+            .with(Interactable())
             .with(Sprite::sprite(sprite_for(fruit), 5))
             .with(Position(x, y))
             .with(Shape::bbox(0.0, 0.0, 12.0, 12.0))

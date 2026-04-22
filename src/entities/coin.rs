@@ -1,4 +1,4 @@
-use crate::component::collisions::{Collided, Pickup};
+use crate::component::collisions::{Collided, Interactable};
 use crate::component::graphics::{Animation, Sprite};
 use crate::component::physics::Position;
 use crate::component::time::{Period, Phase};
@@ -67,7 +67,7 @@ fn spawn_bell(&SpawnBell(x, y): &SpawnBell, world: &mut Entities, _events: &mut 
     world.spawn(
         entity()
             .with(Bell())
-            .with(Pickup())
+            .with(Interactable())
             .with(Sprite::sprite("bell", 5))
             .with(Position(x, y))
             .with(Shape::bbox(0.0, 0.0, 12.0, 12.0))
@@ -78,7 +78,7 @@ fn spawn_coin_inner<T: Component>(world: &mut Entities, x: f64, y: f64, marker: 
     world.spawn(
         entity()
             .with(marker)
-            .with(Pickup())
+            .with(Interactable())
             .with(Animation {
                 sprites,
                 layer: 5,
