@@ -68,14 +68,14 @@ fn spawn_stretchy_spring(&SpawnStretchySpring(x, y): &SpawnStretchySpring, world
 
 fn collide_spring(Collided(first, second): &Collided, world: &mut Entities, events: &mut Events) {
     world.apply_to_pair(first, second, |Hero(), (Spring(), Position(x, y))| {
-        activateSpring(first, second, events, x, y);
+        activate_spring(first, second, events, x, y);
     });
     world.apply_to_pair(second, first, |Hero(), (Spring(), Position(x, y))| {
-        activateSpring(second, first, events, x, y);
+        activate_spring(second, first, events, x, y);
     });
 }
 
-fn activateSpring(first: &EntityId, second: &EntityId, events: &mut Events, x: f64, y: f64) {
+fn activate_spring(first: &EntityId, second: &EntityId, events: &mut Events, x: f64, y: f64) {
     events.fire(Sprung(*first));
     events.fire(Destroy(*second));
     events.fire(SpawnStretchySpring(x, y))

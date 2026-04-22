@@ -14,8 +14,10 @@ mod chest;
 mod sparkle;
 mod fruit;
 pub mod spring;
+pub mod bubble;
 
 pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
+    bubble::register(dispatcher, spawner);
     chest::register(dispatcher, spawner);
     coin::register(dispatcher, spawner);
     crumbler::register(dispatcher, spawner);

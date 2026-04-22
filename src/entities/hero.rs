@@ -57,7 +57,7 @@ struct SpawnHero(f64, f64);
 struct SpawnRadialAndDelayedHero(f64, f64);
 
 #[derive(Event)]
-struct Jump();
+pub struct Jump();
 
 #[derive(Event)]
 struct WallJump(DirectionFacing);
