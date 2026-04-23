@@ -39,7 +39,7 @@ fn spawn_key(&SpawnKey(x, y): &SpawnKey, world: &mut Entities, _events: &mut Eve
 }
 
 
-fn pickup_key(Collided(first, second): &Collided, world: &mut Entities, events: &mut Events) {
+fn pickup_key(Collided(first, second, _): &Collided, world: &mut Entities, events: &mut Events) {
     world.apply_to(first, |Key()| {
         events.fire(Unlock());
         events.fire(Destroy(*first));

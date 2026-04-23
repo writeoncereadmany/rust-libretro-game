@@ -17,7 +17,7 @@ pub struct CheckCollisions;
 pub struct ResolveCollisions;
 
 #[derive(Event)]
-pub struct Collided(pub EntityId, pub EntityId);
+pub struct Collided(pub EntityId, pub EntityId, pub (f64, f64));
 
 #[derive(Event)]
 pub struct Push(pub EntityId, pub (f64, f64));
@@ -56,7 +56,7 @@ pub fn handle_collisions(_ : &CheckCollisions, world: &mut Entities, events: &mu
             mty += py;
             push_x += px;
             push_y += py;
-           events.fire(Collided(hero_id, entity_id));
+           events.fire(Collided(hero_id, entity_id, (px, py)));
         }
         events.fire(Push(hero_id, (push_x, push_y)));
         Translation(mtx, mty)
@@ -66,9 +66,9 @@ pub fn handle_collisions(_ : &CheckCollisions, world: &mut Entities, events: &mu
                          (Interactable(), Id(interactable_id), pickup_shape, pickup_position, pickup_translation)|
         {
             if actor_id != interactable_id {
-                if collides(hero_shape, hero_position, hero_translation, pickup_shape, pickup_position, pickup_translation)
+                if let Some(collision) = collides(hero_shape, hero_position, hero_translation, pickup_shape, pickup_position, pickup_translation)
                 {
-                    events.fire(Collided(*actor_id, *interactable_id));
+                    events.fire(Collided(*actor_id, *interactable_id, collision.push));
                 }
             }
         }
@@ -82,15 +82,15 @@ fn extend(val: &(f64, f64) ) -> (f64, f64) {
 }
 
 fn collides(moving: &Shape, &Position(mx, my): &Position, &Translation(mtx, mty): &Translation,
-            other: &Shape, &Position(ox, oy): &Position, other_translation: &Option<Translation>) -> bool
+            other: &Shape, &Position(ox, oy): &Position, other_translation: &Option<Translation>) -> Option<Collision>
 {
     let moving = moving.translate(&(mx, my));
     let other = other.translate(&(ox, oy));
     if let Some(Translation(otx, oty)) = other_translation {
-        moving.intersects_moving(&other, &(mtx - otx, mty - oty))
+        moving.collides(&other, &(mtx - otx, mty - oty))
     }
     else {  
-        moving.intersects_moving(&other, &(mtx, mty))
+        moving.collides(&other, &(mtx, mty))
     }
 }
 

@@ -71,7 +71,7 @@ fn spawn_fruit(&SpawnFruit(x, y, fruit): &SpawnFruit, world: &mut Entities, _eve
     );
 }
 
-fn pickup_fruit(Collided(first, second): &Collided, world: &mut Entities, events: &mut Events) {
+fn pickup_fruit(Collided(first, second, _): &Collided, world: &mut Entities, events: &mut Events) {
     world.apply_to(first, |Fruit()| events.fire(PickupFruit(*first)));
     world.apply_to(second, |Fruit()| events.fire(PickupFruit(*second)));
 }

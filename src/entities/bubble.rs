@@ -11,6 +11,7 @@ use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use engine::events::spawner::Spawner;
 use engine::shapes::shape::Shape;
+use engine::shapes::vec2d::Vec2d;
 
 #[derive(Constant, Clone)]
 struct Bubble();
@@ -60,17 +61,19 @@ fn spawn_pop(&SpawnBubblePop(x, y): &SpawnBubblePop, world: &mut Entities, event
     events.schedule("Game", Duration::from_millis(500), Destroy(pop_id));
 }
 
-fn collide_bubble(Collided(first, second): &Collided, world: &mut Entities, events: &mut Events) {
+fn collide_bubble(Collided(first, second, push): &Collided, world: &mut Entities, events: &mut Events) {
     world.apply_to_pair(first, second, |Hero(), (Bubble(), Position(x, y))| {
-        collide_with_bubble(second, events, x, y);
+        collide_with_bubble(second, events, x, y, push);
     });
     world.apply_to_pair(second, first, |Hero(), (Bubble(), Position(x, y))| {
-        collide_with_bubble(first, events, x, y);
+        collide_with_bubble(first, events, x, y, &push.scale(&-1.0));
     });
 }
 
-fn collide_with_bubble(second: &EntityId, events: &mut Events, x: f64, y: f64) {
+fn collide_with_bubble(second: &EntityId, events: &mut Events, x: f64, y: f64, &(_, py): &(f64, f64)) {
     events.fire(Destroy(*second));
     events.fire(SpawnBubblePop(x, y));
-    events.fire(Jump());
+    if py > 0.0 {
+        events.fire(Jump());
+    }
 }

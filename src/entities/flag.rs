@@ -80,7 +80,7 @@ fn spawn_flagpole(SpawnFlagpole(x, y): &SpawnFlagpole, world: &mut Entities, _ev
     );
 }
 
-fn pickup_flag(Collided(first, second): &Collided, world: &mut Entities, events: &mut Events) {
+fn pickup_flag(Collided(first, second, _): &Collided, world: &mut Entities, events: &mut Events) {
     world.apply_to(first, |Flag()| events.fire(PickupFlag(*first)));
     world.apply_to(second, |Flag()| events.fire(PickupFlag(*second)));
 }

@@ -81,7 +81,7 @@ pub fn unlock(_: &Unlock, world: &mut Entities, events: &mut Events) {
     });
 }
 
-fn pickup_ruby(Collided(first, second): &Collided, world: &mut Entities, events: &mut Events) {
+fn pickup_ruby(Collided(first, second, _): &Collided, world: &mut Entities, events: &mut Events) {
     world.apply_to_pair(first, second, |Ruby(), Hero()| events.fire(PickupRuby(*first)));
     world.apply_to_pair(second, first, |Ruby(), Hero()| events.fire(PickupRuby(*second)));
 }

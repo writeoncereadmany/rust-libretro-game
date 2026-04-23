@@ -99,7 +99,7 @@ fn spawn_coin_respawn(&SpawnCoinRespawn(x, y): &SpawnCoinRespawn, world: &mut En
     );
 }
 
-fn pickup_coin(Collided(first, second): &Collided, world: &mut Entities, events: &mut Events) {
+fn pickup_coin(Collided(first, second, _): &Collided, world: &mut Entities, events: &mut Events) {
     world.apply_to(first, |Coin()| events.fire(PickupCoin(*first)));
     world.apply_to(second, |Coin()| events.fire(PickupCoin(*second)));
 

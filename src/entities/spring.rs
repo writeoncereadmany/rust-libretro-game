@@ -66,7 +66,7 @@ fn spawn_stretchy_spring(&SpawnStretchySpring(x, y): &SpawnStretchySpring, world
     events.schedule("Game", Duration::from_millis(700), SpawnSpring(x, y));
 }
 
-fn collide_spring(Collided(first, second): &Collided, world: &mut Entities, events: &mut Events) {
+fn collide_spring(Collided(first, second, _): &Collided, world: &mut Entities, events: &mut Events) {
     world.apply_to_pair(first, second, |Hero(), (Spring(), Position(x, y))| {
         activate_spring(first, second, events, x, y);
     });
