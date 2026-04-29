@@ -8,7 +8,7 @@ use engine::shapes::collision::Collision;
 use engine::shapes::shape::Shape;
 use engine::shapes::vec2d::{Vec2d, UNIT_X, UNIT_Y};
 use crate::entities::map::{overlapping, CollisionType, Tilemap};
-use crate::entities::map::CollisionType::LEDGE;
+use crate::entities::map::CollisionType::{LEDGE, WALL};
 
 #[derive(Event)]
 pub struct CheckCollisions;
@@ -98,11 +98,11 @@ fn next_collision(shape: &Shape, collidables: &Vec<(EntityId, Shape, CollisionTy
     let mut collisions: Vec<(EntityId, Collision)> = collidables.iter()
         .map(|(id, collidable, tile)| {
             if let Some(collision) = shape.collides(collidable, translation) {
-                if tile == &LEDGE && (collision.push.dot(&UNIT_X).abs() > 1e-6 || collision.push.dot(&UNIT_Y) < 0.0)  {
-                    None
+                if tile == &WALL || (tile == &LEDGE && collision.push.dot(&UNIT_Y) > 0.0)  {
+                    Some((*id, collision))
                 }
                 else {
-                    Some((*id, collision))
+                    None
                 }
             } else {
                 None
