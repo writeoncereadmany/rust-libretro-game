@@ -13,7 +13,8 @@ use std::collections::HashMap;
 #[derive(Constant, Clone, Copy, PartialEq, Eq, Debug)]
 pub enum CollisionType {
     WALL,
-    LEDGE
+    LEDGE,
+    WATER
 }
 
 #[derive(Constant, Clone)]
@@ -48,6 +49,9 @@ pub fn load_map(map: &tiled::Map, spawner: &Spawner, events: &mut Events) {
                                         },
                                         "Ledge" => {
                                             tile_map.insert((x, -y - 1), CollisionType::LEDGE);
+                                        },
+                                        "Water" => {
+                                            tile_map.insert((x, -y - 1), CollisionType::WATER);
                                         },
                                         _otherwise => {}
                                     };

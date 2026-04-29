@@ -1,3 +1,4 @@
+use CollisionType::WATER;
 use crate::component::physics::{Position, Translation, Velocity};
 use derive::{Constant, Event};
 use engine::entities::entity::{Entities, EntityId};
@@ -21,6 +22,9 @@ pub struct Collided(pub EntityId, pub EntityId, pub (f64, f64));
 
 #[derive(Event)]
 pub struct Push(pub EntityId, pub (f64, f64));
+
+#[derive(Event)]
+pub struct Submerged(pub EntityId, pub bool);
 
 #[derive(Constant, Clone)]
 pub struct Actor();
@@ -60,6 +64,23 @@ pub fn handle_collisions(_ : &CheckCollisions, world: &mut Entities, events: &mu
         }
         events.fire(Push(hero_id, (push_x, push_y)));
         Translation(mtx, mty)
+    });
+
+    world.apply(|(Actor(), Id(hero_id), hero_shape, hero_position@Position(x, y), hero_translation@Translation(tx, ty))| {
+        let zones = overlapping(&tile_maps, &hero_shape, &hero_position, &hero_translation);
+        let final_hero_position = (x + tx, y + ty);
+        let hero_com = Shape::circle(hero_shape.translate(&final_hero_position).center_of_mass(), 0.0);
+
+        let mut submerged = false;
+        for (_id, zone_shape, zone_type) in zones.iter() {
+            if hero_com.intersects(zone_shape) {
+                if zone_type == &WATER
+                {
+                    submerged = true;
+                }
+            }
+        }
+        events.fire(Submerged(hero_id, submerged));
     });
 
     world.for_each_pair(|(Actor(), Id(actor_id), hero_shape, hero_position, hero_translation),

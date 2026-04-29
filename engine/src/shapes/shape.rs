@@ -98,6 +98,13 @@ impl Shape {
             }
         }
     }
+    
+    pub fn center_of_mass(&self) -> (f64, f64) {
+        match self {
+            Circle(circle) => circle.center,
+            BBox(bbox) => ((bbox.left + bbox.right) / 2.0, (bbox.bottom + bbox.top) / 2.0),
+        }
+    }
 }
 
 impl Projects for Shape {

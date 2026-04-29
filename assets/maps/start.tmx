@@ -50,7 +50,7 @@
   <object id="1" gid="121" x="12" y="156" width="12" height="12"/>
   <object id="2" gid="128" x="312" y="156" width="12" height="12">
    <properties>
-    <property name="destination" value="hills"/>
+    <property name="destination" value="lake"/>
    </properties>
   </object>
   <object id="10" gid="122" x="264" y="156" width="12" height="12"/>

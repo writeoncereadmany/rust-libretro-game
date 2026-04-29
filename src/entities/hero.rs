@@ -1,5 +1,5 @@
 use crate::app::application::{AfterUpdate, BeforeUpdate};
-use crate::component::collisions::{Actor, Push};
+use crate::component::collisions::{Actor, Push, Submerged};
 use crate::component::graphics::Sprite;
 use crate::component::physics::{Acceleration, Gravity, Position, Velocity, VelocityCap};
 use crate::entities::radial::SpawnRadials;
@@ -22,6 +22,7 @@ const STATIC_FRICTION_THRESHOLD: f64 = 5.0;
 const ASCENT_DURATION: f64 = 0.15;
 const POST_JUMP_ACCEL: f64 = 1500.0;
 const WALL_STICK: f64 = 100.0;
+const BUOYANCY: f64 = 2400.0;
 
 #[derive(Constant, Clone)]
 pub struct Hero();
@@ -34,7 +35,8 @@ enum HeroState {
     Grounded,
     Airborne,
     WallDragLeft,
-    WallDragRight
+    WallDragRight,
+    Submerged
 }
 
 #[derive(Variable, Clone)]
@@ -74,6 +76,8 @@ pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     dispatcher.register(check_static_friction);
     dispatcher.register(apply_movement);
     dispatcher.register(on_push);
+    dispatcher.register(on_submerged);
+    dispatcher.register(buoyancy);
     dispatcher.register(clamp_to_screen);
     dispatcher.register(update_sprite);
 
@@ -254,6 +258,23 @@ fn on_push(Push(entity_id, (px, py)): &Push, world: &mut Entities, _events: &mut
     });
 }
 
+fn on_submerged(Submerged(entity_id, submerged): &Submerged, world: &mut Entities, _events: &mut Events) {
+    world.apply_to(entity_id, |(Hero(), hero_state)| {
+        if *submerged {
+            HeroState::Submerged
+        } else {
+            hero_state
+        }});
+}
+
+fn buoyancy(_:  &BeforeUpdate, world: &mut Entities, _events: &mut Events) {
+    world.apply(|(Hero(), hero_state, Acceleration(ddx, ddy))| {
+        match hero_state {
+            HeroState::Submerged => Acceleration(ddx, ddy + BUOYANCY),
+            _otherwise => Acceleration(ddx, ddy)
+        }});
+}
+
 fn clamp_to_screen(_: &AfterUpdate, world: &mut Entities, events: &mut Events) {
     world.apply(|(Hero(), pos@Position(x, y), vel@Velocity(_, dy))| {
         if y < -240.0 {
@@ -311,6 +332,9 @@ fn update_sprite(_update: &AfterUpdate, world: &mut Entities, _events: &mut Even
             },
             HeroState::WallDragRight => {
                 Sprite::sprite_ex("panda_wallslide", 10, true)
+            }
+            HeroState::Submerged => {
+                Sprite::sprite_ex("panda_swim_up", 10, flip(&facing))
             }
         },
     );
