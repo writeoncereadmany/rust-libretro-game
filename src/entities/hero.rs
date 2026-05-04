@@ -101,7 +101,7 @@ fn spawn_hero(&SpawnHero(x, y): &SpawnHero, world: &mut Entities, _events: &mut 
             .with(Gravity())
             .with(Actor())
             .with(Sprite::sprite("panda_stand", 10))
-            .with(Shape::bbox(0.0, 0.0, 12.0, 12.0))
+            .with(Shape::bbox(0.0, 0.0, 12.0, 11.75))
             .with(Acceleration(0.0, 0.0))
             .with(Velocity(0.0, 0.0))
             .with(VelocityCap(200.0, f64::INFINITY))
@@ -334,9 +334,13 @@ fn update_sprite(_update: &AfterUpdate, world: &mut Entities, _events: &mut Even
                 Sprite::sprite_ex("panda_wallslide", 10, true)
             }
             HeroState::Submerged => {
+                if dy < 0.0 {
+                    Sprite::sprite_ex("panda_swim_down", 10, flip(&facing))
+                } else {
                 Sprite::sprite_ex("panda_swim_up", 10, flip(&facing))
             }
-        },
+        }
+},
     );
 }
 
