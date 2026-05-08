@@ -88,4 +88,7 @@
  <tile id="86" type="silver_coin_3"/>
  <tile id="87" type="silver_coin_4"/>
  <tile id="88" type="bonus_blank"/>
+ <tile id="89" type="splash_1"/>
+ <tile id="90" type="splash_2"/>
+ <tile id="91" type="splash_3"/>
 </tileset>

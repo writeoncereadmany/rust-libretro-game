@@ -26,6 +26,9 @@ pub struct Push(pub EntityId, pub (f64, f64));
 #[derive(Event)]
 pub struct Submerged(pub EntityId, pub bool);
 
+#[derive(Event)]
+pub struct Splash(pub f64, pub f64);
+
 #[derive(Constant, Clone)]
 pub struct Actor();
 
@@ -46,7 +49,17 @@ pub fn handle_collisions(_ : &CheckCollisions, world: &mut Entities, events: &mu
     let translated_obstacles: Vec<(EntityId, Shape, CollisionType)> = obstacles.iter()
         .map(|(Id(entity_id), shape, tile, Position(x, y))| (*entity_id, shape.translate(&(*x, *y)), *tile)).collect();
 
-    world.apply(|(Actor(), Id(hero_id), hero_shape, hero_position@Position(x, y), hero_translation@Translation(tx, ty))| {
+    handle_scenery_collisions(&tile_maps, &translated_obstacles, world, events);
+
+    handle_water_collisions(&tile_maps, world, events);
+
+    handle_object_interactions(world, events);
+
+    events.fire(ResolveCollisions);
+}
+
+fn handle_scenery_collisions(tile_maps: &Vec<(Id, Tilemap)>, translated_obstacles: &Vec<(EntityId, Shape, CollisionType)>, world: &mut Entities, events: &mut Events) {
+    world.apply(|(Actor(), Id(hero_id), hero_shape, hero_position @ Position(x, y), hero_translation @ Translation(tx, ty))| {
         let collidables = overlapping(&tile_maps, &hero_shape, &hero_position, &hero_translation).iter().chain(translated_obstacles.iter()).map(|item| item.clone()).collect();
 
         let mut mtx = tx;
@@ -54,35 +67,42 @@ pub fn handle_collisions(_ : &CheckCollisions, world: &mut Entities, events: &mu
         let mut push_x = 0.0;
         let mut push_y = 0.0;
         let starting_shape = hero_shape.translate(&(x, y));
-        while let Some((entity_id, next_collision)) = next_collision(&starting_shape, &collidables, &(mtx, mty)) {
+        while let Some((entity_id, next_collision)) = next_collision(&starting_shape, &collidables, &is_impermeable, &(mtx, mty)) {
             let (px, py) = extend(&next_collision.push);
             mtx += px;
             mty += py;
             push_x += px;
             push_y += py;
-           events.fire(Collided(hero_id, entity_id, (px, py)));
+            events.fire(Collided(hero_id, entity_id, (px, py)));
         }
         events.fire(Push(hero_id, (push_x, push_y)));
         Translation(mtx, mty)
     });
+}
 
-    world.apply(|(Actor(), Id(hero_id), hero_shape, hero_position@Position(x, y), hero_translation@Translation(tx, ty))| {
+fn handle_water_collisions(tile_maps: &Vec<(Id, Tilemap)>, world: &mut Entities, events: &mut Events) {
+    world.apply(|(Actor(), Id(hero_id), hero_shape, hero_position @ Position(x, y), hero_translation @ Translation(tx, ty))| {
         let zones = overlapping(&tile_maps, &hero_shape, &hero_position, &hero_translation);
         let final_hero_position = (x + tx, y + ty);
-        let hero_com = Shape::circle(hero_shape.translate(&final_hero_position).center_of_mass(), 0.0);
+        let start_center_of_mass = Shape::circle(hero_shape.translate(&(x, y)).center_of_mass(), 0.0);
+        let end_center_of_mass = Shape::circle(hero_shape.translate(&final_hero_position).center_of_mass(), 0.0);
 
-        let mut submerged = false;
-        for (_id, zone_shape, zone_type) in zones.iter() {
-            if hero_com.intersects(zone_shape) {
-                if zone_type == &WATER
-                {
-                    submerged = true;
-                }
+        let was_submerged = zones.iter().any(|(_, zone_shape, zone_type)| zone_type == &WATER && start_center_of_mass.intersects(zone_shape));
+        let is_submerged = zones.iter().any(|(_, zone_shape, zone_type)| zone_type == &WATER && end_center_of_mass.intersects(zone_shape));
+
+        if !was_submerged & is_submerged {
+            if let Some((_, splash_collision)) = next_collision(&start_center_of_mass, &zones, &|collision_type, _| { collision_type == &WATER}, &(tx, ty)) {
+                let translation_to_splash = (tx, ty).scale(&splash_collision.dt);
+                let (splash_x, splash_y) = start_center_of_mass.translate(&translation_to_splash).center_of_mass();
+                events.fire(Splash(splash_x, splash_y));
             }
         }
-        events.fire(Submerged(hero_id, submerged));
-    });
 
+        events.fire(Submerged(hero_id, is_submerged));
+    });
+}
+
+fn handle_object_interactions(world: &mut Entities, events: &mut Events) {
     world.for_each_pair(|(Actor(), Id(actor_id), hero_shape, hero_position, hero_translation),
                          (Interactable(), Id(interactable_id), pickup_shape, pickup_position, pickup_translation)|
         {
@@ -94,8 +114,6 @@ pub fn handle_collisions(_ : &CheckCollisions, world: &mut Entities, events: &mu
             }
         }
     );
-
-    events.fire(ResolveCollisions);
 }
 
 fn extend(val: &(f64, f64) ) -> (f64, f64) {
@@ -115,11 +133,11 @@ fn collides(moving: &Shape, &Position(mx, my): &Position, &Translation(mtx, mty)
     }
 }
 
-fn next_collision(shape: &Shape, collidables: &Vec<(EntityId, Shape, CollisionType)>, translation: &(f64, f64)) -> Option<(EntityId, Collision)> {
+fn next_collision(shape: &Shape, collidables: &Vec<(EntityId, Shape, CollisionType)>, condition: &dyn Fn(&CollisionType, &Collision) -> bool, translation: &(f64, f64)) -> Option<(EntityId, Collision)> {
     let mut collisions: Vec<(EntityId, Collision)> = collidables.iter()
         .map(|(id, collidable, tile)| {
             if let Some(collision) = shape.collides(collidable, translation) {
-                if tile == &WALL || (tile == &LEDGE && collision.push.dot(&UNIT_Y) > 0.0)  {
+                if condition(tile, &collision) {
                     Some((*id, collision))
                 }
                 else {
@@ -136,6 +154,13 @@ fn next_collision(shape: &Shape, collidables: &Vec<(EntityId, Shape, CollisionTy
     collisions.pop()
 }
 
+fn is_impermeable(tile: &CollisionType, collision: &Collision) -> bool {
+    tile == &WALL || (tile == &LEDGE && collision.push.dot(&UNIT_Y) > 0.0)
+}
+
+fn is_water(tile: &CollisionType, collision: &Collision) -> bool {
+    tile == &WALL || (tile == &LEDGE && collision.push.dot(&UNIT_Y) > 0.0)
+}
 
 fn handle_push(Push(entity_id, (px, py)): &Push, world: &mut Entities, _events: &mut Events) {
     world.apply_to(entity_id, |Velocity(dx, dy)| Velocity(limit(&dx, px), limit(&dy, py)));

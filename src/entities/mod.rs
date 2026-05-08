@@ -15,6 +15,7 @@ mod sparkle;
 mod fruit;
 pub mod spring;
 pub mod bubble;
+mod splash;
 
 pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     bubble::register(dispatcher, spawner);
@@ -29,6 +30,7 @@ pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     map::register(dispatcher, spawner);
     radial::register(dispatcher, spawner);
     sparkle::register(dispatcher, spawner);
+    splash::register(dispatcher, spawner);
     spring::register(dispatcher, spawner);
 }
 
