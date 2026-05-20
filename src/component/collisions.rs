@@ -9,7 +9,7 @@ use engine::shapes::collision::Collision;
 use engine::shapes::shape::Shape;
 use engine::shapes::vec2d::{Vec2d, UNIT_X, UNIT_Y};
 use crate::entities::map::{overlapping, CollisionType, Tilemap};
-use crate::entities::map::CollisionType::{LEDGE, WALL};
+use crate::entities::map::CollisionType::{AIR, LEDGE, WALL};
 
 #[derive(Event)]
 pub struct CheckCollisions;
@@ -92,6 +92,14 @@ fn handle_water_collisions(tile_maps: &Vec<(Id, Tilemap)>, world: &mut Entities,
 
         if !was_submerged & is_submerged {
             if let Some((_, splash_collision)) = next_collision(&start_center_of_mass, &zones, &|collision_type, _| { collision_type == &WATER}, &(tx, ty)) {
+                let translation_to_splash = (tx, ty).scale(&splash_collision.dt);
+                let (splash_x, splash_y) = start_center_of_mass.translate(&translation_to_splash).center_of_mass();
+                events.fire(Splash(splash_x, splash_y));
+            }
+        }
+
+        if was_submerged & !is_submerged {
+            if let Some((_, splash_collision)) = next_collision(&start_center_of_mass, &zones, &|collision_type, _| { collision_type == &AIR}, &(tx, ty)) {
                 let translation_to_splash = (tx, ty).scale(&splash_collision.dt);
                 let (splash_x, splash_y) = start_center_of_mass.translate(&translation_to_splash).center_of_mass();
                 events.fire(Splash(splash_x, splash_y));

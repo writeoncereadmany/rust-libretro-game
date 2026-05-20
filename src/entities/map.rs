@@ -14,7 +14,8 @@ use std::collections::HashMap;
 pub enum CollisionType {
     WALL,
     LEDGE,
-    WATER
+    WATER,
+    AIR
 }
 
 #[derive(Constant, Clone)]
@@ -98,9 +99,8 @@ pub fn overlapping_map(entity_id: EntityId, Tilemap(width, height, tilemap): &Ti
 
     for x in min_tile_x ..= max_tile_x {
         for y in min_tile_y ..= max_tile_y {
-            if let Some(tile) = tilemap.get(&(x, y)) {
+            let tile = tilemap.get(&(x, y)).unwrap_or(&CollisionType::AIR);
             overlapping.push((entity_id, Shape::bbox((x * width) as f64, (y * height) as f64, *width as f64, *height as f64), *tile))
-            }
         }
     }
 
