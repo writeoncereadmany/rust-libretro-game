@@ -31,6 +31,9 @@ pub struct Hero();
 struct AscentRemaining(f64);
 
 #[derive(Variable, Clone)]
+struct DescentRemaining(f64);
+
+#[derive(Variable, Clone)]
 enum HeroState {
     Grounded,
     Airborne,
@@ -62,6 +65,9 @@ struct SpawnRadialAndDelayedHero(f64, f64);
 pub struct Jump();
 
 #[derive(Event)]
+pub struct Swim();
+
+#[derive(Event)]
 struct WallJump(DirectionFacing);
 
 pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
@@ -70,9 +76,11 @@ pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     dispatcher.register(listen_to_input_state);
     dispatcher.register(listen_to_button_press);
     dispatcher.register(jump);
+    dispatcher.register(swim);
     dispatcher.register(sprung);
     dispatcher.register(wall_jump);
     dispatcher.register(post_jump);
+    dispatcher.register(post_swim);
     dispatcher.register(check_static_friction);
     dispatcher.register(apply_movement);
     dispatcher.register(on_push);
@@ -127,6 +135,9 @@ fn listen_to_input_state(
     world.apply(|(Hero(), asc@AscentRemaining(_))| {
        if joypad.contains(JoypadState::A) { Some(asc) } else { None }
     });
+    world.apply(|(Hero(), desc@DescentRemaining(_))| {
+       if joypad.contains(JoypadState::A) { Some(desc) } else { None }
+    });
 }
 
 fn listen_to_button_press(
@@ -139,6 +150,7 @@ fn listen_to_button_press(
             HeroState::Grounded => events.fire(Jump()),
             HeroState::WallDragLeft => events.fire(WallJump(DirectionFacing::RIGHT)),
             HeroState::WallDragRight => events.fire(WallJump(DirectionFacing::LEFT)),
+            HeroState::Submerged => events.fire(Swim()),
             _otherwise => (),
             }
         _otherwise => (),
@@ -152,6 +164,16 @@ fn jump(
 ) {
     world.apply(|(Hero(), Velocity(dx, _dy))| {
         (Velocity(dx, 150.0), AscentRemaining(ASCENT_DURATION))
+    })
+}
+
+fn swim(
+    _: &Swim,
+    world: &mut Entities,
+    _events: &mut Events,
+) {
+    world.apply(|(Hero(), Velocity(dx, dy))| {
+        (Velocity(dx, (dy-150.0).clamp(-200.0, 0.0)), DescentRemaining(ASCENT_DURATION))
     })
 }
 
@@ -186,6 +208,20 @@ fn post_jump(
     world.apply(|(Hero(), AscentRemaining(at), acc@Acceleration(ddx, ddy))| {
         if at > 0.0 {
             (Some(AscentRemaining(at - dt.as_secs_f64())), Acceleration(ddx, ddy + POST_JUMP_ACCEL))
+        } else {
+            (None, acc)
+        }
+    })
+}
+
+fn post_swim(
+    dt: &Duration,
+    world: &mut Entities,
+    _events: &mut Events,
+) {
+    world.apply(|(Hero(), DescentRemaining(at), acc@Acceleration(ddx, ddy))| {
+        if at > 0.0 {
+            (Some(DescentRemaining(at - dt.as_secs_f64())), Acceleration(ddx, ddy - POST_JUMP_ACCEL))
         } else {
             (None, acc)
         }
