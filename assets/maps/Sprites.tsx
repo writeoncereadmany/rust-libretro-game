@@ -25,9 +25,10 @@
  <tile id="21" type="ball_white"/>
  <tile id="22" type="ball_brown"/>
  <tile id="23" type="ball_red"/>
- <tile id="24" type="panda_swim_up"/>
- <tile id="25" type="panda_swim_down"/>
- <tile id="26" type="panda_skid"/>
+ <tile id="24" type="panda_swim_1"/>
+ <tile id="25" type="panda_swim_2"/>
+ <tile id="26" type="panda_swim_down"/>
+ <tile id="27" type="panda_skid"/>
  <tile id="28" type="grapes"/>
  <tile id="29" type="strawberry"/>
  <tile id="30" type="orange"/>
@@ -48,8 +49,9 @@
  <tile id="45" type="flashbulb_2"/>
  <tile id="46" type="flashbulb_3"/>
  <tile id="47" type="flashbulb_4"/>
- <tile id="48" type="redd_swim_up"/>
- <tile id="49" type="redd_swim_down"/>
+ <tile id="48" type="redd_swim_1"/>
+ <tile id="49" type="redd_swim_2"/>
+ <tile id="50" type="redd_swim_down"/>
  <tile id="51" type="redd_skid"/>
  <tile id="52" type="coin_1"/>
  <tile id="53" type="coin_2"/>

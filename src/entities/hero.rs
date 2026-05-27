@@ -373,7 +373,12 @@ fn update_sprite(_update: &AfterUpdate, world: &mut Entities, _events: &mut Even
                 if dy < 0.0 {
                     Sprite::sprite_ex("panda_swim_down", 10, flip(&facing))
                 } else {
-                Sprite::sprite_ex("panda_swim_up", 10, flip(&facing))
+                    let frame = (x as i32 / 16) % 2;
+                    match frame {
+                        0 => Sprite::sprite_ex("panda_swim_1", 10, flip(&facing)),
+                        1 => Sprite::sprite_ex("panda_swim_2", 10, flip(&facing)),
+                        _ => Sprite::sprite("error", 10),
+                    }
             }
         }
 },
