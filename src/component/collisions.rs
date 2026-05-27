@@ -81,7 +81,7 @@ fn handle_scenery_collisions(tile_maps: &Vec<(Id, Tilemap)>, translated_obstacle
 }
 
 fn handle_water_collisions(tile_maps: &Vec<(Id, Tilemap)>, world: &mut Entities, events: &mut Events) {
-    world.apply(|(Actor(), Id(hero_id), hero_shape, hero_position @ Position(x, y), hero_translation @ Translation(tx, ty))| {
+    world.apply(|(Actor(), Id(hero_id), hero_shape, hero_position @ Position(x, y), hero_translation @ Translation(tx, ty), Velocity(dx, dy))| {
         let zones = overlapping(&tile_maps, &hero_shape, &hero_position, &hero_translation);
         let final_hero_position = (x + tx, y + ty);
         let start_center_of_mass = Shape::circle(hero_shape.translate(&(x, y)).center_of_mass(), 0.0);
@@ -100,13 +100,23 @@ fn handle_water_collisions(tile_maps: &Vec<(Id, Tilemap)>, world: &mut Entities,
 
         if was_submerged & !is_submerged {
             if let Some((_, splash_collision)) = next_collision(&start_center_of_mass, &zones, &|collision_type, _| { collision_type == &AIR}, &(tx, ty)) {
-                let translation_to_splash = (tx, ty).scale(&splash_collision.dt);
-                let (splash_x, splash_y) = start_center_of_mass.translate(&translation_to_splash).center_of_mass();
-                events.fire(Splash(splash_x, splash_y));
+                if dy < 200.0 {
+                    let splash_push_extended = extend(&splash_collision.push);
+                    let (sx, sy) = (tx, ty).plus(&splash_push_extended);
+                    events.fire(Submerged(hero_id, true));
+                    return (Velocity(dx, 0.0), Translation(sx, sy));
+                }
+                else {
+                    let translation_to_splash@(_, sy) = (tx, ty).scale(&splash_collision.dt);
+                    let (splash_x, splash_y) = start_center_of_mass.translate(&translation_to_splash).center_of_mass();
+                    events.fire(Splash(splash_x, splash_y));
+                }
             }
         }
 
         events.fire(Submerged(hero_id, is_submerged));
+
+        (Velocity(dx, dy), Translation(tx, ty))
     });
 }
 
