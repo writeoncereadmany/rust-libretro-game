@@ -7,7 +7,7 @@ use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use engine::shapes::collision::Collision;
 use engine::shapes::shape::Shape;
-use engine::shapes::vec2d::{Vec2d, UNIT_X, UNIT_Y};
+use engine::shapes::vec2d::{Vec2d, UNIT_Y};
 use crate::entities::map::{overlapping, CollisionType, Tilemap};
 use crate::entities::map::CollisionType::{AIR, LEDGE, WALL};
 
@@ -107,7 +107,7 @@ fn handle_water_collisions(tile_maps: &Vec<(Id, Tilemap)>, world: &mut Entities,
                     return (Velocity(dx, 0.0), Translation(sx, sy));
                 }
                 else {
-                    let translation_to_splash@(_, sy) = (tx, ty).scale(&splash_collision.dt);
+                    let translation_to_splash = (tx, ty).scale(&splash_collision.dt);
                     let (splash_x, splash_y) = start_center_of_mass.translate(&translation_to_splash).center_of_mass();
                     events.fire(Splash(splash_x, splash_y));
                 }
@@ -173,10 +173,6 @@ fn next_collision(shape: &Shape, collidables: &Vec<(EntityId, Shape, CollisionTy
 }
 
 fn is_impermeable(tile: &CollisionType, collision: &Collision) -> bool {
-    tile == &WALL || (tile == &LEDGE && collision.push.dot(&UNIT_Y) > 0.0)
-}
-
-fn is_water(tile: &CollisionType, collision: &Collision) -> bool {
     tile == &WALL || (tile == &LEDGE && collision.push.dot(&UNIT_Y) > 0.0)
 }
 
