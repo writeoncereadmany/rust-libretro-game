@@ -128,12 +128,20 @@ impl Core for ExampleCore {
         info: Option<retro_game_info>,
         ctx: &mut LoadGameContext,
     ) -> Result<(), Box<dyn std::error::Error>> {
+        println!("Initialising game");
+
         ctx.set_pixel_format(PIXEL_FORMAT);
         ctx.set_performance_level(0);
         ctx.enable_frame_time_callback((1000000.0f64 / 60.0).round() as retro_usec_t);
 
+        println!("Successfully initialised game");
+        println!("Game info: {:?}", info);
+
         let game_info = info.unwrap();
         let data = unsafe { slice::from_raw_parts(game_info.data as *const u8, game_info.size) };
+
+        println!("Successfully loaded game data");
+
         let mut archive = Archive::new(data);
         let mut assets = Assets::new();
         assets.load_assets(&mut archive);
@@ -141,8 +149,12 @@ impl Core for ExampleCore {
         self.application = Some(Application::new(assets.clone()));
         self.renderer = Some(AssetRenderer::new(Renderer::new(WIDTH, HEIGHT), assets.clone()));
 
+        println!("Successfully initialised game components");
+
         let gctx: GenericContext = ctx.into();
         gctx.enable_audio_callback();
+
+        println!("Successfully initialised audi components");
 
         Ok(())
     }
