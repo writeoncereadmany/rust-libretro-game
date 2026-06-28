@@ -44,10 +44,7 @@ pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
 
 fn destination(spawn: &Spawn) -> Option<String> {
     if let Some(dest) = spawn.object.properties.get("destination") {
-        match dest {
-            PropertyValue::StringValue(map) => Some(map.clone()),
-            _otherwise => None
-        }
+        Some(dest.clone())
     } else {
         None
     }

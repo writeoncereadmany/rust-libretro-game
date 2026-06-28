@@ -1,3 +1,5 @@
+pub mod map;
+
 use crate::renderer::indexed_texture::IndexedTexture;
 use crate::renderer::sprite::Sprite;
 use crate::renderer::spritefont::SpriteFont;
@@ -6,10 +8,11 @@ use std::collections::HashMap;
 use std::path::Path;
 use tar::Archive;
 use tiled::PropertyValue::StringValue;
+use crate::assets::map::Map;
 
 pub struct Assets {
     pub tilesheets: HashMap<String, TileSheet>,
-    pub maps: HashMap<String, tiled::Map>,
+    pub maps: HashMap<String, Map>,
     pub fonts: HashMap<String, SpriteFont>,
     pub sprites: HashMap<String, Sprite>
 }
@@ -40,7 +43,7 @@ impl Assets {
                 textures.insert(filename, sheet);
             } else if extension(&path, "tmx") {
                 let map = map_loader.load_tmx_map(&path).unwrap();
-                self.maps.insert(filename(&path), map);
+                // self.maps.insert(filename(&path), map);
             } else if extension(&path, "tsx") {
                 let tileset = map_loader.load_tsx_tileset(&path).unwrap();
                 tilesets.push(tileset);

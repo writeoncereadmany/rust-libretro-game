@@ -1,6 +1,6 @@
 use crate::events::event::Events;
 use std::collections::HashMap;
-use tiled::Object;
+use crate::assets::map::Object;
 
 pub struct Spawner {
     spawns: HashMap<String, fn(Spawn, &mut Events)>
@@ -9,7 +9,7 @@ pub struct Spawner {
 pub struct Spawn<'a> {
     pub x: f64,
     pub y: f64,
-    pub object: &'a Object<'a>
+    pub object: &'a Object
 }
 
 impl Spawner {
@@ -20,7 +20,7 @@ impl Spawner {
     pub fn spawn(&self, object: &Object, events: &mut Events) {
         if let Some(user_type) = get_user_type(object) {
             // tiled goes from top-bottom, we want to go bottom-top, so invert y
-            let spawn = Spawn { x: object.x as f64, y: -object.y as f64, object };
+            let spawn = Spawn { x: object.x, y: -object.y, object };
             self.spawns.get(&user_type).map(|f| f(spawn, events));
         }
     }
@@ -31,5 +31,5 @@ impl Spawner {
 }
 
 fn get_user_type(object: &Object) -> Option<String> {
-    object.get_tile()?.get_tile()?.user_type.clone()
+    object.user_type().clone()
 }

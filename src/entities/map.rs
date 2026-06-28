@@ -9,6 +9,7 @@ use engine::shapes::projection::{Projection, Projects};
 use engine::shapes::shape::Shape;
 use engine::shapes::vec2d::{UNIT_X, UNIT_Y};
 use std::collections::HashMap;
+use engine::assets::map::Map;
 
 #[derive(Constant, Clone, Copy, PartialEq, Eq, Debug)]
 pub enum CollisionType {
@@ -29,7 +30,7 @@ pub fn register(dispatcher: &mut Dispatcher, _spawner: &mut Spawner) {
     dispatcher.register(spawn_map);
 }
 
-pub fn load_map(map: &tiled::Map, spawner: &Spawner, events: &mut Events) {
+pub fn load_map(map: &Map, spawner: &Spawner, events: &mut Events) {
 
     let mut tile_map : HashMap<(i32, i32), CollisionType> = HashMap::new();
 
