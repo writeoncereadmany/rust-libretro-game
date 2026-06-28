@@ -1,6 +1,7 @@
 use crate::assets::Assets;
 use crate::renderer::sprite::Sprite;
 use crate::renderer::texture::Texture;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Clone, Copy)]
@@ -35,6 +36,7 @@ impl Alignment {
     }
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct SpriteFont {
     glyphs: HashMap<char, Sprite>,
     glyph_width: u32,

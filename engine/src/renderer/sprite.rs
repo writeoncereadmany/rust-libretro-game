@@ -1,13 +1,14 @@
 use crate::assets::Assets;
 use crate::renderer::texture::Texture;
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Sprite {
     pub tile_sheet: String,
     pub bounds: Bounds,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Bounds {
     pub x: u32,
     pub y: u32,

@@ -1,5 +1,7 @@
 use crate::renderer::sprite::{Bounds, Sprite};
+use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize)]
 pub struct TileSheet {
     pub name: String,
     pub palette: Vec<u16>,
