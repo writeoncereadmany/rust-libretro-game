@@ -1,3 +1,4 @@
+use crate::assets::Assets;
 use crate::renderer::sprite::Sprite;
 use crate::renderer::texture::Texture;
 use std::collections::HashMap;
@@ -56,7 +57,7 @@ impl SpriteFont {
         }
     }
 
-    pub fn draw_text(&self, dst: &mut Texture, x: i32, y: i32, text: &str, alignment: Alignment) {
+    pub fn draw_text(&self, dst: &mut Texture, assets: &Assets, x: i32, y: i32, text: &str, alignment: Alignment) {
         let text_width = (text.len() as u32 * self.glyph_width) as i32;
 
         let mut next_x = match alignment.horizontal_alignment {
@@ -73,7 +74,7 @@ impl SpriteFont {
 
         for glyph in text.chars() {
             let sprite = self.glyphs.get(&glyph);
-            sprite.unwrap_or(&self.error_glyph).draw_to(dst, next_x, y, false);
+            sprite.unwrap_or(&self.error_glyph).draw_to(dst, assets, next_x, y, false);
             next_x += self.glyph_width as i32;
         }
     }

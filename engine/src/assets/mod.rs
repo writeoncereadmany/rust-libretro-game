@@ -4,12 +4,11 @@ use crate::renderer::spritefont::SpriteFont;
 use crate::renderer::tilesheet::TileSheet;
 use std::collections::HashMap;
 use std::path::Path;
-use std::sync::Arc;
 use tar::Archive;
 use tiled::PropertyValue::StringValue;
 
 pub struct Assets {
-    pub tilesheets: HashMap<String, Arc<TileSheet>>,
+    pub tilesheets: HashMap<String, TileSheet>,
     pub maps: HashMap<String, tiled::Map>,
     pub fonts: HashMap<String, SpriteFont>,
     pub sprites: HashMap<String, Sprite>
@@ -52,13 +51,14 @@ impl Assets {
             let user_type = &tileset.user_type;
             let tile_filename = &filename(&tileset.image.as_ref().unwrap().source);
             let texture = textures.remove(tile_filename).unwrap();
-            let tilesheet = Arc::new(TileSheet::new(
+            let tilesheet = TileSheet::new(
+                &tileset.name,
                 texture.palette,
                 texture.texture,
                 tileset.tile_width,
                 tileset.tile_height,
                 tileset.columns,
-            ));
+            );
 
             if user_type == &Some("Font".to_string()) {
                 let mut glyphs = HashMap::new();
@@ -82,6 +82,7 @@ impl Assets {
                     tileset.name.clone(),
                     SpriteFont::new(glyphs, tileset.tile_width, tileset.tile_height, error_glyph.unwrap()),
                 );
+                self.tilesheets.insert(tileset.name.clone(), tilesheet);
             } else if user_type == &Some("Sprite".to_string()) {
                 for (tile_id, tile) in tileset.tiles() {
                     let x = tile_id % tileset.columns;
@@ -93,6 +94,7 @@ impl Assets {
                         _otherwise => {}
                     }
                 }
+                self.tilesheets.insert(tileset.name.clone(), tilesheet);
             } else {
                 self.tilesheets.insert(tileset.name.clone(), tilesheet);
             }

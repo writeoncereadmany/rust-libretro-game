@@ -1,10 +1,9 @@
+use crate::assets::Assets;
 use crate::renderer::texture::Texture;
-use crate::renderer::tilesheet::TileSheet;
-use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct Sprite {
-    pub tile_sheet: Arc<TileSheet>,
+    pub tile_sheet: String,
     pub bounds: Bounds,
 }
 
@@ -17,8 +16,10 @@ pub struct Bounds {
 }
 
 impl Sprite {
-    pub fn draw_to(&self, dst: &mut Texture, x: i32, y: i32, flip_x: bool) {
-        let sheet = &self.tile_sheet;
+    pub fn draw_to(&self, dst: &mut Texture, assets: &Assets, x: i32, y: i32, flip_x: bool) {
+        let sheet = assets.tilesheets.get(&self.tile_sheet).unwrap_or_else(|| {
+            panic!("Tilesheet not found: looking for {} but tile sheets were {:?} ", &self.tile_sheet, assets.tilesheets.keys().into_iter().collect::<Vec<&String>>());
+        });
 
         let src_x = self.bounds.x as i32;
         let src_y = self.bounds.y as i32;

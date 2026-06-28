@@ -1,8 +1,9 @@
+use crate::assets::Assets;
+use crate::renderer::colors::is_transparent;
 use crate::renderer::sprite::Sprite;
 use crate::renderer::spritefont::{Alignment, SpriteFont};
 use crate::renderer::texture::Texture;
 use rust_libretro::contexts::RunContext;
-use crate::renderer::colors::is_transparent;
 
 pub struct Renderer {
     background: Texture,
@@ -41,28 +42,28 @@ impl Renderer {
         }
     }
 
-    pub fn draw_background(&mut self, sprite: &Sprite, x: i32, y: i32) {
-        sprite.draw_to(&mut self.background, x, y, false);
+    pub fn draw_background(&mut self, assets: &Assets, sprite: &Sprite, x: i32, y: i32) {
+        sprite.draw_to(&mut self.background, assets, x, y, false);
     }
 
-    pub fn draw_hud(&mut self, sprite: &Sprite, x: i32, y: i32) {
-        sprite.draw_to(&mut self.hud, x, y, false);
+    pub fn draw_hud(&mut self, assets: &Assets, sprite: &Sprite, x: i32, y: i32) {
+        sprite.draw_to(&mut self.hud, assets, x, y, false);
     }
 
-    pub fn draw_sprite(&mut self, sprite: &Sprite, x: i32, y: i32, flip_x: bool) {
-        sprite.draw_to(&mut self.buffer, x, y, flip_x);
+    pub fn draw_sprite(&mut self, assets: &Assets, sprite: &Sprite, x: i32, y: i32, flip_x: bool) {
+        sprite.draw_to(&mut self.buffer, assets, x, y, flip_x);
     }
 
-    pub fn draw_text(&mut self, font: &SpriteFont, text: &str, x: i32, y: i32, alignment: Alignment) {
-        font.draw_text(&mut self.buffer, x, y, text, alignment);
+    pub fn draw_text(&mut self, assets: &Assets, font: &SpriteFont, text: &str, x: i32, y: i32, alignment: Alignment) {
+        font.draw_text(&mut self.buffer, assets, x, y, text, alignment);
     }
 
-    pub fn draw_background_text(&mut self, font: &SpriteFont, text: &str, x: i32, y: i32, alignment: Alignment) {
-        font.draw_text(&mut self.background, x, y, text, alignment);
+    pub fn draw_background_text(&mut self, assets: &Assets, font: &SpriteFont, text: &str, x: i32, y: i32, alignment: Alignment) {
+        font.draw_text(&mut self.background, assets, x, y, text, alignment);
     }
 
-    pub fn draw_hud_text(&mut self, font: &SpriteFont, text: &str, x: i32, y: i32, alignment: Alignment) {
-        font.draw_text(&mut self.hud, x, y, text, alignment);
+    pub fn draw_hud_text(&mut self, assets: &Assets, font: &SpriteFont, text: &str, x: i32, y: i32, alignment: Alignment) {
+        font.draw_text(&mut self.hud, assets, x, y, text, alignment);
     }
 
     pub fn render(&self, ctx: &mut RunContext) {

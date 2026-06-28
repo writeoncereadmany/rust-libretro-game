@@ -19,7 +19,7 @@ impl AssetRenderer {
 
     pub fn draw_background(&mut self, tileset: &str, tile: TileId, x: i32, y: i32) {
         if let Some(tilesheet) = self.assets.tilesheets.get(tileset) {
-            self.renderer.draw_background(&tilesheet.tile(tile), x, y);
+            self.renderer.draw_background(&self.assets, &tilesheet.tile(tile), x, y);
         }
         else {
             self.draw_background_sprite("error", x, y);
@@ -27,27 +27,27 @@ impl AssetRenderer {
     }
 
     pub fn draw_background_sprite(&mut self, sprite: &str, x: i32, y: i32) {
-        self.renderer.draw_background(self.assets.sprite(sprite), x, y);
+        self.renderer.draw_background(&self.assets, self.assets.sprite(sprite), x, y);
     }
     
     pub fn draw_hud_sprite(&mut self, sprite: &str, x: i32, y: i32) {
-        self.renderer.draw_hud(self.assets.sprite(sprite), x, y);
+        self.renderer.draw_hud(&self.assets, self.assets.sprite(sprite), x, y);
     }
 
     pub fn draw_sprite(&mut self, sprite: &str, x: i32, y: i32, flip_x: bool) {
-        self.renderer.draw_sprite(self.assets.sprite(sprite), x, y, flip_x);
+        self.renderer.draw_sprite(&self.assets, self.assets.sprite(sprite), x, y, flip_x);
     }
 
     pub fn draw_text(&mut self, text: &str, font: &str, x: i32, y: i32, alignment: Alignment) {
-        self.renderer.draw_text(self.assets.fonts.get(font).unwrap(), text, x, y, alignment);
+        self.renderer.draw_text(&self.assets, self.assets.fonts.get(font).unwrap(), text, x, y, alignment);
     }
 
     pub fn draw_background_text(&mut self, text: &str, font: &str, x: i32, y: i32, alignment: Alignment) {
-        self.renderer.draw_background_text(self.assets.fonts.get(font).unwrap(), &text, x, y, alignment);
+        self.renderer.draw_background_text(&self.assets, self.assets.fonts.get(font).unwrap(), &text, x, y, alignment);
     }
     
     pub fn draw_hud_text(&mut self, text: &str, font: &str, x: i32, y: i32, alignment: Alignment) {
-        self.renderer.draw_hud_text(self.assets.fonts.get(font).unwrap(), &text, x, y, alignment);
+        self.renderer.draw_hud_text(&self.assets, self.assets.fonts.get(font).unwrap(), &text, x, y, alignment);
     }
     
     pub fn render(&mut self, ctx: &mut RunContext) {
