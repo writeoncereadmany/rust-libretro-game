@@ -18,18 +18,14 @@ impl Spawner {
     }
 
     pub fn spawn(&self, object: &Object, events: &mut Events) {
-        if let Some(user_type) = get_user_type(object) {
+        if let Some(user_type) = &object.user_type {
             // tiled goes from top-bottom, we want to go bottom-top, so invert y
             let spawn = Spawn { x: object.x, y: -object.y, object };
-            self.spawns.get(&user_type).map(|f| f(spawn, events));
+            self.spawns.get(user_type).map(|f| f(spawn, events));
         }
     }
 
     pub fn register(&mut self, name: &str, spawner: fn(Spawn, &mut Events)) {
         self.spawns.insert(name.to_string(), spawner);
     }
-}
-
-fn get_user_type(object: &Object) -> Option<String> {
-    object.user_type().clone()
 }
