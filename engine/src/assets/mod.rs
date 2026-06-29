@@ -134,9 +134,3 @@ fn filename(path: &Path) -> String {
         .map(|filename| filename.to_string_lossy().to_string())
         .unwrap_or_else(String::new)
 }
-
-fn extension(path: &Path, extension: &str) -> bool {
-    path.extension()
-        .map(|ext| ext.eq_ignore_ascii_case(extension))
-        .unwrap_or(false)
-}

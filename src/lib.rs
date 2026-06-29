@@ -3,6 +3,7 @@ mod game;
 mod screens;
 mod component;
 mod entities;
+mod export;
 
 use crate::app::application::Application;
 use engine::assets::Assets;
@@ -132,10 +133,9 @@ impl Core for ExampleCore {
         ctx.enable_frame_time_callback((1000000.0f64 / 60.0).round() as retro_usec_t);
 
         let game_info = info.unwrap();
-        let _data = unsafe { slice::from_raw_parts(game_info.data as *const u8, game_info.size) };
+        let data = unsafe { slice::from_raw_parts(game_info.data as *const u8, game_info.size) };
 
-        let mut assets = Assets::new();
-        assets.load_from_filesystem("assets");
+        let assets = serde_json::from_slice::<Assets>(data).unwrap();
         let assets = Arc::new(assets);
         self.application = Some(Application::new(assets.clone()));
         self.renderer = Some(AssetRenderer::new(Renderer::new(WIDTH, HEIGHT), assets.clone()));
