@@ -5,10 +5,11 @@ use crate::renderer::indexed_texture::IndexedTexture;
 use crate::renderer::sprite::Sprite;
 use crate::renderer::spritefont::SpriteFont;
 use crate::renderer::tilesheet::TileSheet;
+use glob::glob;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fs::File;
 use std::path::Path;
-use tar::Archive;
 use tiled::PropertyValue::StringValue;
 
 #[derive(Serialize, Deserialize)]
@@ -29,28 +30,45 @@ impl Assets {
         }
     }
 
-    pub fn load_assets(&mut self, archive: &mut Archive<&[u8]>) {
+    pub fn load_from_filesystem(&mut self, path: &str) {
         let mut textures = HashMap::new();
         let mut tilesets = Vec::new();
 
         let mut map_loader = tiled::Loader::new();
 
-        for entry in archive.entries().unwrap() {
-            let entry = entry.unwrap();
-            let path = entry.path().unwrap();
-            if extension(&path, "png") {
-                let filename = filename(&path);
-                let decoder = png::Decoder::new(entry);
-                let sheet = IndexedTexture::from_png(decoder);
-                textures.insert(filename, sheet);
-            } else if extension(&path, "tmx") {
-                let map = map_loader.load_tmx_map(&path).unwrap();
-                self.maps.insert(filename(&path), map::load_map(map));
-            } else if extension(&path, "tsx") {
-                let tileset = map_loader.load_tsx_tileset(&path).unwrap();
-                tilesets.push(tileset);
+        for entry in glob(&(path.to_string() + "/**/*.png")).unwrap() {
+            match entry {
+                Ok(image) => {
+                    let filename = filename(&image);
+                    let file = File::open(&image).unwrap();
+                    let decoder = png::Decoder::new(&file);
+                    let sheet = IndexedTexture::from_png(decoder);
+                    textures.insert(filename, sheet);
+                },
+                Err(e) => panic!("Failed to read image: {}", e),
             }
         }
+
+        for entry in glob(&(path.to_string() + "/**/*.tmx")).unwrap() {
+            match entry {
+                Ok(tilemap) => {
+                    let map = map_loader.load_tmx_map(&tilemap).unwrap();
+                    self.maps.insert(filename(&tilemap), map::load_map(map));
+                }
+                Err(e) => panic!("Failed to read map: {}", e),
+            }
+        }
+
+        for entry in glob(&(path.to_string() + "/**/*.tsx")).unwrap() {
+            match entry {
+                Ok(tileset) => {
+                    let tileset = map_loader.load_tsx_tileset(&tileset).unwrap();
+                    tilesets.push(tileset);
+                }
+                Err(e) => panic!("Failed to read map: {}", e),
+            }
+        }
+
 
         for tileset in tilesets {
             let user_type = &tileset.user_type;

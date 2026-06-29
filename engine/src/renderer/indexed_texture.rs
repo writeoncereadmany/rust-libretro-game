@@ -1,6 +1,6 @@
 use crate::renderer::colors::color_xrgb1555;
 use png::Decoder;
-use tar::Entry;
+use std::fs::File;
 
 pub struct IndexedTexture {
     pub palette: Vec<u16>,
@@ -8,7 +8,7 @@ pub struct IndexedTexture {
 }
 
 impl IndexedTexture {
-    pub fn from_png(decoder: Decoder<Entry<&[u8]>>) -> Self {
+    pub fn from_png(decoder: Decoder<&File>) -> Self {
         let mut reader = decoder.read_info().unwrap();
         let info = reader.info();
         let mut palette = Vec::new();
