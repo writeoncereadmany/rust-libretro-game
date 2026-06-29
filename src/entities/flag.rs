@@ -2,6 +2,7 @@ use crate::component::collisions::{Collided, Interactable};
 use crate::component::graphics::{Animation, Sprite};
 use crate::component::physics::Position;
 use crate::component::time::{Period, Phase};
+use crate::entities::coin::Coin;
 use crate::entities::radial::SpawnRadials;
 use crate::game::game::{CompleteLevel, IncreaseMultiplier};
 use derive::{Constant, Event};
@@ -11,8 +12,6 @@ use engine::events::event::Events;
 use engine::events::spawner::{Spawn, Spawner};
 use engine::shapes::shape::Shape;
 use std::time::Duration;
-use tiled::PropertyValue;
-use crate::entities::coin::Coin;
 
 #[derive(Event)]
 pub struct SpawnFlag(f64, f64, String);

@@ -43,7 +43,7 @@ impl Assets {
                 textures.insert(filename, sheet);
             } else if extension(&path, "tmx") {
                 let map = map_loader.load_tmx_map(&path).unwrap();
-                // self.maps.insert(filename(&path), map);
+                self.maps.insert(filename(&path), map::load_map(map));
             } else if extension(&path, "tsx") {
                 let tileset = map_loader.load_tsx_tileset(&path).unwrap();
                 tilesets.push(tileset);
