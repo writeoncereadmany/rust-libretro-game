@@ -1,15 +1,17 @@
 pub mod map;
 
+use crate::assets::map::Map;
 use crate::renderer::indexed_texture::IndexedTexture;
 use crate::renderer::sprite::Sprite;
 use crate::renderer::spritefont::SpriteFont;
 use crate::renderer::tilesheet::TileSheet;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::Path;
 use tar::Archive;
 use tiled::PropertyValue::StringValue;
-use crate::assets::map::Map;
 
+#[derive(Serialize, Deserialize)]
 pub struct Assets {
     pub tilesheets: HashMap<String, TileSheet>,
     pub maps: HashMap<String, Map>,
