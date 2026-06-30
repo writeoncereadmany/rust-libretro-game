@@ -1,2 +1,2 @@
-COPYFILE_DISABLE=1 tar -cvf pandamonium.panda assets
+cargo run export_assets pandamonium.panda
 cargo build --release

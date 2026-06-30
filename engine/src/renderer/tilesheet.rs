@@ -1,16 +1,36 @@
+use base64::{alphabet, engine, Engine};
+use base64::engine::general_purpose;
 use crate::renderer::sprite::{Bounds, Sprite};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+const CUSTOM_ENGINE: engine::GeneralPurpose =
+    engine::GeneralPurpose::new(&alphabet::URL_SAFE, general_purpose::NO_PAD);
 
 #[derive(Serialize, Deserialize)]
 pub struct TileSheet {
     pub name: String,
     pub palette: Vec<u16>,
+    #[serde(serialize_with = "as_base64", deserialize_with = "from_base64")]
     pub tile_sheet: Vec<u8>,
     pub tile_width: u32,
     pub tile_height: u32,
     pub columns: u32
 }
 
+fn as_base64<T, S>(key: &T, serializer: S) -> Result<S::Ok, S::Error>
+where T: AsRef<[u8]>,
+      S: Serializer
+{
+    serializer.serialize_str(&CUSTOM_ENGINE.encode(key))
+}
+
+fn from_base64<'de, D>(deserializer: D) -> Result<Vec<u8>, D::Error>
+where D: Deserializer<'de>
+{
+    use serde::de::Error;
+    String::deserialize(deserializer)
+        .and_then(|string| CUSTOM_ENGINE.decode(&string).map_err(|err| Error::custom(err.to_string())))
+}
 
 impl TileSheet {
     pub fn new(
