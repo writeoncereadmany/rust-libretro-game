@@ -93,4 +93,5 @@
  <tile id="89" type="splash_1"/>
  <tile id="90" type="splash_2"/>
  <tile id="91" type="splash_3"/>
+ <tile id="92" type="mosaic"/>
 </tileset>

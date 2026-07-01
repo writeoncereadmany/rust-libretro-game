@@ -28,6 +28,11 @@ impl Screen for TitleScreen {
 
     fn draw(&mut self, renderer: &mut AssetRenderer) {
         renderer.clear();
+        for x in 0..30 {
+            for y in 0..20 {
+                renderer.draw_sprite("mosaic", x*12, y*12, false);
+            }
+        }
         renderer.draw_text(
             "Pandamonium!",
             "Spritefont_Medium",
