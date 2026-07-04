@@ -22,7 +22,7 @@ pub struct Application {
     dispatcher: Arc<Dispatcher>,
     spawner: Arc<Spawner>,
     screen: Box<dyn Screen>,
-    _guard: WorkerGuard
+    loggerWorker: Option<WorkerGuard>
 }
 
 #[derive(Event)]
@@ -44,7 +44,7 @@ impl Debug for Application {
 }
 
 impl Application {
-    pub fn new(assets: Arc<Assets>, _guard: WorkerGuard) -> Self {
+    pub fn new(assets: Arc<Assets>, loggerWorker: Option<WorkerGuard>) -> Self {
         let mut dispatcher = Dispatcher::new();
         let mut spawner = Spawner::new();
 
@@ -57,7 +57,7 @@ impl Application {
             spawner: Arc::new(spawner),
             previous_joypad_state: JoypadState::empty(),
             screen: Box::new(TitleScreen::new()),
-            _guard
+            loggerWorker
         }
     }
 
