@@ -17,6 +17,9 @@ use std::ffi::c_uint;
 use std::ffi::CString;
 use std::slice;
 use std::sync::Arc;
+use tracing::{span, Level};
+use tracing_subscriber::fmt::format::FmtSpan;
+use tracing_subscriber::FmtSubscriber;
 
 const WIDTH: c_uint = 360;
 const HEIGHT: c_uint = 240;
@@ -132,12 +135,20 @@ impl Core for ExampleCore {
         ctx.set_performance_level(0);
         ctx.enable_frame_time_callback((1000000.0f64 / 60.0).round() as retro_usec_t);
 
+        let file_appender = tracing_appender::rolling::hourly("logs", "pandamonium.log");
+        let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
+        tracing_subscriber::fmt()
+            .json()
+            .with_span_events(FmtSpan::CLOSE)
+            .with_writer(non_blocking)
+            .init();
+
         let game_info = info.unwrap();
         let data = unsafe { slice::from_raw_parts(game_info.data as *const u8, game_info.size) };
 
         let assets = serde_json::from_slice::<Assets>(data).unwrap();
         let assets = Arc::new(assets);
-        self.application = Some(Application::new(assets.clone()));
+        self.application = Some(Application::new(assets.clone(), _guard));
         self.renderer = Some(AssetRenderer::new(Renderer::new(WIDTH, HEIGHT), assets.clone()));
 
         let gctx: GenericContext = ctx.into();

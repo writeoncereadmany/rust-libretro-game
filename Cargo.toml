@@ -13,8 +13,9 @@ path = "src/export.rs"
 
 [dependencies]
 libc = "0.2.174"
-png = "0.17.16"
-tiled = "0.15.0"
+tracing = "0.1.44"
+tracing-subscriber = {  version = "0.3.23", features = ["json"] }
+tracing-appender = "0.2.5"
 rust-libretro = {  version = "0.3.2", features = [ "unstable-env-commands" ] }
 serde_json = "1.0.150"
 derive = { path = "./derive" }

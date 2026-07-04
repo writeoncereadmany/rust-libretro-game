@@ -1,3 +1,4 @@
+use std::fmt::{Debug, Formatter};
 use crate::game::game::{Game, StartLevel};
 use crate::screens::screen::Screen;
 use crate::screens::title::TitleScreen;
@@ -12,13 +13,16 @@ use rust_libretro::contexts::AudioContext;
 use rust_libretro::types::JoypadState;
 use std::sync::Arc;
 use std::time::Duration;
+use tracing::{instrument, span, Level};
+use tracing_appender::non_blocking::WorkerGuard;
 
 pub struct Application {
     assets: Arc<Assets>,
     previous_joypad_state: JoypadState,
     dispatcher: Arc<Dispatcher>,
     spawner: Arc<Spawner>,
-    screen: Box<dyn Screen>
+    screen: Box<dyn Screen>,
+    _guard: WorkerGuard
 }
 
 #[derive(Event)]
@@ -33,8 +37,14 @@ pub struct BeforeUpdate();
 #[derive(Event)]
 pub struct AfterUpdate();
 
+impl Debug for Application {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("Application")
+    }
+}
+
 impl Application {
-    pub fn new(assets: Arc<Assets>) -> Self {
+    pub fn new(assets: Arc<Assets>, _guard: WorkerGuard) -> Self {
         let mut dispatcher = Dispatcher::new();
         let mut spawner = Spawner::new();
 
@@ -46,11 +56,15 @@ impl Application {
             dispatcher: Arc::new(dispatcher),
             spawner: Arc::new(spawner),
             previous_joypad_state: JoypadState::empty(),
-            screen: Box::new(TitleScreen::new())
+            screen: Box::new(TitleScreen::new()),
+            _guard
         }
     }
 
     pub fn update(&mut self, input: JoypadState, delta_time: u64, renderer: &mut AssetRenderer, events: &mut Events) {
+        let span = span!(Level::INFO, "update");
+        let _update = span.enter();
+
         let dt = Duration::from_micros(delta_time);
 
         fire_input_events(input, self.previous_joypad_state, events);
@@ -80,6 +94,9 @@ impl Application {
     }
 
     pub fn draw(&mut self, renderer: &mut AssetRenderer) {
+        let span = span!(Level::INFO, "draw");
+        let _update = span.enter();
+
         self.screen.draw(renderer);
     }
 

@@ -5,3 +5,4 @@ target
 .gitignore
 modules.xml
 vcs.xml
+logs/*
