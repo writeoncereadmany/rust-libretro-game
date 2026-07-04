@@ -18,5 +18,5 @@ tracing-subscriber = {  version = "0.3.23", features = ["json"] }
 tracing-appender = "0.2.5"
 rust-libretro = {  version = "0.3.2", features = [ "unstable-env-commands" ] }
 serde_json = "1.0.150"
-derive = { path = "./engine-derive" }
-engine = { path = "./engine" }
+derive = { path = "../engine-derive" }
+engine = { path = "../engine" }
