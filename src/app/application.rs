@@ -62,7 +62,7 @@ impl Application {
     }
 
     pub fn update(&mut self, input: JoypadState, delta_time: u64, renderer: &mut AssetRenderer, events: &mut Events) {
-        let span = span!(Level::INFO, "update");
+        let span = span!(Level::INFO, "update", screen = self.screen.describe());
         let _update = span.enter();
 
         let dt = Duration::from_micros(delta_time);
@@ -94,7 +94,7 @@ impl Application {
     }
 
     pub fn draw(&mut self, renderer: &mut AssetRenderer) {
-        let span = span!(Level::INFO, "draw");
+        let span = span!(Level::INFO, "draw", screen = self.screen.describe());
         let _update = span.enter();
 
         self.screen.draw(renderer);

@@ -183,4 +183,8 @@ impl Screen for Game {
                 renderer.draw_sprite(sprite, x.round() as i32 + GAME_WINDOW_START_X, y.round() as i32 + GAME_WINDOW_TOP_Y, *flip_x)
             });
     }
+
+    fn describe(&self) -> &str {
+        &self.current_level
+    }
 }
