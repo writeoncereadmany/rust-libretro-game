@@ -17,9 +17,7 @@ use std::ffi::c_uint;
 use std::ffi::CString;
 use std::slice;
 use std::sync::Arc;
-use tracing::{span, Level};
 use tracing_subscriber::fmt::format::FmtSpan;
-use tracing_subscriber::FmtSubscriber;
 
 const WIDTH: c_uint = 360;
 const HEIGHT: c_uint = 240;
@@ -135,15 +133,15 @@ impl Core for ExampleCore {
         ctx.set_performance_level(0);
         ctx.enable_frame_time_callback((1000000.0f64 / 60.0).round() as retro_usec_t);
 
-        let loggerWorker = if std::env::var("LOG_PANDA_TRACES").is_ok() {
+        let logger_worker = if std::env::var("LOG_PANDA_TRACES").is_ok() {
             let file_appender = tracing_appender::rolling::hourly("logs", "pandamonium.log");
-            let (non_blocking, loggerWorker) = tracing_appender::non_blocking(file_appender);
+            let (non_blocking, logger_worker) = tracing_appender::non_blocking(file_appender);
             tracing_subscriber::fmt()
                 .json()
                 .with_span_events(FmtSpan::CLOSE)
                 .with_writer(non_blocking)
                 .init();
-            Some(loggerWorker)
+            Some(logger_worker)
         } else {
             None
         };
@@ -153,7 +151,7 @@ impl Core for ExampleCore {
 
         let assets = serde_json::from_slice::<Assets>(data).unwrap();
         let assets = Arc::new(assets);
-        self.application = Some(Application::new(assets.clone(), loggerWorker));
+        self.application = Some(Application::new(assets.clone(), logger_worker));
         self.renderer = Some(AssetRenderer::new(Renderer::new(WIDTH, HEIGHT), assets.clone()));
 
         let gctx: GenericContext = ctx.into();

@@ -1,4 +1,3 @@
-use std::fmt::{Debug, Formatter};
 use crate::game::game::{Game, StartLevel};
 use crate::screens::screen::Screen;
 use crate::screens::title::TitleScreen;
@@ -11,9 +10,10 @@ use engine::events::spawner::Spawner;
 use engine::renderer::asset_renderer::AssetRenderer;
 use rust_libretro::contexts::AudioContext;
 use rust_libretro::types::JoypadState;
+use std::fmt::{Debug, Formatter};
 use std::sync::Arc;
 use std::time::Duration;
-use tracing::{instrument, span, Level};
+use tracing::{span, Level};
 use tracing_appender::non_blocking::WorkerGuard;
 
 pub struct Application {
@@ -22,7 +22,7 @@ pub struct Application {
     dispatcher: Arc<Dispatcher>,
     spawner: Arc<Spawner>,
     screen: Box<dyn Screen>,
-    loggerWorker: Option<WorkerGuard>
+    _logger_worker: Option<WorkerGuard>
 }
 
 #[derive(Event)]
@@ -44,7 +44,7 @@ impl Debug for Application {
 }
 
 impl Application {
-    pub fn new(assets: Arc<Assets>, loggerWorker: Option<WorkerGuard>) -> Self {
+    pub fn new(assets: Arc<Assets>, logger_worker: Option<WorkerGuard>) -> Self {
         let mut dispatcher = Dispatcher::new();
         let mut spawner = Spawner::new();
 
@@ -57,7 +57,7 @@ impl Application {
             spawner: Arc::new(spawner),
             previous_joypad_state: JoypadState::empty(),
             screen: Box::new(TitleScreen::new()),
-            loggerWorker
+            _logger_worker: logger_worker
         }
     }
 
