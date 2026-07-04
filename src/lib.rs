@@ -28,62 +28,24 @@ const INPUT_DESCRIPTORS: &[retro_input_descriptor] = &input_descriptors!(
     { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN, "Down" },
     { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT, "Left" },
     { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "Action" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "Jump" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
 );
 
 #[derive(CoreOptions)]
-#[categories({
-    "advanced_settings",
-    "Advanced",
-    "Options affecting low-level emulation performance and accuracy."
-},{
-    "not_so_advanced_settings",
-    "Not So Advanced",
-    "Options not affecting low-level emulation performance and accuracy."
-})]
-#[options({
-    "foo_option_1",
-    "Advanced > Speed hack coprocessor X",
-    "Speed hack coprocessor X",
-    "Setting 'Advanced > Speed hack coprocessor X' to 'true' or 'Turbo' provides increased performance at the expense of reduced accuracy",
-    "Setting 'Speed hack coprocessor X' to 'true' or 'Turbo' provides increased performance at the expense of reduced accuracy",
-    "advanced_settings",
-    {
-        { "false" },
-        { "true" },
-        { "unstable", "Turbo (Unstable)" },
-    }
-}, {
-    "foo_option_2",
-    "Simple > Toggle Something",
-    "Toggle Something",
-    "Setting 'Simple > Toggle Something' to 'true' does something.",
-    "Setting 'Toggle Something' to 'true' does something.",
-    "not_so_advanced_settings",
-    {
-        { "false" },
-        { "true" },
-    }
-})]
-struct ExampleCore {
-    option_1: bool,
-    option_2: bool,
-
+struct PandamoniumCore {
     application: Option<Application>,
     events: Events,
     renderer: Option<AssetRenderer>
 }
 
-retro_core!(ExampleCore {
-    option_1: false,
-    option_2: true,
-
+retro_core!(PandamoniumCore {
     application: None,
     renderer: None,
     events: Events::new()
 });
 
-impl Core for ExampleCore {
+impl Core for PandamoniumCore {
     fn get_info(&self) -> SystemInfo {
         SystemInfo {
             library_name: CString::new("PandaEngine").unwrap(),
@@ -158,20 +120,6 @@ impl Core for ExampleCore {
         gctx.enable_audio_callback();
 
         Ok(())
-    }
-
-    fn on_options_changed(&mut self, ctx: &mut OptionsChangedContext) {
-        match ctx.get_variable("foo_option_1") {
-            Some("true") => self.option_1 = true,
-            Some("false") => self.option_1 = false,
-            _ => (),
-        }
-
-        match ctx.get_variable("foo_option_2") {
-            Some("true") => self.option_2 = true,
-            Some("false") => self.option_2 = false,
-            _ => (),
-        }
     }
 
     #[inline]
