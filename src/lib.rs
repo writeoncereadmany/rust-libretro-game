@@ -17,6 +17,7 @@ use std::ffi::c_uint;
 use std::ffi::CString;
 use std::slice;
 use std::sync::Arc;
+use tracing::{span, Level};
 use tracing_subscriber::fmt::format::FmtSpan;
 
 const WIDTH: c_uint = 360;
@@ -134,13 +135,21 @@ impl Core for PandamoniumCore {
 
         if let Some(ref mut application) = self.application {
             if let Some(ref mut renderer) = self.renderer {
-                application.update(input, delta_us.unwrap_or(16_666) as u64, renderer, &mut self.events);
-                if let Some(ref mut renderer) = self.renderer {
+                {
+                    let span = span!(Level::INFO, "Updating game state");
+                    let _span = span.enter();
+                    application.update(input, delta_us.unwrap_or(16_666) as u64, renderer, &mut self.events);
+                }
+                {
+                    let span = span!(Level::INFO, "Updating renderer");
+                    let _span = span.enter();
                     application.draw(renderer);
                 }
             }
         }
         if let Some (ref mut renderer) = self.renderer {
+            let span = span!(Level::INFO, "Rendering");
+            let _span = span.enter();
             renderer.render(ctx);
         }
     }
