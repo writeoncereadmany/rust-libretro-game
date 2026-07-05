@@ -141,14 +141,14 @@ impl Core for PandamoniumCore {
                     application.update(input, delta_us.unwrap_or(16_666) as u64, renderer, &mut self.events);
                 }
                 {
-                    let span = span!(Level::INFO, "Updating renderer");
+                    let span = span!(Level::INFO, "Drawing scene");
                     let _span = span.enter();
                     application.draw(renderer);
                 }
             }
         }
         if let Some (ref mut renderer) = self.renderer {
-            let span = span!(Level::INFO, "Rendering");
+            let span = span!(Level::INFO, "Rendering to context");
             let _span = span.enter();
             renderer.render(ctx);
         }
