@@ -182,7 +182,7 @@ impl Screen for Game {
             .for_each(|(Sprite(sprite, _, flip_x), Position(x, y))| {
                 renderer.draw_sprite(sprite, x.round() as i32 + GAME_WINDOW_START_X, y.round() as i32 + GAME_WINDOW_TOP_Y, *flip_x)
             });
-        renderer.render_hud();
+        renderer.draw_hud();
     }
 
     fn describe(&self) -> &str {

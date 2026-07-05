@@ -150,7 +150,7 @@ impl Core for PandamoniumCore {
         if let Some (ref mut renderer) = self.renderer {
             let span = span!(Level::INFO, "Rendering to context");
             let _span = span.enter();
-            renderer.render(ctx);
+            renderer.present(ctx);
         }
     }
 
