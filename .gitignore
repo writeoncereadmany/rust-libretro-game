@@ -6,3 +6,4 @@ target
 modules.xml
 vcs.xml
 logs/*
+*.panda
