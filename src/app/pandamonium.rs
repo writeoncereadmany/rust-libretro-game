@@ -1,5 +1,4 @@
 use crate::game::game::{Game, StartLevel};
-use crate::retroarch::{Application, ApplicationProperties};
 use crate::screens::screen::Screen;
 use crate::screens::title::TitleScreen;
 use derive::Event;
@@ -14,6 +13,7 @@ use rust_libretro::types::JoypadState;
 use std::fmt::{Debug, Formatter};
 use std::sync::Arc;
 use std::time::Duration;
+use engine::retroarch::{Application, ApplicationProperties};
 use rust_libretro::input_descriptors;
 use rust_libretro::sys::{retro_input_descriptor, RETRO_DEVICE_ID_JOYPAD_A, RETRO_DEVICE_ID_JOYPAD_DOWN, RETRO_DEVICE_ID_JOYPAD_LEFT, RETRO_DEVICE_ID_JOYPAD_RIGHT, RETRO_DEVICE_ID_JOYPAD_START, RETRO_DEVICE_ID_JOYPAD_UP, RETRO_DEVICE_JOYPAD};
 use tracing_appender::non_blocking::WorkerGuard;

@@ -168,10 +168,15 @@ dependencies = [
  "glob",
  "googletest",
  "itertools",
+ "libc",
  "png",
  "rust-libretro",
  "serde",
+ "serde_json",
  "tiled",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
 ]
 
 [[package]]
@@ -388,9 +393,7 @@ dependencies = [
  "libc",
  "rust-libretro",
  "serde_json",
- "tracing",
  "tracing-appender",
- "tracing-subscriber",
 ]
 
 [[package]]

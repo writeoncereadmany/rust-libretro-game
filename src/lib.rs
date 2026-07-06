@@ -4,11 +4,10 @@ mod screens;
 mod component;
 mod entities;
 mod export;
-pub mod retroarch;
 
 use crate::app::pandamonium::Pandamonium;
-use crate::retroarch::*;
 use engine::events::event::Events;
+use engine::retroarch::RetroarchCore;
 use rust_libretro::{retro_core};
 
 retro_core!(RetroarchCore::<Pandamonium> {
