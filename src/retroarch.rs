@@ -4,17 +4,23 @@ use engine::renderer::asset_renderer::AssetRenderer;
 use engine::renderer::renderer::Renderer;
 use rust_libretro::contexts::{AudioContext, GenericContext, GetAvInfoContext, InitContext, LoadGameContext, RunContext, SetEnvironmentContext};
 use rust_libretro::proc::CoreOptions;
-use rust_libretro::sys::{retro_game_geometry, retro_game_info, retro_input_descriptor, retro_system_av_info, retro_system_timing, retro_usec_t, RETRO_DEVICE_ID_JOYPAD_A, RETRO_DEVICE_ID_JOYPAD_DOWN, RETRO_DEVICE_ID_JOYPAD_LEFT, RETRO_DEVICE_ID_JOYPAD_RIGHT, RETRO_DEVICE_ID_JOYPAD_START, RETRO_DEVICE_ID_JOYPAD_UP, RETRO_DEVICE_JOYPAD};
+use rust_libretro::sys::{retro_game_geometry, retro_game_info, retro_input_descriptor, retro_system_av_info, retro_system_timing, retro_usec_t};
 use rust_libretro::types::{JoypadState, PixelFormat, SystemInfo};
-use rust_libretro::{
-    contexts::*, core::Core, env_version, input_descriptors, proc::*, retro_core, sys::*, types::*,
-};
+use rust_libretro::{core::Core, env_version, sys::*};
 use std::ffi::{c_uint, CString};
 use std::slice;
 use std::sync::Arc;
 use tracing::{span, Level};
 use tracing_appender::non_blocking::WorkerGuard;
 use tracing_subscriber::fmt::format::FmtSpan;
+
+pub struct ApplicationProperties {
+    pub width: u32,
+    pub height: u32,
+    pub name: String,
+    pub extensions: &'static [&'static str],
+    pub input_descriptors: &'static [retro_input_descriptor],
+}
 
 pub trait Application {
     fn new(assets: Arc<Assets>, logger_worker: Option<WorkerGuard>) -> Self;
@@ -24,22 +30,11 @@ pub trait Application {
     fn draw(&mut self, renderer: &mut AssetRenderer);
 
     fn play(&mut self, _ctx: &mut AudioContext);
-    
-    fn width() -> u32;
-    
-    fn height() -> u32;
+
+    fn properties() -> ApplicationProperties;
 }
 
 const PIXEL_FORMAT: PixelFormat = PixelFormat::XRGB1555;
-
-const INPUT_DESCRIPTORS: &[retro_input_descriptor] = &input_descriptors!(
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP, "Up" },
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN, "Down" },
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT, "Left" },
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "Jump" },
-    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
-);
 
 #[derive(CoreOptions)]
 pub struct RetroarchCore<T: Application> {
@@ -50,10 +45,11 @@ pub struct RetroarchCore<T: Application> {
 
 impl<T: Application> Core for RetroarchCore<T> {
     fn get_info(&self) -> SystemInfo {
+        let properties = T::properties();
         SystemInfo {
-            library_name: CString::new("PandaEngine").unwrap(),
+            library_name: CString::new(properties.name).unwrap(),
             library_version: CString::new(env_version!("CARGO_PKG_VERSION").to_string()).unwrap(),
-            valid_extensions: CString::new("").unwrap(),
+            valid_extensions: CString::new(properties.extensions.join("|")).unwrap(),
 
             need_fullpath: false,
             block_extract: false,
@@ -70,16 +66,17 @@ impl<T: Application> Core for RetroarchCore<T> {
 
     fn on_init(&mut self, ctx: &mut InitContext) {
         let gctx: GenericContext = ctx.into();
-        gctx.set_input_descriptors(INPUT_DESCRIPTORS);
+        gctx.set_input_descriptors(&T::properties().input_descriptors);
     }
 
     fn on_get_av_info(&mut self, _ctx: &mut GetAvInfoContext) -> retro_system_av_info {
+        let properties = T::properties();
         retro_system_av_info {
             geometry: retro_game_geometry {
-                base_width: T::width() as c_uint,
-                base_height: T::height() as c_uint,
-                max_width: T::width() as c_uint,
-                max_height: T::height() as c_uint,
+                base_width: properties.width as c_uint,
+                base_height: properties.height as c_uint,
+                max_width: properties.width as c_uint,
+                max_height: properties.height as c_uint,
                 aspect_ratio: 0.0,
             },
             timing: retro_system_timing {
@@ -94,12 +91,13 @@ impl<T: Application> Core for RetroarchCore<T> {
         info: Option<retro_game_info>,
         ctx: &mut LoadGameContext,
     ) -> Result<(), Box<dyn std::error::Error>> {
+        let properties = T::properties();
         ctx.set_pixel_format(PIXEL_FORMAT);
         ctx.set_performance_level(0);
         ctx.enable_frame_time_callback((1000000.0f64 / 60.0).round() as retro_usec_t);
 
-        let logger_worker = if std::env::var("LOG_PANDA_TRACES").is_ok() {
-            let file_appender = tracing_appender::rolling::hourly("logs", "pandamonium.log");
+        let logger_worker = if std::env::var("LOG_TRACES").is_ok() {
+            let file_appender = tracing_appender::rolling::hourly("logs", properties.name + ".log");
             let (non_blocking, logger_worker) = tracing_appender::non_blocking(file_appender);
             tracing_subscriber::fmt()
                 .json()
@@ -117,7 +115,7 @@ impl<T: Application> Core for RetroarchCore<T> {
         let assets = serde_json::from_slice::<Assets>(data).unwrap();
         let assets = Arc::new(assets);
         self.application = Some(T::new(assets.clone(), logger_worker));
-        self.renderer = Some(AssetRenderer::new(Renderer::new(T::width(), T::height()), assets.clone()));
+        self.renderer = Some(AssetRenderer::new(Renderer::new(properties.width, properties.height), assets.clone()));
 
         let gctx: GenericContext = ctx.into();
         gctx.enable_audio_callback();

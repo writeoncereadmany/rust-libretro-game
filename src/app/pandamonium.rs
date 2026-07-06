@@ -1,5 +1,5 @@
 use crate::game::game::{Game, StartLevel};
-use crate::retroarch::Application;
+use crate::retroarch::{Application, ApplicationProperties};
 use crate::screens::screen::Screen;
 use crate::screens::title::TitleScreen;
 use derive::Event;
@@ -14,6 +14,8 @@ use rust_libretro::types::JoypadState;
 use std::fmt::{Debug, Formatter};
 use std::sync::Arc;
 use std::time::Duration;
+use rust_libretro::input_descriptors;
+use rust_libretro::sys::{retro_input_descriptor, RETRO_DEVICE_ID_JOYPAD_A, RETRO_DEVICE_ID_JOYPAD_DOWN, RETRO_DEVICE_ID_JOYPAD_LEFT, RETRO_DEVICE_ID_JOYPAD_RIGHT, RETRO_DEVICE_ID_JOYPAD_START, RETRO_DEVICE_ID_JOYPAD_UP, RETRO_DEVICE_JOYPAD};
 use tracing_appender::non_blocking::WorkerGuard;
 
 pub struct Pandamonium {
@@ -42,6 +44,15 @@ impl Debug for Pandamonium {
         f.write_str("Application")
     }
 }
+
+const INPUT_DESCRIPTORS: &[retro_input_descriptor] = &input_descriptors!(
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP, "Up" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN, "Down" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT, "Left" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "Jump" },
+    { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
+);
 
 impl Application for Pandamonium {
     fn new(assets: Arc<Assets>, logger_worker: Option<WorkerGuard>) -> Self {
@@ -88,9 +99,15 @@ impl Application for Pandamonium {
 
     fn play(&mut self, _ctx: &mut AudioContext) {}
 
-    fn width() -> u32 { 360 }
-    
-    fn height() -> u32 { 240 }
+    fn properties() -> ApplicationProperties {
+        ApplicationProperties {
+            width: 360,
+            height: 240,
+            name: "pandamonium".to_string(),
+            input_descriptors: INPUT_DESCRIPTORS,
+            extensions: &["panda"],
+        }
+    }
 }
 
 impl Pandamonium {

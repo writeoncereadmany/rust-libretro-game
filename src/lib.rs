@@ -9,9 +9,7 @@ pub mod retroarch;
 use crate::app::pandamonium::Pandamonium;
 use crate::retroarch::*;
 use engine::events::event::Events;
-use rust_libretro::{
-    core::Core, retro_core, types::*,
-};
+use rust_libretro::{retro_core};
 
 retro_core!(RetroarchCore::<Pandamonium> {
     application: None,
