@@ -87,6 +87,10 @@ impl Application for Pandamonium {
     }
 
     fn play(&mut self, _ctx: &mut AudioContext) {}
+
+    fn width() -> u32 { 360 }
+    
+    fn height() -> u32 { 240 }
 }
 
 impl Pandamonium {

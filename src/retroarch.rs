@@ -24,10 +24,12 @@ pub trait Application {
     fn draw(&mut self, renderer: &mut AssetRenderer);
 
     fn play(&mut self, _ctx: &mut AudioContext);
+    
+    fn width() -> u32;
+    
+    fn height() -> u32;
 }
 
-const WIDTH: c_uint = 360;
-const HEIGHT: c_uint = 240;
 const PIXEL_FORMAT: PixelFormat = PixelFormat::XRGB1555;
 
 const INPUT_DESCRIPTORS: &[retro_input_descriptor] = &input_descriptors!(
@@ -46,7 +48,7 @@ pub struct RetroarchCore<T: Application> {
     pub renderer: Option<AssetRenderer>
 }
 
-impl<T: Application> Core for crate::RetroarchCore<T> {
+impl<T: Application> Core for RetroarchCore<T> {
     fn get_info(&self) -> SystemInfo {
         SystemInfo {
             library_name: CString::new("PandaEngine").unwrap(),
@@ -74,10 +76,10 @@ impl<T: Application> Core for crate::RetroarchCore<T> {
     fn on_get_av_info(&mut self, _ctx: &mut GetAvInfoContext) -> retro_system_av_info {
         retro_system_av_info {
             geometry: retro_game_geometry {
-                base_width: WIDTH,
-                base_height: HEIGHT,
-                max_width: WIDTH,
-                max_height: HEIGHT,
+                base_width: T::width() as c_uint,
+                base_height: T::height() as c_uint,
+                max_width: T::width() as c_uint,
+                max_height: T::height() as c_uint,
                 aspect_ratio: 0.0,
             },
             timing: retro_system_timing {
@@ -115,7 +117,7 @@ impl<T: Application> Core for crate::RetroarchCore<T> {
         let assets = serde_json::from_slice::<Assets>(data).unwrap();
         let assets = Arc::new(assets);
         self.application = Some(T::new(assets.clone(), logger_worker));
-        self.renderer = Some(AssetRenderer::new(Renderer::new(WIDTH, HEIGHT), assets.clone()));
+        self.renderer = Some(AssetRenderer::new(Renderer::new(T::width(), T::height()), assets.clone()));
 
         let gctx: GenericContext = ctx.into();
         gctx.enable_audio_callback();
