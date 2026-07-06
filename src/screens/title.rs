@@ -31,6 +31,7 @@ impl Screen for TitleScreen {
     }
 
     fn draw(&mut self, renderer: &mut AssetRenderer) {
+        renderer.clear();
         renderer.draw_text(
             "Pandamonium!",
             "Spritefont_Medium",
