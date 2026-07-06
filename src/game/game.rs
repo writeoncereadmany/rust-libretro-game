@@ -184,8 +184,4 @@ impl Screen for Game {
             });
         renderer.draw_hud();
     }
-
-    fn describe(&self) -> &str {
-        &self.current_level
-    }
 }

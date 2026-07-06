@@ -26,10 +26,6 @@ impl Screen for TitleScreen {
         });
     }
 
-    fn describe(&self) -> &str {
-        "Title screen"
-    }
-
     fn draw(&mut self, renderer: &mut AssetRenderer) {
         renderer.clear();
         renderer.draw_text(
