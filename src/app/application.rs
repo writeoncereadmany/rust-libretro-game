@@ -1,4 +1,5 @@
 use crate::game::game::{Game, StartLevel};
+use crate::retroarch::Application;
 use crate::screens::screen::Screen;
 use crate::screens::title::TitleScreen;
 use derive::Event;
@@ -13,9 +14,7 @@ use rust_libretro::types::JoypadState;
 use std::fmt::{Debug, Formatter};
 use std::sync::Arc;
 use std::time::Duration;
-use tracing::{span, Level};
 use tracing_appender::non_blocking::WorkerGuard;
-use crate::retroarch::Application;
 
 pub struct Pandamonium {
     assets: Arc<Assets>,
@@ -91,7 +90,6 @@ impl Application for Pandamonium {
 }
 
 impl Pandamonium {
-    
     fn process_events(&mut self, renderer: &mut AssetRenderer, events: &mut Events) {
         while let Some(event) = events.pop() {
             renderer.on_event(&event, events);
@@ -99,8 +97,6 @@ impl Pandamonium {
             self.screen.on_event(&event, events);
         }
     }
-
-
 
     fn on_event(&mut self, event: &Event, events: &mut Events) {
         event.apply(|StartGame()| {
