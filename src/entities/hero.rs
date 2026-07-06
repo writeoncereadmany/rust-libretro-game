@@ -1,4 +1,4 @@
-use crate::app::application::{AfterUpdate, BeforeUpdate};
+use crate::app::pandamonium::{AfterUpdate, BeforeUpdate};
 use crate::component::collisions::{Actor, Push, Submerged};
 use crate::component::graphics::Sprite;
 use crate::component::physics::{Acceleration, Gravity, Position, Velocity, VelocityCap};

@@ -6,7 +6,7 @@ mod entities;
 mod export;
 pub mod retroarch;
 
-use crate::app::application::Pandamonium;
+use crate::app::pandamonium::Pandamonium;
 use crate::retroarch::*;
 use engine::events::event::Events;
 use rust_libretro::{

@@ -1,4 +1,4 @@
-use crate::app::application::GameOver;
+use crate::app::pandamonium::GameOver;
 use crate::component::graphics::Sprite;
 use crate::component::physics::Position;
 use crate::entities::load_map;

@@ -1,4 +1,4 @@
-use crate::app::application::AfterUpdate;
+use crate::app::pandamonium::AfterUpdate;
 use crate::component::graphics::Sprite;
 use crate::component::lifecycle::Destroy;
 use crate::component::physics::Position;
