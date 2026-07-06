@@ -15,8 +15,9 @@ use std::sync::Arc;
 use std::time::Duration;
 use tracing::{span, Level};
 use tracing_appender::non_blocking::WorkerGuard;
+use crate::retroarch::Application;
 
-pub struct Application {
+pub struct Pandamonium {
     assets: Arc<Assets>,
     previous_joypad_state: JoypadState,
     dispatcher: Arc<Dispatcher>,
@@ -37,21 +38,21 @@ pub struct BeforeUpdate();
 #[derive(Event)]
 pub struct AfterUpdate();
 
-impl Debug for Application {
+impl Debug for Pandamonium {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str("Application")
     }
 }
 
-impl Application {
-    pub fn new(assets: Arc<Assets>, logger_worker: Option<WorkerGuard>) -> Self {
+impl Application for Pandamonium {
+    fn new(assets: Arc<Assets>, logger_worker: Option<WorkerGuard>) -> Self {
         let mut dispatcher = Dispatcher::new();
         let mut spawner = Spawner::new();
 
         crate::component::register(&mut dispatcher);
         crate::entities::register(&mut dispatcher, &mut spawner);
 
-        Application {
+        Pandamonium {
             assets: assets.clone(),
             dispatcher: Arc::new(dispatcher),
             spawner: Arc::new(spawner),
@@ -60,8 +61,8 @@ impl Application {
             _logger_worker: logger_worker
         }
     }
-
-    pub fn update(&mut self, input: JoypadState, delta_time: u64, renderer: &mut AssetRenderer, events: &mut Events) {
+    
+    fn update(&mut self, input: JoypadState, delta_time: u64, renderer: &mut AssetRenderer, events: &mut Events) {
         let dt = Duration::from_micros(delta_time);
 
         fire_input_events(input, self.previous_joypad_state, events);
@@ -81,7 +82,16 @@ impl Application {
 
         self.previous_joypad_state = input;
     }
+    
+    fn draw(&mut self, renderer: &mut AssetRenderer) {
+        self.screen.draw(renderer);
+    }
 
+    fn play(&mut self, _ctx: &mut AudioContext) {}
+}
+
+impl Pandamonium {
+    
     fn process_events(&mut self, renderer: &mut AssetRenderer, events: &mut Events) {
         while let Some(event) = events.pop() {
             renderer.on_event(&event, events);
@@ -90,11 +100,7 @@ impl Application {
         }
     }
 
-    pub fn draw(&mut self, renderer: &mut AssetRenderer) {
-        self.screen.draw(renderer);
-    }
 
-    pub fn play(&mut self, _ctx: &mut AudioContext) {}
 
     fn on_event(&mut self, event: &Event, events: &mut Events) {
         event.apply(|StartGame()| {

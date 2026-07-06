@@ -4,8 +4,10 @@ mod screens;
 mod component;
 mod entities;
 mod export;
+pub mod retroarch;
 
-use crate::app::application::Application;
+use crate::app::application::Pandamonium;
+use crate::retroarch::Application;
 use engine::assets::Assets;
 use engine::events::event::Events;
 use engine::renderer::asset_renderer::AssetRenderer;
@@ -34,19 +36,19 @@ const INPUT_DESCRIPTORS: &[retro_input_descriptor] = &input_descriptors!(
 );
 
 #[derive(CoreOptions)]
-struct PandamoniumCore {
-    application: Option<Application>,
+struct RetroarchCore<T: Application> {
+    application: Option<T>,
     events: Events,
     renderer: Option<AssetRenderer>
 }
 
-retro_core!(PandamoniumCore {
+retro_core!(RetroarchCore::<Pandamonium> {
     application: None,
     renderer: None,
     events: Events::new()
 });
 
-impl Core for PandamoniumCore {
+impl<T: Application> Core for RetroarchCore<T> {
     fn get_info(&self) -> SystemInfo {
         SystemInfo {
             library_name: CString::new("PandaEngine").unwrap(),
@@ -114,7 +116,7 @@ impl Core for PandamoniumCore {
 
         let assets = serde_json::from_slice::<Assets>(data).unwrap();
         let assets = Arc::new(assets);
-        self.application = Some(Application::new(assets.clone(), logger_worker));
+        self.application = Some(T::new(assets.clone(), logger_worker));
         self.renderer = Some(AssetRenderer::new(Renderer::new(WIDTH, HEIGHT), assets.clone()));
 
         let gctx: GenericContext = ctx.into();
