@@ -1,2 +1,2 @@
-cargo run export_assets pandamonium.panda
+../engine/target/release/export_assets -s assets -o pandamonium.panda
 cargo build --release
