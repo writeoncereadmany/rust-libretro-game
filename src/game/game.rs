@@ -20,7 +20,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 const GAME_WINDOW_START_X: i32 = 12;
-const GAME_WINDOW_TOP_Y: i32 = 19*12;
+const GAME_WINDOW_TOP_Y: i32 = 12;
 
 #[derive(Event)]
 pub struct StartLevel(pub String);

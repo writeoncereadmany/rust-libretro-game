@@ -35,20 +35,20 @@ pub fn load_map(map: &Map, spawner: &Spawner, events: &mut Events) {
     for tile in &map.tiles {
         events.fire(UpdateBackgroundTile {
             x: (tile.x + 1) * 12,
-            y: (18 - tile.y) * 12,
+            y: (tile.y + 1) * 12,
             tileset: tile.tile_set_name.clone(),
             tile: tile.id,
         });
         if let Some(user_type) = &tile.user_type {
             match user_type.as_str() {
                 "Wall" => {
-                    tile_map.insert((tile.x, -tile.y - 1), CollisionType::WALL);
+                    tile_map.insert((tile.x, tile.y), CollisionType::WALL);
                 }
                 "Ledge" => {
-                    tile_map.insert((tile.x, -tile.y - 1), CollisionType::LEDGE);
+                    tile_map.insert((tile.x, tile.y), CollisionType::LEDGE);
                 }
                 "Water" => {
-                    tile_map.insert((tile.x, -tile.y - 1), CollisionType::WATER);
+                    tile_map.insert((tile.x, tile.y), CollisionType::WATER);
                 }
                 _otherwise => {}
             };
