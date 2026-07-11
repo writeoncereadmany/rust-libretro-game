@@ -8,14 +8,13 @@ use engine::events::event::{Event, Events};
 use engine::events::input::fire_input_events;
 use engine::events::spawner::Spawner;
 use engine::renderer::asset_renderer::AssetRenderer;
-use rust_libretro::contexts::AudioContext;
-use rust_libretro::types::JoypadState;
-use std::fmt::{Debug, Formatter};
-use std::sync::Arc;
-use std::time::Duration;
 use engine::retroarch::{Application, ApplicationProperties};
+use rust_libretro::contexts::AudioContext;
 use rust_libretro::input_descriptors;
 use rust_libretro::sys::{retro_input_descriptor, RETRO_DEVICE_ID_JOYPAD_A, RETRO_DEVICE_ID_JOYPAD_DOWN, RETRO_DEVICE_ID_JOYPAD_LEFT, RETRO_DEVICE_ID_JOYPAD_RIGHT, RETRO_DEVICE_ID_JOYPAD_START, RETRO_DEVICE_ID_JOYPAD_UP, RETRO_DEVICE_JOYPAD};
+use rust_libretro::types::JoypadState;
+use std::sync::Arc;
+use std::time::Duration;
 use tracing_appender::non_blocking::WorkerGuard;
 
 pub struct Pandamonium {
@@ -38,12 +37,6 @@ pub struct BeforeUpdate();
 
 #[derive(Event)]
 pub struct AfterUpdate();
-
-impl Debug for Pandamonium {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("Application")
-    }
-}
 
 const INPUT_DESCRIPTORS: &[retro_input_descriptor] = &input_descriptors!(
     { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP, "Up" },
