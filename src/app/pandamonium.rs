@@ -94,8 +94,8 @@ impl Application for Pandamonium {
 
     fn properties() -> ApplicationProperties {
         ApplicationProperties {
-            width: 360,
-            height: 240,
+            width: 384,
+            height: 216,
             name: "pandamonium".to_string(),
             input_descriptors: INPUT_DESCRIPTORS,
             extensions: &["panda"],

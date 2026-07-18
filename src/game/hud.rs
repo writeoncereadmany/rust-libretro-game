@@ -11,11 +11,11 @@ pub fn setup_hud(events: &mut Events, score: &u32, bonus: &u32, metamultiplier: 
 }
 
 pub fn update_bonus(bonus: &u32, events: &mut Events) {
-    update_bonus_sprite(12, bonus, "bonus_1", events);
+    update_bonus_sprite(13, bonus, "bonus_1", events);
 }
 
 pub fn update_metamultiplier(bonus: &u32, events: &mut Events) {
-    update_bonus_sprite(11, bonus, "bonus_blank", events);
+    update_bonus_sprite(12, bonus, "bonus_blank", events);
 }
 
 fn update_bonus_sprite(x: i32, &bonus: &u32, no_bonus_sprite: &'static str, events: &mut Events) {
@@ -28,14 +28,14 @@ fn update_bonus_sprite(x: i32, &bonus: &u32, no_bonus_sprite: &'static str, even
         _otherwise => "error"
     }.to_string();
 
-    events.fire(UpdateHudSprite { x: x*12, y: 19*12, sprite})
+    events.fire(UpdateHudSprite { x: x*12, y: 17*12, sprite})
 }
 
 pub fn update_score(score: &u32, events: &mut Events) {
-    events.fire(UpdateHudSprite { x: 13*12, y: 19*12, sprite: "score_left".to_string() });
-    events.fire(UpdateHudSprite { x: 14*12, y: 19*12, sprite: "score_mid".to_string() });
-    events.fire(UpdateHudSprite { x: 15*12, y: 19*12, sprite: "score_mid".to_string() });
-    events.fire(UpdateHudSprite { x: 16*12, y: 19*12, sprite: "score_right".to_string() });
+    events.fire(UpdateHudSprite { x: 14*12, y: 17*12, sprite: "score_left".to_string() });
+    events.fire(UpdateHudSprite { x: 15*12, y: 17*12, sprite: "score_mid".to_string() });
+    events.fire(UpdateHudSprite { x: 16*12, y: 17*12, sprite: "score_mid".to_string() });
+    events.fire(UpdateHudSprite { x: 17*12, y: 17*12, sprite: "score_right".to_string() });
 
     events.fire(UpdateHudText {
         x: 17*12 - 3,
