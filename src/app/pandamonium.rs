@@ -114,8 +114,10 @@ impl Pandamonium {
 
     fn on_event(&mut self, event: &Event, events: &mut Events) {
         event.apply(|StartGame()| {
+            println!("{:?}", std::env::vars());
+            let first_level: String = std::env::var("PANDA_LEVEL").unwrap_or("start".to_string());
             self.screen = Box::new(Game::new(&self.assets, self.dispatcher.clone(), self.spawner.clone()));
-            events.fire(StartLevel("start".to_string()));
+            events.fire(StartLevel(first_level));
         });
         event.apply(|GameOver()| {
             self.screen = Box::new(TitleScreen::new())
