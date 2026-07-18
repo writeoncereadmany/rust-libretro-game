@@ -8,7 +8,7 @@ pub fn setup_flashlamps(events: &mut Events) {
         flashlamps.push((x, 17))
     }
     for y in 1..17 {
-        flashlamps.push((31, 19-y))
+        flashlamps.push((31, 17-y))
     }
     for x in 0..33 {
         flashlamps.push((31 - x, 0))
