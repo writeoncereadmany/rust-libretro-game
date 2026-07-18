@@ -313,12 +313,12 @@ fn buoyancy(_:  &BeforeUpdate, world: &mut Entities, _events: &mut Events) {
 
 fn clamp_to_screen(_: &AfterUpdate, world: &mut Entities, events: &mut Events) {
     world.apply(|(Hero(), pos@Position(x, y), vel@Velocity(_, dy))| {
-        if y < -240.0 {
+        if y < -12.0 {
             events.fire(Failed());
         }
 
-        if x < 0.0 || x > 324.0 {
-            (Position(x.clamp(0.0, 324.0), y), Velocity(0.0, dy))
+        if x < 0.0 || x > 348.0 {
+            (Position(x.clamp(0.0, 348.0), y), Velocity(0.0, dy))
         } else {
             (pos, vel)
         }
