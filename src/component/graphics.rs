@@ -6,15 +6,19 @@ use std::time::Duration;
 use crate::component::time::Phase;
 
 #[derive(Clone, Variable)]
-pub struct Sprite(pub &'static str, pub u32, pub bool);
+pub struct Sprite(pub String, pub u32, pub bool);
 
 impl Sprite {
     pub fn sprite(name: &'static str, layer: u32) -> Self {
-        Sprite(name, layer, false)
+        Sprite(name.to_string(), layer, false)
+    }
+
+    pub fn sprite_from_string(name: String, layer: u32, flip_x: bool) -> Self {
+        Sprite(name, layer, flip_x)
     }
 
     pub fn sprite_ex(name: &'static str, layer: u32, flip_x: bool) -> Self {
-        Sprite(name, layer, flip_x)
+        Sprite(name.to_string(), layer, flip_x)
     }
 }
 
