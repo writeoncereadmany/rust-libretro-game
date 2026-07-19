@@ -6,9 +6,9 @@ use crate::game::flashlamps::setup_flashlamps;
 use crate::game::hud;
 use crate::game::hud::{setup_hud, update_bonus, update_metamultiplier};
 use crate::screens::screen::Screen;
-use derive::Event;
+use derive::{Constant, Event};
 use engine::assets::Assets;
-use engine::entities::entity::Entities;
+use engine::entities::entity::{entity, Entities};
 use engine::events::dispatcher::Dispatcher;
 use engine::events::event::{Event, Events};
 use engine::events::input::ButtonPressed;
@@ -49,6 +49,17 @@ pub struct Pause();
 #[derive(Event)]
 pub struct Unpause();
 
+#[derive(Clone, Constant)]
+pub enum Character {
+    Blu,
+    Redd
+}
+
+#[derive(Clone, Constant)]
+pub struct Options {
+    pub character: Character
+}
+
 pub struct Game {
     assets: Arc<Assets>,
     world: Entities,
@@ -83,6 +94,9 @@ impl Game {
         events.fire(Unpause());
 
         self.world = Entities::new();
+        
+        self.world.spawn(entity()
+            .with(Options { character: Character::Redd }));
 
         match self.assets.maps.get(map) {
             Some(map) => load_map(map, &self.spawner, events),

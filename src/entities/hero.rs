@@ -3,7 +3,7 @@ use crate::component::collisions::{Actor, Push, Submerged};
 use crate::component::graphics::Sprite;
 use crate::component::physics::{Acceleration, Gravity, Position, Velocity, VelocityCap};
 use crate::entities::radial::SpawnRadials;
-use crate::game::game::Failed;
+use crate::game::game::{Character, Failed, Options};
 use derive::{Constant, Event, Variable};
 use engine::entities::entity::{entity, Entities};
 use engine::events::dispatcher::Dispatcher;
@@ -100,10 +100,15 @@ fn spawn_radial_and_delayed_hero(&SpawnRadialAndDelayedHero(x, y): &SpawnRadialA
 }
 
 fn spawn_hero(&SpawnHero(x, y): &SpawnHero, world: &mut Entities, _events: &mut Events) {
+    let options: Vec<Options> = world.collect();
+
+    let character = options.get(0).map(|options| options.character.clone()).unwrap_or(Character::Blu);
+
     world.spawn(
         entity()
             .with(Hero())
             .with(HeroState::Grounded)
+            .with(character)
             .with(DirectionFacing::RIGHT)
             .with(MovementIntent::NEUTRAL)
             .with(Gravity())
@@ -326,62 +331,69 @@ fn clamp_to_screen(_: &AfterUpdate, world: &mut Entities, events: &mut Events) {
 }
 
 fn update_sprite(_update: &AfterUpdate, world: &mut Entities, _events: &mut Events) {
-    world.apply(|(Hero(), facing, Velocity(dx, _))| {
-        if dx > 0.0 {
-            DirectionFacing::RIGHT
-        } else if dx < 0.0 {
-            DirectionFacing::LEFT
-        } else {
-            facing
+    world.apply(|(Hero(), status, facing, Velocity(dx, _))| {
+        match status {
+            HeroState::WallDragLeft => DirectionFacing::RIGHT,
+            HeroState::WallDragRight => DirectionFacing::LEFT,
+            HeroState::Airborne => facing,
+            _otherwise => if dx > 0.0 {
+                DirectionFacing::RIGHT
+            } else if dx < 0.0 {
+                DirectionFacing::LEFT
+            } else {
+                facing
+            }
         }
     });
     world.apply(
-        |(Hero(), status, facing, movement_intent, Position(x, _y), Velocity(dx, dy))| match status {
-            HeroState::Grounded => {
-                if dx == 0.0 {
-                    Sprite::sprite_ex("panda_stand", 10, flip(&facing))
-                } else {
-                    if turning(&facing, &movement_intent) {
-                        Sprite::sprite_ex("panda_skid", 10, flip(&facing))
+        |(Hero(), status, facing, movement_intent, Position(x, _y), Velocity(dx, dy))| {
+            let suffix = match status {
+                HeroState::Grounded => {
+                    if dx == 0.0 {
+                        "panda_stand"
+                    } else {
+                        if turning(&facing, &movement_intent) {
+                            "panda_skid"
+                        } else {
+                            let frame = (x as i32 / 8) % 4;
+                            match frame {
+                                0 => "panda_run_1",
+                                1 => "panda_run_2",
+                                2 => "panda_run_3",
+                                3 => "panda_run_2",
+                                _ => "error",
+                            }
+                        }
                     }
-                    else {
-                        let frame = (x as i32 / 8) % 4;
+                },
+                HeroState::Airborne => {
+                    if dy > 0.0 {
+                        "panda_ascend"
+                    } else {
+                        "panda_descend"
+                    }
+                },
+                HeroState::WallDragLeft => {
+                    "panda_wallslide"
+                },
+                HeroState::WallDragRight => {
+                    "panda_wallslide"
+                }
+                HeroState::Submerged => {
+                    if dy < 0.0 {
+                        "panda_swim_down"
+                    } else {
+                        let frame = (x as i32 / 16) % 2;
                         match frame {
-                            0 => Sprite::sprite_ex("panda_run_1", 10, flip(&facing)),
-                            1 => Sprite::sprite_ex("panda_run_2", 10, flip(&facing)),
-                            2 => Sprite::sprite_ex("panda_run_3", 10, flip(&facing)),
-                            3 => Sprite::sprite_ex("panda_run_2", 10, flip(&facing)),
-                            _ => Sprite::sprite("error", 10)
+                            0 => "panda_swim_1",
+                            1 => "panda_swim_2",
+                            _ => "error",
                         }
                     }
                 }
-            },
-            HeroState::Airborne => {
-                if dy > 0.0 {
-                    Sprite::sprite_ex("panda_ascend", 10, flip(&facing))
-                } else {
-                    Sprite::sprite_ex("panda_descend", 10, flip(&facing))
-                }
-            },
-            HeroState::WallDragLeft => {
-                Sprite::sprite_ex("panda_wallslide", 10, false)
-            },
-            HeroState::WallDragRight => {
-                Sprite::sprite_ex("panda_wallslide", 10, true)
-            }
-            HeroState::Submerged => {
-                if dy < 0.0 {
-                    Sprite::sprite_ex("panda_swim_down", 10, flip(&facing))
-                } else {
-                    let frame = (x as i32 / 16) % 2;
-                    match frame {
-                        0 => Sprite::sprite_ex("panda_swim_1", 10, flip(&facing)),
-                        1 => Sprite::sprite_ex("panda_swim_2", 10, flip(&facing)),
-                        _ => Sprite::sprite("error", 10),
-                    }
-            }
+            };
+            Sprite::sprite_ex(suffix, 10, flip(&facing))
         }
-},
     );
 }
 
