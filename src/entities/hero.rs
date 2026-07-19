@@ -346,21 +346,21 @@ fn update_sprite(_update: &AfterUpdate, world: &mut Entities, _events: &mut Even
         }
     });
     world.apply(
-        |(Hero(), status, facing, movement_intent, Position(x, _y), Velocity(dx, dy))| {
+        |(Hero(), status, facing, character, movement_intent, Position(x, _y), Velocity(dx, dy))| {
             let suffix = match status {
                 HeroState::Grounded => {
                     if dx == 0.0 {
-                        "panda_stand"
+                        "_stand"
                     } else {
                         if turning(&facing, &movement_intent) {
-                            "panda_skid"
+                            "_skid"
                         } else {
                             let frame = (x as i32 / 8) % 4;
                             match frame {
-                                0 => "panda_run_1",
-                                1 => "panda_run_2",
-                                2 => "panda_run_3",
-                                3 => "panda_run_2",
+                                0 => "_run_1",
+                                1 => "_run_2",
+                                2 => "_run_3",
+                                3 => "_run_2",
                                 _ => "error",
                             }
                         }
@@ -368,31 +368,35 @@ fn update_sprite(_update: &AfterUpdate, world: &mut Entities, _events: &mut Even
                 },
                 HeroState::Airborne => {
                     if dy > 0.0 {
-                        "panda_ascend"
+                        "_ascend"
                     } else {
-                        "panda_descend"
+                        "_descend"
                     }
                 },
                 HeroState::WallDragLeft => {
-                    "panda_wallslide"
+                    "_wallslide"
                 },
                 HeroState::WallDragRight => {
-                    "panda_wallslide"
+                    "_wallslide"
                 }
                 HeroState::Submerged => {
                     if dy < 0.0 {
-                        "panda_swim_down"
+                        "_swim_down"
                     } else {
                         let frame = (x as i32 / 16) % 2;
                         match frame {
-                            0 => "panda_swim_1",
-                            1 => "panda_swim_2",
+                            0 => "_swim_1",
+                            1 => "_swim_2",
                             _ => "error",
                         }
                     }
                 }
             };
-            Sprite::sprite_ex(suffix, 10, flip(&facing))
+            let sprite = match character {
+                Character::Blu => "panda",
+                Character::Redd => "redd",
+            }.to_string() + suffix;
+            Sprite::sprite_ex(&sprite, 10, flip(&facing))
         }
     );
 }
