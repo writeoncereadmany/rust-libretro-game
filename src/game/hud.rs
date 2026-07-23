@@ -38,8 +38,8 @@ pub fn update_score(score: &u32, events: &mut Events) {
     events.fire(UpdateHudSprite { x: 17*12, y: 17*12, sprite: "score_right".to_string() });
 
     events.fire(UpdateHudText {
-        x: 17*12 - 3,
-        y: 19*12 + 6,
+        x: 18*12 - 3,
+        y: 17*12 + 6,
         font: "Spritefont_Medium",
         text: simplify(score),
         alignment: Alignment::aligned(RIGHT, MIDDLE)});

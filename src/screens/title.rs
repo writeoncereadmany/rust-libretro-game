@@ -31,8 +31,8 @@ impl Screen for TitleScreen {
         renderer.draw_text(
             "Pandamonium!",
             "Spritefont_Medium",
-            180,
-            120,
+            192,
+            108,
             Alignment::aligned(CENTER, MIDDLE),
         );
     }
