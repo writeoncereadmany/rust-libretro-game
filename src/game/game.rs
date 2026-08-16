@@ -1,6 +1,7 @@
 use crate::app::pandamonium::GameOver;
 use crate::component::graphics::Sprite;
-use crate::component::physics::Position;
+use crate::component::physics;
+use crate::component::physics::{Acceleration, Gravity, Position, Velocity};
 use crate::entities::load_map;
 use crate::game::flashlamps::setup_flashlamps;
 use crate::game::hud;
@@ -55,6 +56,13 @@ pub enum Character {
     Redd
 }
 
+#[derive(Event)]
+pub struct SpawnMiniBall {
+    sprite: String,
+    dx: f64,
+    position: (f64, f64),
+}
+
 #[derive(Clone, Constant)]
 pub struct Options {
     pub character: Character
@@ -63,29 +71,45 @@ pub struct Options {
 pub struct Game {
     assets: Arc<Assets>,
     world: Entities,
+    effects: Entities,
     dispatcher: Arc<Dispatcher>,
+    effects_dispatcher: Dispatcher,
     spawner: Arc<Spawner>,
     bonus: u32,
     metamultiplier: u32,
     score: u32,
     paused: bool,
     game_over_timer: TimerId,
-    current_level: String
+    current_level: String,
 }
 
 impl Game {
     pub fn new(assets: &Arc<Assets>, dispatcher: Arc<Dispatcher>, spawner: Arc<Spawner>) -> Self {
+        let mut effects_dispatcher = Dispatcher::new();
+        effects_dispatcher.register(physics::simple_integrate);
+        effects_dispatcher.register(|SpawnMiniBall { sprite, dx, position: (x, y) }, entities, events| {
+            entities.spawn(entity()
+                .with(Gravity())
+                .with(Sprite::sprite_from_string(sprite.clone(), 5, false))
+                .with(Acceleration(0.0, 0.0))
+                .with(Position(*x, *y))
+                .with(Velocity(*dx, 0.0))
+            );
+        });
+
         Game {
             assets: assets.clone(),
             world: Entities::new(),
+            effects: Entities::new(),
             dispatcher,
+            effects_dispatcher,
             spawner,
             bonus: 1,
             metamultiplier: 1,
             score: 0,
             paused: false,
             game_over_timer: TimerId::MAX,
-            current_level: String::new()
+            current_level: String::new(),
         }
     }
 
@@ -94,6 +118,7 @@ impl Game {
         events.fire(Unpause());
 
         self.world = Entities::new();
+        self.effects = Entities::new();
         
         self.world.spawn(entity()
             .with(Options { character: Character::Redd }));
@@ -137,12 +162,13 @@ impl Screen for Game {
             events.cancel("Application", &self.game_over_timer);
             events.fire(Pause());
 
+            drop_miniballs(self.bonus, events);
+
             if self.bonus == 1 {
-                events.schedule("Application", Duration::from_secs_f64(1.0), GameOver());
-            }
-            else {
+                events.schedule("Application", Duration::from_secs_f64(1.5), GameOver());
+            } else {
                 self.set_bonus(1, events);
-                events.schedule("Application", Duration::from_secs_f64(1.0), StartLevel(self.current_level.clone()));
+                events.schedule("Application", Duration::from_secs_f64(1.5), StartLevel(self.current_level.clone()));
             }
         });
 
@@ -180,16 +206,55 @@ impl Screen for Game {
             event.apply(|dt| events.elapse("Game", *dt));
             event.dispatch(&self.dispatcher, &mut self.world, events);
         }
+        event.dispatch(&self.effects_dispatcher, &mut self.effects, events);
     }
 
     fn draw(&mut self, renderer: &mut AssetRenderer) {
         renderer.clear_sprites();
-        let mut sprites : Vec<(Sprite, Position)> = self.world.collect();
-        sprites.sort_by(|(Sprite(_, l1, _), _), (Sprite(_, l2, _), _)| l1.cmp(l2));
-        sprites.iter()
-            .for_each(|(Sprite(sprite, _, flip_x), Position(x, y))| {
-                renderer.draw_sprite(sprite, x.round() as i32 + GAME_WINDOW_START_X, y.round() as i32 + GAME_WINDOW_TOP_Y, *flip_x)
-            });
+        draw_sprites(&mut self.world, renderer);
         renderer.draw_hud();
+        draw_sprites_2(&mut self.effects, renderer);
+    }
+}
+
+fn draw_sprites(entities: &mut Entities, renderer: &mut AssetRenderer) {
+    let mut sprites: Vec<(Sprite, Position)> = entities.collect();
+    sprites.sort_by(|(Sprite(_, l1, _), _), (Sprite(_, l2, _), _)| l1.cmp(l2));
+    sprites.iter()
+        .for_each(|(Sprite(sprite, _, flip_x), Position(x, y))| {
+            renderer.draw_sprite(sprite, x.round() as i32 + GAME_WINDOW_START_X, y.round() as i32 + GAME_WINDOW_TOP_Y, *flip_x)
+        });
+}
+
+fn draw_sprites_2(entities: &mut Entities, renderer: &mut AssetRenderer) {
+    let mut sprites: Vec<(Sprite, Position)> = entities.collect();
+    sprites.sort_by(|(Sprite(_, l1, _), _), (Sprite(_, l2, _), _)| l1.cmp(l2));
+    sprites.iter()
+        .for_each(|(Sprite(sprite, _, flip_x), Position(x, y))| {
+            println!("Drawing {sprite} at ({x},{y})");
+            renderer.draw_sprite(sprite, x.round() as i32 + GAME_WINDOW_START_X, y.round() as i32 + GAME_WINDOW_TOP_Y, *flip_x)
+        });
+}
+
+fn drop_miniballs(bonus: u32, events: &mut Events) {
+    if bonus > 1 {
+        for _ in 0..3 {
+            events.fire(SpawnMiniBall { sprite: "small_ball_red".to_string(), dx: rand::random_range(-200.0..200.0), position: (140.0, 188.0) });
+        }
+    }
+    if bonus > 2 {
+        for _ in 0..3 {
+            events.fire(SpawnMiniBall { sprite: "small_ball_orange".to_string(), dx: rand::random_range(-200.0..200.0), position: (140.0, 191.0) });
+        }
+    }
+    if bonus > 3 {
+        for _ in 0..3 {
+            events.fire(SpawnMiniBall { sprite: "small_ball_yellow".to_string(), dx: rand::random_range(-200.0..200.0), position: (140.0, 194.0) });
+        }
+    }
+    if bonus > 4 {
+        for _ in 0..3 {
+            events.fire(SpawnMiniBall { sprite: "small_ball_green".to_string(), dx: rand::random_range(-200.0..200.0), position: (140.0, 197.0) });
+        }
     }
 }
