@@ -384,7 +384,7 @@ fn update_sprite(_update: &AfterUpdate, world: &mut Entities, _events: &mut Even
                 Character::Blu => "panda",
                 Character::Redd => "redd",
             }.to_string() + suffix;
-            Sprite::sprite_from_string(sprite, 10, flip(&facing))
+            Sprite::sprite_ex(sprite, 10, flip(&facing))
         }
     );
 }

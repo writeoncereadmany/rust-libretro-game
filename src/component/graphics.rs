@@ -13,12 +13,8 @@ impl Sprite {
         Sprite(name.to_string(), layer, false)
     }
 
-    pub fn sprite_from_string(name: String, layer: u32, flip_x: bool) -> Self {
+    pub fn sprite_ex(name: String, layer: u32, flip_x: bool) -> Self {
         Sprite(name, layer, flip_x)
-    }
-
-    pub fn sprite_ex(name: &'static str, layer: u32, flip_x: bool) -> Self {
-        Sprite(name.to_string(), layer, flip_x)
     }
 }
 

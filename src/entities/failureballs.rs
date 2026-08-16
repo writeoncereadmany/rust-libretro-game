@@ -19,7 +19,7 @@ pub fn register(dispatcher: &mut Dispatcher) {
 fn spawn_failure_ball(SpawnFailureBall { sprite, dx, position: (x, y) }: &SpawnFailureBall, world: &mut Entities, _events: &mut Events) {
     world.spawn(entity()
             .with(Gravity())
-            .with(Sprite::sprite_from_string(sprite.clone(), 5, false))
+            .with(Sprite::sprite_ex(sprite.clone(), 5, false))
             .with(Acceleration(0.0, 0.0))
             .with(Position(*x, *y))
             .with(Velocity(*dx, 0.0))
