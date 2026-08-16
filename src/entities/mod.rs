@@ -17,6 +17,7 @@ mod fruit;
 pub mod spring;
 pub mod bubble;
 mod splash;
+pub mod failureballs;
 
 pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     bubble::register(dispatcher, spawner);
