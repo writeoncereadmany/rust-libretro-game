@@ -1,7 +1,9 @@
 use crate::app::pandamonium::GameOver;
 use crate::component::graphics::Sprite;
-use crate::component::{lifecycle, physics, time};
-use crate::entities::{failureballs, load_map, radial};
+use crate::component::physics::Position;
+use crate::entities::failureballs::SpawnFailureBall;
+use crate::entities::radial::SpawnBonusBalls;
+use crate::entities::load_map;
 use crate::game::flashlamps::setup_flashlamps;
 use crate::game::hud;
 use crate::game::hud::{setup_hud, update_bonus, update_metamultiplier};
@@ -18,9 +20,6 @@ use engine::renderer::asset_renderer::AssetRenderer;
 use rust_libretro::types::JoypadState;
 use std::sync::Arc;
 use std::time::Duration;
-use crate::component::physics::Position;
-use crate::entities::failureballs::SpawnFailureBall;
-use crate::entities::radial::SpawnBonusBalls;
 
 const GAME_WINDOW_START_X: i32 = 12;
 const GAME_WINDOW_TOP_Y: i32 = 12;
