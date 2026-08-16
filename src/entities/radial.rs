@@ -38,6 +38,7 @@ enum RadialPattern {
 
 pub fn register(dispatcher: &mut Dispatcher, _spawner: &mut Spawner) {
     dispatcher.register(spawn_radials);
+    dispatcher.register(spawn_bonus_balls);
     dispatcher.register(radial_events);
 }
 

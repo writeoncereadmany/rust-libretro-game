@@ -42,10 +42,3 @@ fn integrate(dt: &Duration, world: &mut Entities, events: &mut Events) {
 fn resolve_collisions(_ : &ResolveCollisions, world: &mut Entities, _events: &mut Events) {
     world.apply(|(Position(x, y), Translation(tx, ty))| { Position(x + tx, y + ty)});
 }
-
-pub fn simple_integrate(dt: &Duration, world: &mut Entities, _events: &mut Events) {
-    let dt = dt.as_secs_f64();
-    world.apply(|(Gravity(), Acceleration(ddx, ddy))| Acceleration(ddx, ddy - GRAVITY));
-    world.apply(|(Acceleration(ddx, ddy), Velocity(dx, dy))| (Acceleration(0.0, 0.0), Velocity (dx + (ddx * dt), dy + (ddy * dt))));
-    world.apply(|(Velocity(dx, dy), Position(x, y))| Position (x + dx * dt, y + dy * dt));
-}

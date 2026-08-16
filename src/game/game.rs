@@ -69,9 +69,7 @@ pub struct Options {
 pub struct Game {
     assets: Arc<Assets>,
     world: Entities,
-    effects: Entities,
     dispatcher: Arc<Dispatcher>,
-    effects_dispatcher: Dispatcher,
     spawner: Arc<Spawner>,
     bonus: u32,
     metamultiplier: u32,
@@ -83,20 +81,10 @@ pub struct Game {
 
 impl Game {
     pub fn new(assets: &Arc<Assets>, dispatcher: Arc<Dispatcher>, spawner: Arc<Spawner>) -> Self {
-        let mut effects_dispatcher = Dispatcher::new();
-        effects_dispatcher.register(physics::simple_integrate);
-        effects_dispatcher.register(radial::spawn_bonus_balls);
-        effects_dispatcher.register(radial::radial_events);
-        lifecycle::register(&mut effects_dispatcher);
-        time::register(&mut effects_dispatcher);
-        failureballs::register(&mut effects_dispatcher);
-
         Game {
             assets: assets.clone(),
             world: Entities::new(),
-            effects: Entities::new(),
             dispatcher,
-            effects_dispatcher,
             spawner,
             bonus: 1,
             metamultiplier: 1,
@@ -112,8 +100,7 @@ impl Game {
         events.fire(Unpause());
 
         self.world = Entities::new();
-        self.effects = Entities::new();
-        
+
         self.world.spawn(entity()
             .with(Options { character: Character::Redd }));
 
@@ -154,7 +141,6 @@ impl Screen for Game {
 
         event.apply(|Failed()| {
             events.cancel("Application", &self.game_over_timer);
-            events.fire(Pause());
 
             drop_miniballs(self.bonus, events);
 
@@ -202,7 +188,6 @@ impl Screen for Game {
 
         event.apply(|CompleteLevel(map)| {
             events.cancel("Application", &self.game_over_timer);
-            events.fire(Pause());
             events.schedule("Application", Duration::from_secs_f64(1.5), StartLevel(map.clone()));
         });
 
@@ -211,14 +196,12 @@ impl Screen for Game {
             event.apply(|dt| events.elapse("Game", *dt));
             event.dispatch(&self.dispatcher, &mut self.world, events);
         }
-        event.dispatch(&self.effects_dispatcher, &mut self.effects, events);
     }
 
     fn draw(&mut self, renderer: &mut AssetRenderer) {
         renderer.clear_sprites();
         draw_sprites(&mut self.world, renderer);
         renderer.draw_hud();
-        draw_sprites(&mut self.effects, renderer);
     }
 }
 

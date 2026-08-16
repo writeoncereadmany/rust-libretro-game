@@ -24,6 +24,7 @@ pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     chest::register(dispatcher, spawner);
     coin::register(dispatcher, spawner);
     crumbler::register(dispatcher, spawner);
+    failureballs::register(dispatcher);
     flag::register(dispatcher, spawner);
     fruit::register(dispatcher, spawner);
     hero::register(dispatcher, spawner);

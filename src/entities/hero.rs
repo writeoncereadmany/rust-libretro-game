@@ -1,11 +1,13 @@
 use crate::app::pandamonium::{AfterUpdate, BeforeUpdate};
 use crate::component::collisions::{Actor, Push, Submerged};
 use crate::component::graphics::Sprite;
+use crate::component::lifecycle::Destroy;
 use crate::component::physics::{Acceleration, Gravity, Position, Velocity, VelocityCap};
 use crate::entities::radial::SpawnRadials;
-use crate::game::game::{Character, Failed, Options};
+use crate::entities::spring::Sprung;
+use crate::game::game::{Character, CompleteLevel, Failed, Options};
 use derive::{Constant, Event, Variable};
-use engine::entities::entity::{entity, Entities};
+use engine::entities::entity::{entity, Entities, Id};
 use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use engine::events::input::{ButtonPressed, InputState};
@@ -13,7 +15,6 @@ use engine::events::spawner::Spawner;
 use engine::shapes::shape::Shape;
 use rust_libretro::types::JoypadState;
 use std::time::Duration;
-use crate::entities::spring::Sprung;
 
 const RUN_ACCEL: f64 = 500.0;
 const SKID_ACCEL: f64 = 1200.0;
@@ -62,6 +63,9 @@ struct SpawnHero(f64, f64);
 struct SpawnRadialAndDelayedHero(f64, f64);
 
 #[derive(Event)]
+struct SpawnShade(Sprite, Position);
+
+#[derive(Event)]
 pub struct Jump();
 
 #[derive(Event)]
@@ -87,6 +91,9 @@ pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     dispatcher.register(buoyancy);
     dispatcher.register(clamp_to_screen);
     dispatcher.register(update_sprite);
+    dispatcher.register(create_shade_on_victory);
+    dispatcher.register(create_shade_on_failure);
+    dispatcher.register(spawn_shade);
 
     spawner.register("Hero", |spawn, events| {
         events.fire(SpawnRadialAndDelayedHero(spawn.x, spawn.y))
@@ -192,6 +199,36 @@ fn sprung(
     world.apply_to(id, |(Hero(), Velocity(dx, _dy))| {
         (Velocity(dx, 500.0), AscentRemaining(0.0), HeroState::Airborne)
     })
+}
+
+fn create_shade_on_victory(
+    _: &CompleteLevel,
+    world: &mut Entities,
+    events: &mut Events,
+) {
+    world.apply(|(Hero(), Id(id), sprite, pos)| {
+        events.fire(SpawnShade(sprite, pos));
+        events.fire(Destroy(id))
+    })
+}
+
+fn create_shade_on_failure(
+    _: &Failed,
+    world: &mut Entities,
+    events: &mut Events,
+) {
+    world.apply(|(Hero(), Id(id), sprite, pos)| {
+        events.fire(SpawnShade(sprite, pos));
+        events.fire(Destroy(id))
+    })
+}
+
+fn spawn_shade(
+    SpawnShade(sprite, pos): &SpawnShade,
+    world: &mut Entities,
+    _events: &mut Events,
+) {
+    world.spawn(entity().with(sprite.clone()).with(pos.clone()));
 }
 
 fn wall_jump(
