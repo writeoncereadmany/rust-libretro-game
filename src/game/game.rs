@@ -128,12 +128,6 @@ impl Screen for Game {
         event.apply(|Unpause()| { self.paused = false; });
         event.apply(|StartLevel(map)| self.load_map(map, events));
 
-        event.apply(|ButtonPressed(button)| {
-            if button == &JoypadState::START {
-                events.fire(GameOver())
-            }
-        });
-
         event.apply(|Score(score)| {
             self.score += score * self.bonus * self.metamultiplier;
             hud::update_score(&self.score, events);
