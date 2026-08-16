@@ -200,14 +200,18 @@ impl Screen for Game {
 
     fn draw(&mut self, renderer: &mut AssetRenderer) {
         renderer.clear_sprites();
-        draw_sprites(&mut self.world, renderer);
+        let mut sprites: Vec<(Sprite, Position)> = self.world.collect();
+        sprites.sort_by(|(Sprite(_, l1, _), _), (Sprite(_, l2, _), _)| l1.cmp(l2));
+        let (below_hud, above_hud): (Vec<(Sprite, Position)>, Vec<(Sprite, Position)>) =
+            sprites.into_iter().partition(|&(Sprite(_, l, _), _)| l <= 100);
+        draw_sprites(&below_hud, renderer);
         renderer.draw_hud();
+        draw_sprites(&above_hud, renderer);
+
     }
 }
 
-fn draw_sprites(entities: &mut Entities, renderer: &mut AssetRenderer) {
-    let mut sprites: Vec<(Sprite, Position)> = entities.collect();
-    sprites.sort_by(|(Sprite(_, l1, _), _), (Sprite(_, l2, _), _)| l1.cmp(l2));
+fn draw_sprites(sprites: &Vec<(Sprite, Position)>, renderer: &mut AssetRenderer) {
     sprites.iter()
         .for_each(|(Sprite(sprite, _, flip_x), Position(x, y))| {
             renderer.draw_sprite(sprite, x.round() as i32 + GAME_WINDOW_START_X, y.round() as i32 + GAME_WINDOW_TOP_Y, *flip_x)

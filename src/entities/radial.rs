@@ -59,7 +59,7 @@ pub fn spawn_bonus_balls(SpawnBonusBalls(x, y, sprites, elements): &SpawnBonusBa
 fn spawn_radial(x: f64, y: f64, sprite: &'static str, theta: f64, radial_pattern: RadialPattern, timer: &'static str, entities: &mut Entities, events: &mut Events) {
     let radial_id = entities.spawn(entity()
         .with(Center(x, y))
-        .with(Sprite::sprite(sprite, 20))
+        .with(Sprite::sprite(sprite, 200))
         .with(Period(0.6))
         .with(Phase(0.0))
         .with(AngleOffset(theta))
