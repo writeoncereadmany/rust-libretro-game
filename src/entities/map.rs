@@ -32,10 +32,12 @@ pub fn register(dispatcher: &mut Dispatcher, _spawner: &mut Spawner) {
 pub fn load_map(map: &Map, spawner: &Spawner, events: &mut Events) {
     let mut tile_map: HashMap<(i32, i32), CollisionType> = HashMap::new();
 
+    let tile_width = map.tile_width;
+    let tile_height = map.tile_height;
     for tile in &map.tiles {
         events.fire(UpdateBackgroundTile {
-            x: (tile.x + 1) * 12,
-            y: (tile.y + 1) * 12,
+            x: (tile.x + 1) * tile_width,
+            y: (tile.y + 1) * tile_height,
             tileset: tile.tile_set_name.clone(),
             tile: tile.id,
         });
@@ -55,7 +57,7 @@ pub fn load_map(map: &Map, spawner: &Spawner, events: &mut Events) {
         }
     }
     
-    events.fire(SpawnTilemap(Tilemap(12, 12, tile_map)));
+    events.fire(SpawnTilemap(Tilemap(tile_width, tile_height, tile_map)));
 
     for object in &map.objects {
         spawner.spawn(&object, events);
