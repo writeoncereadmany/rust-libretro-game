@@ -7,7 +7,7 @@ pub mod coin;
 mod hero;
 mod flag;
 pub mod map;
-mod radial;
+pub mod radial;
 mod crumbler;
 mod lockbox;
 mod key;

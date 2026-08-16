@@ -1,7 +1,7 @@
 use crate::app::pandamonium::GameOver;
 use crate::component::graphics::Sprite;
-use crate::component::physics;
-use crate::entities::{failureballs, load_map};
+use crate::component::{lifecycle, physics, time};
+use crate::entities::{failureballs, load_map, radial};
 use crate::game::flashlamps::setup_flashlamps;
 use crate::game::hud;
 use crate::game::hud::{setup_hud, update_bonus, update_metamultiplier};
@@ -20,6 +20,7 @@ use std::sync::Arc;
 use std::time::Duration;
 use crate::component::physics::Position;
 use crate::entities::failureballs::SpawnFailureBall;
+use crate::entities::radial::SpawnBonusBalls;
 
 const GAME_WINDOW_START_X: i32 = 12;
 const GAME_WINDOW_TOP_Y: i32 = 12;
@@ -29,6 +30,9 @@ pub struct StartLevel(pub String);
 
 #[derive(Event)]
 pub struct IncreaseMultiplier();
+
+#[derive(Event)]
+pub struct ApplyMultiplier(u32);
 
 #[derive(Event)]
 pub struct BuyMetamultiplier();
@@ -81,6 +85,10 @@ impl Game {
     pub fn new(assets: &Arc<Assets>, dispatcher: Arc<Dispatcher>, spawner: Arc<Spawner>) -> Self {
         let mut effects_dispatcher = Dispatcher::new();
         effects_dispatcher.register(physics::simple_integrate);
+        effects_dispatcher.register(radial::spawn_bonus_balls);
+        effects_dispatcher.register(radial::radial_events);
+        lifecycle::register(&mut effects_dispatcher);
+        time::register(&mut effects_dispatcher);
         failureballs::register(&mut effects_dispatcher);
 
         Game {
@@ -159,7 +167,18 @@ impl Screen for Game {
         });
 
         event.apply(|IncreaseMultiplier()| {
-            self.set_bonus((self.bonus + 1).clamp(1, 5), events);
+            match self.bonus {
+                1 => events.fire(SpawnBonusBalls(140.0, 188.0, vec!["small_ball_red"], 5)),
+                2 => events.fire(SpawnBonusBalls(142.0, 191.0, vec!["small_ball_orange"], 5)),
+                3 => events.fire(SpawnBonusBalls(144.0, 194.0, vec!["small_ball_yellow"], 5)),
+                4 => events.fire(SpawnBonusBalls(144.0, 197.0, vec!["small_ball_green"], 5)),
+                _ => {}
+            }
+            events.schedule("Application", Duration::from_secs_f64(1.0), ApplyMultiplier((self.bonus + 1).clamp(1, 5)));
+        });
+
+        event.apply(|ApplyMultiplier(mult)| {
+            self.set_bonus(*mult, events);
         });
 
         event.apply(|BuyMetamultiplier()| {
@@ -184,7 +203,7 @@ impl Screen for Game {
         event.apply(|CompleteLevel(map)| {
             events.cancel("Application", &self.game_over_timer);
             events.fire(Pause());
-            events.schedule("Application", Duration::from_secs_f64(1.0), StartLevel(map.clone()));
+            events.schedule("Application", Duration::from_secs_f64(1.5), StartLevel(map.clone()));
         });
 
         if !self.paused
@@ -220,7 +239,7 @@ fn drop_miniballs(bonus: u32, events: &mut Events) {
     }
     if bonus > 2 {
         for _ in 0..3 {
-            events.fire(SpawnFailureBall { sprite: "small_ball_orange".to_string(), dx: rand::random_range(-200.0..200.0), position: (140.0, 191.0) });
+            events.fire(SpawnFailureBall { sprite: "small_ball_orange".to_string(), dx: rand::random_range(-200.0..200.0), position: (142.0, 191.0) });
         }
     }
     if bonus > 3 {
