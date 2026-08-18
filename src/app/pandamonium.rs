@@ -1,4 +1,4 @@
-use crate::game::game::{Game, StartLevel};
+use crate::game::game::{Character, Game, StartLevel};
 use crate::screens::screen::Screen;
 use crate::screens::title::TitleScreen;
 use derive::Event;
@@ -27,7 +27,7 @@ pub struct Pandamonium {
 }
 
 #[derive(Event)]
-pub struct StartGame();
+pub struct StartGame(pub Character);
 
 #[derive(Event)]
 pub struct GameOver();
@@ -113,10 +113,10 @@ impl Pandamonium {
     }
 
     fn on_event(&mut self, event: &Event, events: &mut Events) {
-        event.apply(|StartGame()| {
+        event.apply(|StartGame(character)| {
             println!("{:?}", std::env::vars());
             let first_level: String = std::env::var("PANDA_LEVEL").unwrap_or("start".to_string());
-            self.screen = Box::new(Game::new(&self.assets, self.dispatcher.clone(), self.spawner.clone()));
+            self.screen = Box::new(Game::new(character.clone(), &self.assets, self.dispatcher.clone(), self.spawner.clone()));
             events.fire(StartLevel(first_level));
         });
         event.apply(|GameOver()| {

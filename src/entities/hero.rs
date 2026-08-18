@@ -102,9 +102,9 @@ pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
 
 fn spawn_radial_and_delayed_hero(&SpawnRadialAndDelayedHero(x, y): &SpawnRadialAndDelayedHero, world: &mut Entities, events: &mut Events) {
     let options : Vec<Options> = world.collect();
-    let character = options.get(0).map(|options| options.character.clone()).unwrap_or(Character::Blu);
+    let character = options.get(0).map(|options| options.character.clone()).unwrap_or(Character::Bluu);
     match character {
-        Character::Blu => events.fire(SpawnRadials(x, y, vec!["ball_blue", "ball_white"], 8)),
+        Character::Bluu => events.fire(SpawnRadials(x, y, vec!["ball_blue", "ball_white"], 8)),
         Character::Redd => events.fire(SpawnRadials(x, y, vec!["ball_brown", "ball_white"], 8)),
     }
 
@@ -114,7 +114,7 @@ fn spawn_radial_and_delayed_hero(&SpawnRadialAndDelayedHero(x, y): &SpawnRadialA
 fn spawn_hero(&SpawnHero(x, y): &SpawnHero, world: &mut Entities, _events: &mut Events) {
     let options: Vec<Options> = world.collect();
 
-    let character = options.get(0).map(|options| options.character.clone()).unwrap_or(Character::Blu);
+    let character = options.get(0).map(|options| options.character.clone()).unwrap_or(Character::Bluu);
 
     world.spawn(
         entity()
@@ -418,7 +418,7 @@ fn update_sprite(_update: &AfterUpdate, world: &mut Entities, _events: &mut Even
                 }
             };
             let sprite = match character {
-                Character::Blu => "panda",
+                Character::Bluu => "panda",
                 Character::Redd => "redd",
             }.to_string() + suffix;
             Sprite::sprite_ex(sprite, 10, flip(&facing))

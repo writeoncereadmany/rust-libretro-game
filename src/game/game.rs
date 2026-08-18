@@ -56,7 +56,7 @@ pub struct Unpause();
 
 #[derive(Clone, Constant)]
 pub enum Character {
-    Blu,
+    Bluu,
     Redd
 }
 
@@ -76,10 +76,11 @@ pub struct Game {
     paused: bool,
     game_over_timer: TimerId,
     current_level: String,
+    character: Character
 }
 
 impl Game {
-    pub fn new(assets: &Arc<Assets>, dispatcher: Arc<Dispatcher>, spawner: Arc<Spawner>) -> Self {
+    pub fn new(character: Character, assets: &Arc<Assets>, dispatcher: Arc<Dispatcher>, spawner: Arc<Spawner>) -> Self {
         Game {
             assets: assets.clone(),
             world: Entities::new(),
@@ -91,6 +92,7 @@ impl Game {
             paused: false,
             game_over_timer: TimerId::MAX,
             current_level: String::new(),
+            character
         }
     }
 
@@ -101,7 +103,7 @@ impl Game {
         self.world = Entities::new();
 
         self.world.spawn(entity()
-            .with(Options { character: Character::Redd }));
+            .with(Options { character: self.character.clone() }));
 
         match self.assets.maps.get(map) {
             Some(map) => load_map(map, &self.spawner, events),
