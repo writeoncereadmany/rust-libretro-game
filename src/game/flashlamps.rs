@@ -1,8 +1,9 @@
 use engine::events::event::Events;
 use engine::renderer::background_renderer::UpdateHudSprite;
 use std::time::Duration;
+use engine::events::timer::TimerId;
 
-pub fn setup_flashlamps(events: &mut Events) {
+pub fn setup_flashlamps(events: &mut Events) -> Vec<TimerId> {
     let mut flashlamps: Vec<(i32, i32)> = Vec::new();
     for x in 18..32 {
         flashlamps.push((x, 17))
@@ -20,6 +21,8 @@ pub fn setup_flashlamps(events: &mut Events) {
         flashlamps.push((x, 17))
     }
 
+    let mut flashlamp_timers = Vec::new();
+    
     for (i, (x, y)) in flashlamps.iter().enumerate() {
         let (x, y) = (x * 12, y * 12);
         let fraction_of_fulltime = i as f64 / flashlamps.len() as f64;
@@ -38,16 +41,17 @@ pub fn setup_flashlamps(events: &mut Events) {
         events.schedule("Game", Duration::from_secs_f64(distance_from_center + 1.8), UpdateHudSprite {x, y, sprite: "lamp_unlit".to_string() });
 
         if fraction_of_fulltime < 0.5 {
-            events.schedule("Game", fire_at(fraction_of_fulltime), UpdateHudSprite {x, y, sprite: "lamp_green".to_string() });
-            events.schedule("Game", fire_at(refire_amber), UpdateHudSprite {x, y, sprite: "lamp_amber".to_string() });
-            events.schedule("Game", fire_at(refire_red), UpdateHudSprite {x, y, sprite: "lamp_red".to_string() });
+            flashlamp_timers.push(events.schedule("Game", fire_at(fraction_of_fulltime), UpdateHudSprite {x, y, sprite: "lamp_green".to_string() }));
+            flashlamp_timers.push(events.schedule("Game", fire_at(refire_amber), UpdateHudSprite {x, y, sprite: "lamp_amber".to_string() }));
+            flashlamp_timers.push(events.schedule("Game", fire_at(refire_red), UpdateHudSprite {x, y, sprite: "lamp_red".to_string() }));
         } else if fraction_of_fulltime < 0.75 {
-            events.schedule("Game", fire_at(fraction_of_fulltime), UpdateHudSprite {x, y, sprite: "lamp_amber".to_string() });
-            events.schedule("Game", fire_at(refire_red), UpdateHudSprite {x, y, sprite: "lamp_red".to_string() });
+            flashlamp_timers.push(events.schedule("Game", fire_at(fraction_of_fulltime), UpdateHudSprite {x, y, sprite: "lamp_amber".to_string() }));
+            flashlamp_timers.push(events.schedule("Game", fire_at(refire_red), UpdateHudSprite {x, y, sprite: "lamp_red".to_string() }));
         } else {
-            events.schedule("Game", fire_at(fraction_of_fulltime), UpdateHudSprite {x, y, sprite: "lamp_red".to_string() });
+            flashlamp_timers.push(events.schedule("Game", fire_at(fraction_of_fulltime), UpdateHudSprite {x, y, sprite: "lamp_red".to_string() }));
         }
     }
+    flashlamp_timers
 }
 
 fn fire_at(fraction_of_fulltime: f64) -> Duration {

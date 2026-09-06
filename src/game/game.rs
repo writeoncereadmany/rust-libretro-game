@@ -75,6 +75,7 @@ pub struct Game {
     score: u32,
     paused: bool,
     game_over_timer: TimerId,
+    flashlamp_timers: Vec<TimerId>,
     current_level: String,
     character: Character
 }
@@ -91,6 +92,7 @@ impl Game {
             score: 0,
             paused: false,
             game_over_timer: TimerId::MAX,
+            flashlamp_timers: Vec::new(),
             current_level: String::new(),
             character
         }
@@ -112,7 +114,7 @@ impl Game {
 
         self.current_level = map.clone();
 
-        setup_flashlamps(events);
+        self.flashlamp_timers = setup_flashlamps(events);
         setup_hud(events, &self.score, &self.bonus, &self.metamultiplier);
         self.game_over_timer = events.schedule("Game", Duration::from_secs_f64(12.4), Failed());
     }
@@ -142,6 +144,7 @@ impl Screen for Game {
 
         event.apply(|Failed()| {
             events.cancel("Game", &self.game_over_timer);
+            self.flashlamp_timers.iter().for_each(|timer_id| events.cancel("Game", timer_id));
 
             drop_miniballs(self.bonus, events);
 
@@ -189,6 +192,8 @@ impl Screen for Game {
 
         event.apply(|CompleteLevel(map)| {
             events.cancel("Game", &self.game_over_timer);
+            self.flashlamp_timers.iter().for_each(|timer_id| events.cancel("Game", timer_id));
+
             events.schedule("Game", Duration::from_secs_f64(1.5), StartLevel(map.clone()));
         });
 
