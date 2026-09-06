@@ -24,6 +24,7 @@ const ASCENT_DURATION: f64 = 0.15;
 const POST_JUMP_ACCEL: f64 = 1500.0;
 const WALL_STICK: f64 = 100.0;
 const BUOYANCY: f64 = 2400.0;
+const WALL_DRAG_COEFFICIENT: f64 = -10.0;
 
 #[derive(Constant, Clone)]
 pub struct Hero();
@@ -307,7 +308,7 @@ fn apply_movement(_: &BeforeUpdate, world: &mut Entities, _events: &mut Events)
                     };
 
                 let y_accel = match &hero_state {
-                    HeroState::WallDragLeft | HeroState::WallDragRight => dy.min(0.0) * -10.0,
+                    HeroState::WallDragLeft | HeroState::WallDragRight => dy.min(0.0) * WALL_DRAG_COEFFICIENT,
                     _otherwise => 0.0
                 };
                 Acceleration(ddx + h_accel, ddy + y_accel)
