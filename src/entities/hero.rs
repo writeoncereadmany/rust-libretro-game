@@ -277,9 +277,9 @@ fn check_static_friction(_: &BeforeUpdate, world: &mut Entities, _events: &mut E
 fn apply_movement(_: &BeforeUpdate, world: &mut Entities, _events: &mut Events)
 {
     world.apply(
-        |(Hero(), movement_intent, hero_state, Acceleration(ddx, ddy), Velocity(dx, _))|
+        |(Hero(), movement_intent, hero_state, Acceleration(ddx, ddy), Velocity(dx, dy))|
             {
-                let h_accel = match (hero_state, movement_intent) {
+                let h_accel = match (&hero_state, movement_intent) {
                     (HeroState::WallDragLeft, MovementIntent::LEFT) => {
                         -RUN_ACCEL
                     },
@@ -305,7 +305,12 @@ fn apply_movement(_: &BeforeUpdate, world: &mut Entities, _events: &mut Events)
                     (_otherwise, MovementIntent::NEUTRAL) =>
                                 if dx > 0.0 { -SLOW_ACCEL } else if dx < 0.0 { SLOW_ACCEL } else { 0.0 },
                     };
-                Acceleration(ddx + h_accel, ddy)
+
+                let y_accel = match &hero_state {
+                    HeroState::WallDragLeft | HeroState::WallDragRight => dy.min(0.0) * -10.0,
+                    _otherwise => 0.0
+                };
+                Acceleration(ddx + h_accel, ddy + y_accel)
             }
     );
 }
