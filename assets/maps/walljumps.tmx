@@ -44,7 +44,11 @@
  </layer>
  <objectgroup id="8" name="Objects">
   <object id="6" gid="121" x="12" y="156" width="12" height="12"/>
-  <object id="36" gid="128" x="336" y="24" width="12" height="12"/>
+  <object id="36" gid="128" x="336" y="24" width="12" height="12">
+   <properties>
+    <property name="destination" value="lake"/>
+   </properties>
+  </object>
   <object id="37" gid="122" x="288" y="132" width="12" height="12"/>
   <object id="38" gid="122" x="288" y="120" width="12" height="12"/>
   <object id="39" gid="122" x="240" y="84" width="12" height="12"/>
