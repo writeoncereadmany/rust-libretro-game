@@ -141,15 +141,15 @@ impl Screen for Game {
         });
 
         event.apply(|Failed()| {
-            events.cancel("Application", &self.game_over_timer);
+            events.cancel("Game", &self.game_over_timer);
 
             drop_miniballs(self.bonus, events);
 
             if self.bonus == 1 {
-                events.schedule("Application", Duration::from_secs_f64(1.5), GameOver());
+                events.schedule("Game", Duration::from_secs_f64(1.5), GameOver());
             } else {
                 self.set_bonus(1, events);
-                events.schedule("Application", Duration::from_secs_f64(1.5), StartLevel(self.current_level.clone()));
+                events.schedule("Game", Duration::from_secs_f64(1.5), StartLevel(self.current_level.clone()));
             }
         });
 
@@ -161,7 +161,7 @@ impl Screen for Game {
                 4 => events.fire(SpawnBonusBalls(144.0, 197.0, vec!["small_ball_green"], 5)),
                 _ => {}
             }
-            events.schedule("Application", Duration::from_secs_f64(1.0), ApplyMultiplier((self.bonus + 1).clamp(1, 5)));
+            events.schedule("Game", Duration::from_secs_f64(1.0), ApplyMultiplier((self.bonus + 1).clamp(1, 5)));
         });
 
         event.apply(|ApplyMultiplier(mult)| {
@@ -188,8 +188,8 @@ impl Screen for Game {
         });
 
         event.apply(|CompleteLevel(map)| {
-            events.cancel("Application", &self.game_over_timer);
-            events.schedule("Application", Duration::from_secs_f64(1.5), StartLevel(map.clone()));
+            events.cancel("Game", &self.game_over_timer);
+            events.schedule("Game", Duration::from_secs_f64(1.5), StartLevel(map.clone()));
         });
 
         if !self.paused
