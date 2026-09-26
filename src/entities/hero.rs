@@ -3,11 +3,12 @@ use crate::component::collisions::{Actor, Push, Splash, Submerged};
 use crate::component::graphics::Sprite;
 use crate::component::lifecycle::Destroy;
 use crate::component::physics::{Acceleration, Gravity, Position, Velocity, VelocityCap};
+use crate::entities::bubble::SpawnBubbles;
 use crate::entities::radial::SpawnRadials;
 use crate::entities::spring::Sprung;
 use crate::game::game::{Character, CompleteLevel, Failed, Options};
 use derive::{Constant, Event, Variable};
-use engine::entities::entity::{entity, Entities, EntityId, Id};
+use engine::entities::entity::{Entities, EntityId, Id, entity};
 use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use engine::events::input::{ButtonPressed, InputState};
@@ -15,7 +16,6 @@ use engine::events::spawner::Spawner;
 use engine::shapes::shape::Shape;
 use rust_libretro::types::JoypadState;
 use std::time::Duration;
-use crate::entities::bubble::SpawnBubbles;
 
 const RUN_ACCEL: f64 = 500.0;
 const SKID_ACCEL: f64 = 1200.0;
@@ -26,6 +26,7 @@ const POST_JUMP_ACCEL: f64 = 1500.0;
 const WALL_STICK: f64 = 100.0;
 const BUOYANCY: f64 = 2400.0;
 const WALL_DRAG_COEFFICIENT: f64 = -10.0;
+const COYOYE_TIME: f64 = 0.2;
 
 #[derive(Constant, Clone)]
 pub struct Hero();
@@ -42,8 +43,11 @@ enum HeroState {
     Airborne,
     WallDragLeft,
     WallDragRight,
-    Submerged
+    Submerged,
 }
+
+#[derive(Variable, Clone)]
+struct CoyoteTime(HeroState, f64);
 
 #[derive(Variable, Clone)]
 enum DirectionFacing {
@@ -55,7 +59,7 @@ enum DirectionFacing {
 enum MovementIntent {
     LEFT,
     NEUTRAL,
-    RIGHT
+    RIGHT,
 }
 
 #[derive(Variable, Clone)]
@@ -84,6 +88,7 @@ pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     dispatcher.register(spawn_radial_and_delayed_hero);
     dispatcher.register(listen_to_input_state);
     dispatcher.register(listen_to_button_press);
+    dispatcher.register(coyote_time);
     dispatcher.register(jump);
     dispatcher.register(swim);
     dispatcher.register(sprung);
@@ -107,9 +112,16 @@ pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     });
 }
 
-fn spawn_radial_and_delayed_hero(&SpawnRadialAndDelayedHero(x, y): &SpawnRadialAndDelayedHero, world: &mut Entities, events: &mut Events) {
-    let options : Vec<Options> = world.collect();
-    let character = options.get(0).map(|options| options.character.clone()).unwrap_or(Character::Bluu);
+fn spawn_radial_and_delayed_hero(
+    &SpawnRadialAndDelayedHero(x, y): &SpawnRadialAndDelayedHero,
+    world: &mut Entities,
+    events: &mut Events,
+) {
+    let options: Vec<Options> = world.collect();
+    let character = options
+        .get(0)
+        .map(|options| options.character.clone())
+        .unwrap_or(Character::Bluu);
     match character {
         Character::Bluu => events.fire(SpawnRadials(x, y, vec!["ball_blue", "ball_white"], 8)),
         Character::Redd => events.fire(SpawnRadials(x, y, vec!["ball_brown", "ball_white"], 8)),
@@ -121,7 +133,10 @@ fn spawn_radial_and_delayed_hero(&SpawnRadialAndDelayedHero(x, y): &SpawnRadialA
 fn spawn_hero(&SpawnHero(x, y): &SpawnHero, world: &mut Entities, _events: &mut Events) {
     let options: Vec<Options> = world.collect();
 
-    let character = options.get(0).map(|options| options.character.clone()).unwrap_or(Character::Bluu);
+    let character = options
+        .get(0)
+        .map(|options| options.character.clone())
+        .unwrap_or(Character::Bluu);
 
     world.spawn(
         entity()
@@ -156,8 +171,12 @@ fn listen_to_input_state(
             _otherwise => MovementIntent::NEUTRAL,
         }
     });
-    world.apply(|(Hero(), asc@AscentRemaining(_))| {
-       if joypad.contains(JoypadState::A) { Some(asc) } else { None }
+    world.apply(|(Hero(), asc @ AscentRemaining(_))| {
+        if joypad.contains(JoypadState::A) {
+            Some(asc)
+        } else {
+            None
+        }
     });
 }
 
@@ -166,109 +185,132 @@ fn listen_to_button_press(
     world: &mut Entities,
     events: &mut Events,
 ) {
-    world.apply(|(Hero(), hero_state)| match button {
-        JoypadState::A => match hero_state {
-            HeroState::Grounded => events.fire(Jump()),
-            HeroState::WallDragLeft => events.fire(WallJump(DirectionFacing::RIGHT)),
-            HeroState::WallDragRight => events.fire(WallJump(DirectionFacing::LEFT)),
-            HeroState::Submerged => events.fire(Swim()),
-            _otherwise => (),
+    world.apply(|(Hero(), hero_state, maybe_ct)| match button {
+        JoypadState::A => match (hero_state, maybe_ct) {
+            (HeroState::Grounded, _) | (_, Some(CoyoteTime(HeroState::Grounded, _))) => {
+                events.fire(Jump())
             }
+            (HeroState::WallDragLeft, _) | (_, Some(CoyoteTime(HeroState::WallDragLeft, _))) => {
+                events.fire(WallJump(DirectionFacing::RIGHT))
+            }
+            (HeroState::WallDragRight, _) | (_, Some(CoyoteTime(HeroState::WallDragRight, _))) => {
+                events.fire(WallJump(DirectionFacing::LEFT))
+            }
+            (HeroState::Submerged, _) => events.fire(Swim()),
+            _otherwise => (),
+        },
         _otherwise => (),
     })
 }
 
-fn jump(
-    _: &Jump,
-    world: &mut Entities,
-    _events: &mut Events,
-) {
+fn jump(_: &Jump, world: &mut Entities, _events: &mut Events) {
     world.apply(|(Hero(), Velocity(dx, _dy))| {
-        (Velocity(dx, 150.0), AscentRemaining(ASCENT_DURATION), PostJump(0.0, POST_JUMP_ACCEL))
+        (
+            Velocity(dx, 150.0),
+            AscentRemaining(ASCENT_DURATION),
+            PostJump(0.0, POST_JUMP_ACCEL),
+            HeroState::Airborne,
+            None::<CoyoteTime>
+        )
     })
 }
 
-fn swim(
-    _: &Swim,
-    world: &mut Entities,
-    _events: &mut Events,
-) {
+fn swim(_: &Swim, world: &mut Entities, _events: &mut Events) {
     world.apply(|(Hero(), Velocity(dx, dy))| {
-        (Velocity(dx, (dy-150.0).clamp(-200.0, 0.0)), AscentRemaining(ASCENT_DURATION), PostJump(0.0, -POST_JUMP_ACCEL))
+        (
+            Velocity(dx, (dy - 150.0).clamp(-200.0, 0.0)),
+            AscentRemaining(ASCENT_DURATION),
+            PostJump(0.0, -POST_JUMP_ACCEL),
+        )
     })
 }
 
-fn sprung(
-    Sprung(id): &Sprung,
-    world: &mut Entities,
-    _events: &mut Events,
-) {
+fn sprung(Sprung(id): &Sprung, world: &mut Entities, _events: &mut Events) {
     world.apply_to(id, |(Hero(), Velocity(dx, _dy))| {
-        (Velocity(dx, 500.0), AscentRemaining(0.0), HeroState::Airborne)
+        (
+            Velocity(dx, 500.0),
+            AscentRemaining(0.0),
+            HeroState::Airborne,
+            None::<CoyoteTime>
+        )
     })
 }
 
-fn create_shade_on_victory(
-    _: &CompleteLevel,
-    world: &mut Entities,
-    events: &mut Events,
-) {
+fn create_shade_on_victory(_: &CompleteLevel, world: &mut Entities, events: &mut Events) {
     world.apply(|(Hero(), Id(id), sprite, pos)| {
         events.fire(SpawnShade(sprite, pos));
         events.fire(Destroy(id))
     })
 }
 
-fn create_shade_on_failure(
-    _: &Failed,
-    world: &mut Entities,
-    events: &mut Events,
-) {
+fn create_shade_on_failure(_: &Failed, world: &mut Entities, events: &mut Events) {
     world.apply(|(Hero(), Id(id), sprite, pos)| {
         events.fire(SpawnShade(sprite, pos));
         events.fire(Destroy(id))
     })
 }
 
-fn spawn_shade(
-    SpawnShade(sprite, pos): &SpawnShade,
-    world: &mut Entities,
-    _events: &mut Events,
-) {
+fn spawn_shade(SpawnShade(sprite, pos): &SpawnShade, world: &mut Entities, _events: &mut Events) {
     world.spawn(entity().with(sprite.clone()).with(pos.clone()));
 }
 
-fn wall_jump(
-    WallJump(facing): &WallJump,
-    world: &mut Entities,
-    _events: &mut Events,
-) {
-    world.apply(|(Hero(), Velocity(_dx, _dy))| {
-        match facing {
-            DirectionFacing::LEFT => (Velocity(-200.0, 150.0), AscentRemaining(ASCENT_DURATION), PostJump(-POST_JUMP_ACCEL, POST_JUMP_ACCEL)),
-            DirectionFacing::RIGHT => (Velocity(200.0, 150.0), AscentRemaining(ASCENT_DURATION), PostJump(POST_JUMP_ACCEL, POST_JUMP_ACCEL)),
-        }
+fn wall_jump(WallJump(facing): &WallJump, world: &mut Entities, _events: &mut Events) {
+    world.apply(|(Hero(), Velocity(_dx, _dy))| match facing {
+        DirectionFacing::LEFT => (
+            Velocity(-200.0, 150.0),
+            AscentRemaining(ASCENT_DURATION),
+            PostJump(-POST_JUMP_ACCEL, POST_JUMP_ACCEL),
+            HeroState::Airborne,
+            None::<CoyoteTime>
+        ),
+        DirectionFacing::RIGHT => (
+            Velocity(200.0, 150.0),
+            AscentRemaining(ASCENT_DURATION),
+            PostJump(POST_JUMP_ACCEL, POST_JUMP_ACCEL),
+            HeroState::Airborne,
+            None::<CoyoteTime>
+        ),
     })
 }
 
-fn post_jump(
-    dt: &Duration,
-    world: &mut Entities,
-    _events: &mut Events,
-) {
-    world.apply(|(Hero(), AscentRemaining(at), PostJump(pddx, pddy), acc@Acceleration(ddx, ddy))| {
-        if at > 0.0 {
-            (Some(AscentRemaining(at - dt.as_secs_f64())), Acceleration(ddx + pddx, ddy + pddy))
-        } else {
-            (None, acc)
-        }
-    })
+fn post_jump(dt: &Duration, world: &mut Entities, _events: &mut Events) {
+    world.apply(
+        |(Hero(), AscentRemaining(at), PostJump(pddx, pddy), acc @ Acceleration(ddx, ddy))| {
+            if at > 0.0 {
+                (
+                    Some(AscentRemaining(at - dt.as_secs_f64())),
+                    Acceleration(ddx + pddx, ddy + pddy),
+                )
+            } else {
+                (None, acc)
+            }
+        },
+    )
 }
 
+fn coyote_time(dt: &Duration, world: &mut Entities, _events: &mut Events) {
+    world.apply(|(heroState, maybe_ct)| match heroState {
+        HeroState::Grounded => Some(CoyoteTime(HeroState::Grounded, COYOYE_TIME)),
+        HeroState::WallDragRight => Some(CoyoteTime(HeroState::WallDragRight, COYOYE_TIME)),
+        HeroState::WallDragLeft => Some(CoyoteTime(HeroState::WallDragLeft, COYOYE_TIME)),
+        _ => {
+            if let Some(CoyoteTime(current_state, ct)) = maybe_ct {
+                let new_ct = ct - dt.as_secs_f64();
+                if (new_ct <= 0.0) {
+                    None
+                } else {
+                    Some(CoyoteTime(current_state, COYOYE_TIME))
+                }
+            } else {
+                None
+            }
+        }
+    });
+}
 
 fn check_static_friction(_: &BeforeUpdate, world: &mut Entities, _events: &mut Events) {
-    world.apply(|(Hero(), movement_intent, Velocity(dx, dy))| {
-        match movement_intent {
+    world.apply(
+        |(Hero(), movement_intent, Velocity(dx, dy))| match movement_intent {
             MovementIntent::NEUTRAL => {
                 if dx.abs() < STATIC_FRICTION_THRESHOLD {
                     Velocity(0.0, dy)
@@ -276,49 +318,54 @@ fn check_static_friction(_: &BeforeUpdate, world: &mut Entities, _events: &mut E
                     Velocity(dx, dy)
                 }
             }
-            _otherwise => Velocity(dx, dy)
-        }
-    });
+            _otherwise => Velocity(dx, dy),
+        },
+    );
 }
 
-fn apply_movement(_: &BeforeUpdate, world: &mut Entities, _events: &mut Events)
-{
+fn apply_movement(_: &BeforeUpdate, world: &mut Entities, _events: &mut Events) {
     world.apply(
-        |(Hero(), movement_intent, hero_state, Acceleration(ddx, ddy), Velocity(dx, dy))|
-            {
-                let h_accel = match (&hero_state, movement_intent) {
-                    (HeroState::WallDragLeft, MovementIntent::LEFT) => {
+        |(Hero(), movement_intent, hero_state, Acceleration(ddx, ddy), Velocity(dx, dy))| {
+            let h_accel = match (&hero_state, movement_intent) {
+                (HeroState::WallDragLeft, MovementIntent::LEFT) => -RUN_ACCEL,
+                (HeroState::WallDragLeft, MovementIntent::RIGHT) => -WALL_STICK,
+                (HeroState::WallDragLeft, MovementIntent::NEUTRAL) => RUN_ACCEL,
+                (HeroState::WallDragRight, MovementIntent::LEFT) => -RUN_ACCEL,
+                (HeroState::WallDragRight, MovementIntent::RIGHT) => WALL_STICK,
+                (HeroState::WallDragRight, MovementIntent::NEUTRAL) => RUN_ACCEL,
+                (_otherwise, MovementIntent::LEFT) => {
+                    if dx > 0.0 {
+                        -SKID_ACCEL
+                    } else {
                         -RUN_ACCEL
-                    },
-                    (HeroState::WallDragLeft, MovementIntent::RIGHT) => {
-                        -WALL_STICK
-                    },
-                    (HeroState::WallDragLeft, MovementIntent::NEUTRAL) => {
+                    }
+                }
+                (_otherwise, MovementIntent::RIGHT) => {
+                    if dx < 0.0 {
+                        SKID_ACCEL
+                    } else {
                         RUN_ACCEL
-                    },
-                    (HeroState::WallDragRight, MovementIntent::LEFT) => {
-                        -RUN_ACCEL
-                    },
-                    (HeroState::WallDragRight, MovementIntent::RIGHT) => {
-                        WALL_STICK
-                    },
-                    (HeroState::WallDragRight, MovementIntent::NEUTRAL) => {
-                        RUN_ACCEL
-                    },
-                    (_otherwise, MovementIntent::LEFT) =>
-                                if dx > 0.0 { -SKID_ACCEL } else { -RUN_ACCEL },
-                    (_otherwise, MovementIntent::RIGHT) =>
-                                if dx < 0.0 { SKID_ACCEL } else { RUN_ACCEL },
-                    (_otherwise, MovementIntent::NEUTRAL) =>
-                                if dx > 0.0 { -SLOW_ACCEL } else if dx < 0.0 { SLOW_ACCEL } else { 0.0 },
-                    };
+                    }
+                }
+                (_otherwise, MovementIntent::NEUTRAL) => {
+                    if dx > 0.0 {
+                        -SLOW_ACCEL
+                    } else if dx < 0.0 {
+                        SLOW_ACCEL
+                    } else {
+                        0.0
+                    }
+                }
+            };
 
-                let y_accel = match &hero_state {
-                    HeroState::WallDragLeft | HeroState::WallDragRight => dy.min(0.0) * WALL_DRAG_COEFFICIENT,
-                    _otherwise => 0.0
-                };
-                Acceleration(ddx + h_accel, ddy + y_accel)
-            }
+            let y_accel = match &hero_state {
+                HeroState::WallDragLeft | HeroState::WallDragRight => {
+                    dy.min(0.0) * WALL_DRAG_COEFFICIENT
+                }
+                _otherwise => 0.0,
+            };
+            Acceleration(ddx + h_accel, ddy + y_accel)
+        },
     );
 }
 
@@ -336,13 +383,18 @@ fn on_push(Push(entity_id, (px, py)): &Push, world: &mut Entities, _events: &mut
     });
 }
 
-fn on_submerged(Submerged(entity_id, submerged): &Submerged, world: &mut Entities, _events: &mut Events) {
+fn on_submerged(
+    Submerged(entity_id, submerged): &Submerged,
+    world: &mut Entities,
+    _events: &mut Events,
+) {
     world.apply_to(entity_id, |(Hero(), hero_state)| {
         if *submerged {
             HeroState::Submerged
         } else {
             hero_state
-        }});
+        }
+    });
 }
 
 fn on_splash(&Splash { id, dy, .. }: &Splash, world: &mut Entities, _events: &mut Events) {
@@ -355,12 +407,13 @@ fn on_splash(&Splash { id, dy, .. }: &Splash, world: &mut Entities, _events: &mu
     });
 }
 
-fn buoyancy(_:  &BeforeUpdate, world: &mut Entities, _events: &mut Events) {
-    world.apply(|(Hero(), hero_state, Acceleration(ddx, ddy))| {
-        match hero_state {
+fn buoyancy(_: &BeforeUpdate, world: &mut Entities, _events: &mut Events) {
+    world.apply(
+        |(Hero(), hero_state, Acceleration(ddx, ddy))| match hero_state {
             HeroState::Submerged => Acceleration(ddx, ddy + BUOYANCY),
-            _otherwise => Acceleration(ddx, ddy)
-        }});
+            _otherwise => Acceleration(ddx, ddy),
+        },
+    );
 }
 
 fn bubbles(dt: &Duration, world: &mut Entities, events: &mut Events) {
@@ -375,12 +428,16 @@ fn bubbles(dt: &Duration, world: &mut Entities, events: &mut Events) {
         if before > 0.0 && after < 0.0 {
             events.fire(SpawnBubbles(x, y));
         }
-        if after < 0.0 { None } else { Some(Bubbles(after)) }
+        if after < 0.0 {
+            None
+        } else {
+            Some(Bubbles(after))
+        }
     });
 }
 
 fn clamp_to_screen(_: &AfterUpdate, world: &mut Entities, events: &mut Events) {
-    world.apply(|(Hero(), pos@Position(x, y), vel@Velocity(_, dy))| {
+    world.apply(|(Hero(), pos @ Position(x, y), vel @ Velocity(_, dy))| {
         if y < -12.0 {
             events.fire(Failed());
         }
@@ -394,12 +451,12 @@ fn clamp_to_screen(_: &AfterUpdate, world: &mut Entities, events: &mut Events) {
 }
 
 fn update_sprite(_update: &AfterUpdate, world: &mut Entities, _events: &mut Events) {
-    world.apply(|(Hero(), status, facing, Velocity(dx, _))| {
-        match status {
-            HeroState::WallDragLeft => DirectionFacing::RIGHT,
-            HeroState::WallDragRight => DirectionFacing::LEFT,
-            HeroState::Airborne => facing,
-            _otherwise => if dx > 0.0 {
+    world.apply(|(Hero(), status, facing, Velocity(dx, _))| match status {
+        HeroState::WallDragLeft => DirectionFacing::RIGHT,
+        HeroState::WallDragRight => DirectionFacing::LEFT,
+        HeroState::Airborne => facing,
+        _otherwise => {
+            if dx > 0.0 {
                 DirectionFacing::RIGHT
             } else if dx < 0.0 {
                 DirectionFacing::LEFT
@@ -409,7 +466,15 @@ fn update_sprite(_update: &AfterUpdate, world: &mut Entities, _events: &mut Even
         }
     });
     world.apply(
-        |(Hero(), status, facing, character, movement_intent, Position(x, _y), Velocity(dx, dy))| {
+        |(
+            Hero(),
+            status,
+            facing,
+            character,
+            movement_intent,
+            Position(x, _y),
+            Velocity(dx, dy),
+        )| {
             let suffix = match status {
                 HeroState::Grounded => {
                     if dx == 0.0 {
@@ -428,20 +493,16 @@ fn update_sprite(_update: &AfterUpdate, world: &mut Entities, _events: &mut Even
                             }
                         }
                     }
-                },
+                }
                 HeroState::Airborne => {
                     if dy > 0.0 {
                         "_ascend"
                     } else {
                         "_descend"
                     }
-                },
-                HeroState::WallDragLeft => {
-                    "_wallslide"
-                },
-                HeroState::WallDragRight => {
-                    "_wallslide"
                 }
+                HeroState::WallDragLeft => "_wallslide",
+                HeroState::WallDragRight => "_wallslide",
                 HeroState::Submerged => {
                     if dy < 0.0 {
                         "_swim_down"
@@ -458,9 +519,11 @@ fn update_sprite(_update: &AfterUpdate, world: &mut Entities, _events: &mut Even
             let sprite = match character {
                 Character::Bluu => "panda",
                 Character::Redd => "redd",
-            }.to_string() + suffix;
+            }
+            .to_string()
+                + suffix;
             Sprite::sprite_ex(sprite, 10, flip(&facing))
-        }
+        },
     );
 }
 
@@ -468,13 +531,13 @@ fn turning(facing: &DirectionFacing, movement_intent: &MovementIntent) -> bool {
     match (movement_intent, facing) {
         (MovementIntent::LEFT, DirectionFacing::RIGHT) => true,
         (MovementIntent::RIGHT, DirectionFacing::LEFT) => true,
-        _otherwise => false
+        _otherwise => false,
     }
 }
 
 fn flip(facing: &DirectionFacing) -> bool {
     match facing {
         DirectionFacing::LEFT => true,
-        DirectionFacing::RIGHT => false
+        DirectionFacing::RIGHT => false,
     }
 }
