@@ -347,10 +347,8 @@ fn on_submerged(Submerged(entity_id, submerged): &Submerged, world: &mut Entitie
 
 fn on_splash(&Splash { id, dy, .. }: &Splash, world: &mut Entities, _events: &mut Events) {
     world.apply_to(&id, |Hero()| {
-        if dy < -300.0 {
+        if dy < -150.0 {
             Some(Bubbles(0.25))
-        } else if dy < 0.0 {
-            Some(Bubbles(0.15))
         } else {
             None
         }
