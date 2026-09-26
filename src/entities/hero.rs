@@ -26,7 +26,7 @@ const POST_JUMP_ACCEL: f64 = 1500.0;
 const WALL_STICK: f64 = 100.0;
 const BUOYANCY: f64 = 2400.0;
 const WALL_DRAG_COEFFICIENT: f64 = -10.0;
-const COYOYE_TIME: f64 = 0.2;
+const COYOYE_TIME: f64 = 0.07;
 
 #[derive(Constant, Clone)]
 pub struct Hero();
@@ -289,7 +289,7 @@ fn post_jump(dt: &Duration, world: &mut Entities, _events: &mut Events) {
 }
 
 fn coyote_time(dt: &Duration, world: &mut Entities, _events: &mut Events) {
-    world.apply(|(heroState, maybe_ct)| match heroState {
+    world.apply(|(hero_state, maybe_ct)| match hero_state {
         HeroState::Grounded => Some(CoyoteTime(HeroState::Grounded, COYOYE_TIME)),
         HeroState::WallDragRight => Some(CoyoteTime(HeroState::WallDragRight, COYOYE_TIME)),
         HeroState::WallDragLeft => Some(CoyoteTime(HeroState::WallDragLeft, COYOYE_TIME)),
@@ -299,7 +299,7 @@ fn coyote_time(dt: &Duration, world: &mut Entities, _events: &mut Events) {
                 if (new_ct <= 0.0) {
                     None
                 } else {
-                    Some(CoyoteTime(current_state, COYOYE_TIME))
+                    Some(CoyoteTime(current_state, new_ct))
                 }
             } else {
                 None
