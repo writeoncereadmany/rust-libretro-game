@@ -13,7 +13,7 @@ pub fn register(dispatcher: &mut Dispatcher, _spawner: &mut Spawner) {
     dispatcher.register(spawn_splash);
 }
 
-pub fn spawn_splash(&Splash(x, y): &Splash, world: &mut Entities, events: &mut Events) {
+pub fn spawn_splash(&Splash {x, y, ..}: &Splash, world: &mut Entities, events: &mut Events) {
     let splash_id = world.spawn(entity()
         .with(Sprite::sprite("splash_1", 4))
         .with(Position(x - 6.0, y))

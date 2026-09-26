@@ -1,5 +1,5 @@
 use crate::app::pandamonium::{AfterUpdate, BeforeUpdate};
-use crate::component::collisions::{Actor, Push, Submerged};
+use crate::component::collisions::{Actor, Push, Splash, Submerged};
 use crate::component::graphics::Sprite;
 use crate::component::lifecycle::Destroy;
 use crate::component::physics::{Acceleration, Gravity, Position, Velocity, VelocityCap};
@@ -7,7 +7,7 @@ use crate::entities::radial::SpawnRadials;
 use crate::entities::spring::Sprung;
 use crate::game::game::{Character, CompleteLevel, Failed, Options};
 use derive::{Constant, Event, Variable};
-use engine::entities::entity::{entity, Entities, Id};
+use engine::entities::entity::{entity, Entities, EntityId, Id};
 use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use engine::events::input::{ButtonPressed, InputState};
@@ -15,6 +15,7 @@ use engine::events::spawner::Spawner;
 use engine::shapes::shape::Shape;
 use rust_libretro::types::JoypadState;
 use std::time::Duration;
+use crate::entities::bubble::SpawnBubbles;
 
 const RUN_ACCEL: f64 = 500.0;
 const SKID_ACCEL: f64 = 1200.0;
@@ -50,12 +51,15 @@ enum DirectionFacing {
     RIGHT,
 }
 
-#[derive(Variable, Clone, Debug)]
+#[derive(Variable, Clone)]
 enum MovementIntent {
     LEFT,
     NEUTRAL,
     RIGHT
 }
+
+#[derive(Variable, Clone)]
+pub struct Bubbles(f64);
 
 #[derive(Event)]
 struct SpawnHero(f64, f64);
@@ -90,6 +94,8 @@ pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     dispatcher.register(on_push);
     dispatcher.register(on_submerged);
     dispatcher.register(buoyancy);
+    dispatcher.register(on_splash);
+    dispatcher.register(bubbles);
     dispatcher.register(clamp_to_screen);
     dispatcher.register(update_sprite);
     dispatcher.register(create_shade_on_victory);
@@ -339,12 +345,40 @@ fn on_submerged(Submerged(entity_id, submerged): &Submerged, world: &mut Entitie
         }});
 }
 
+fn on_splash(&Splash { id, dy, .. }: &Splash, world: &mut Entities, _events: &mut Events) {
+    world.apply_to(&id, |Hero()| {
+        if dy < -300.0 {
+            Some(Bubbles(0.25))
+        } else if dy < 0.0 {
+            Some(Bubbles(0.15))
+        } else {
+            None
+        }
+    });
+}
+
 fn buoyancy(_:  &BeforeUpdate, world: &mut Entities, _events: &mut Events) {
     world.apply(|(Hero(), hero_state, Acceleration(ddx, ddy))| {
         match hero_state {
             HeroState::Submerged => Acceleration(ddx, ddy + BUOYANCY),
             _otherwise => Acceleration(ddx, ddy)
         }});
+}
+
+fn bubbles(dt: &Duration, world: &mut Entities, events: &mut Events) {
+    world.apply(|(Bubbles(before), Position(x, y))| {
+        let after = before - dt.as_secs_f64();
+        if before > 0.2 && after < 0.2 {
+            events.fire(SpawnBubbles(x, y));
+        }
+        if before > 0.1 && after < 0.1 {
+            events.fire(SpawnBubbles(x, y));
+        }
+        if before > 0.0 && after < 0.0 {
+            events.fire(SpawnBubbles(x, y));
+        }
+        if after < 0.0 { None } else { Some(Bubbles(after)) }
+    });
 }
 
 fn clamp_to_screen(_: &AfterUpdate, world: &mut Entities, events: &mut Events) {

@@ -20,10 +20,14 @@ struct Bubble();
 pub struct SpawnBubble(f64, f64);
 
 #[derive(Event)]
+pub struct SpawnBubbles(pub f64, pub f64);
+
+#[derive(Event)]
 pub struct SpawnBubblePop(f64, f64);
 
 pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
     dispatcher.register(spawn_bubble);
+    dispatcher.register(spawn_bubbles);
     dispatcher.register(spawn_pop);
     dispatcher.register(collide_bubble);
 
@@ -59,6 +63,20 @@ fn spawn_pop(&SpawnBubblePop(x, y): &SpawnBubblePop, world: &mut Entities, event
         })
     );
     events.schedule("Game", Duration::from_millis(500), Destroy(pop_id));
+}
+
+fn spawn_bubbles(&SpawnBubbles(x, y): &SpawnBubbles, world: &mut Entities, events: &mut Events) {
+    let pop_id = world.spawn(entity()
+        .with(Position(x, y))
+        .with(Sprite::sprite("bubble_pop_2", 6))
+        .with(Period(0.3))
+        .with(Phase(0.0))
+        .with(Animation {
+            sprites: vec!["bubble_pop_2", "bubble_pop_3"],
+            layer: 6
+        })
+    );
+    events.schedule("Game", Duration::from_millis(300), Destroy(pop_id));
 }
 
 fn collide_bubble(Collided(first, second, push): &Collided, world: &mut Entities, events: &mut Events) {
