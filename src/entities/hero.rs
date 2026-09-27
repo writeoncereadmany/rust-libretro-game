@@ -8,7 +8,7 @@ use crate::entities::radial::SpawnRadials;
 use crate::entities::spring::Sprung;
 use crate::game::game::{Character, CompleteLevel, Failed, Options};
 use derive::{Constant, Event, Variable};
-use engine::entities::entity::{Entities, EntityId, Id, entity};
+use engine::entities::entity::{entity, Entities, Id};
 use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use engine::events::input::{ButtonPressed, InputState};
@@ -296,7 +296,7 @@ fn coyote_time(dt: &Duration, world: &mut Entities, _events: &mut Events) {
         _ => {
             if let Some(CoyoteTime(current_state, ct)) = maybe_ct {
                 let new_ct = ct - dt.as_secs_f64();
-                if (new_ct <= 0.0) {
+                if new_ct <= 0.0 {
                     None
                 } else {
                     Some(CoyoteTime(current_state, new_ct))

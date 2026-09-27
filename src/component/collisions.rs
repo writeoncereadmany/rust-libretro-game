@@ -28,7 +28,7 @@ pub struct Submerged(pub EntityId, pub bool);
 
 #[derive(Event)]
 pub struct Splash{
-    pub id: EntityId, pub x: f64, pub y: f64, pub dx: f64, pub dy: f64
+    pub id: EntityId, pub x: f64, pub y: f64, pub dy: f64
 }
 
 #[derive(Constant, Clone)]
@@ -96,7 +96,7 @@ fn handle_water_collisions(tile_maps: &Vec<(Id, Tilemap)>, world: &mut Entities,
             if let Some((_, splash_collision)) = next_collision(&start_center_of_mass, &zones, &|collision_type, _| { collision_type == &WATER}, &(tx, ty)) {
                 let translation_to_splash = (tx, ty).scale(&splash_collision.dt);
                 let (splash_x, splash_y) = start_center_of_mass.translate(&translation_to_splash).center_of_mass();
-                events.fire(Splash{ id: hero_id, dx, dy, x: splash_x, y: splash_y });
+                events.fire(Splash{ id: hero_id, dy, x: splash_x, y: splash_y });
             }
         }
 
@@ -111,7 +111,7 @@ fn handle_water_collisions(tile_maps: &Vec<(Id, Tilemap)>, world: &mut Entities,
                 else {
                     let translation_to_splash = (tx, ty).scale(&splash_collision.dt);
                     let (splash_x, splash_y) = start_center_of_mass.translate(&translation_to_splash).center_of_mass();
-                    events.fire(Splash{ id: hero_id, dx, dy, x: splash_x, y: splash_y });
+                    events.fire(Splash{ id: hero_id, dy, x: splash_x, y: splash_y });
                 }
             }
         }
