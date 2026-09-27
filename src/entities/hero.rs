@@ -26,7 +26,7 @@ const POST_JUMP_ACCEL: f64 = 1500.0;
 const WALL_STICK: f64 = 100.0;
 const BUOYANCY: f64 = 2400.0;
 const WALL_DRAG_COEFFICIENT: f64 = -10.0;
-const COYOYE_TIME: f64 = 0.07;
+const COYOTE_TIME: f64 = 0.07;
 
 #[derive(Constant, Clone)]
 pub struct Hero();
@@ -119,7 +119,7 @@ fn spawn_radial_and_delayed_hero(
 ) {
     let options: Vec<Options> = world.collect();
     let character = options
-        .get(0)
+        .first()
         .map(|options| options.character.clone())
         .unwrap_or(Character::Bluu);
     match character {
@@ -134,7 +134,7 @@ fn spawn_hero(&SpawnHero(x, y): &SpawnHero, world: &mut Entities, _events: &mut 
     let options: Vec<Options> = world.collect();
 
     let character = options
-        .get(0)
+        .first()
         .map(|options| options.character.clone())
         .unwrap_or(Character::Bluu);
 
@@ -290,9 +290,9 @@ fn post_jump(dt: &Duration, world: &mut Entities, _events: &mut Events) {
 
 fn coyote_time(dt: &Duration, world: &mut Entities, _events: &mut Events) {
     world.apply(|(hero_state, maybe_ct)| match hero_state {
-        HeroState::Grounded => Some(CoyoteTime(HeroState::Grounded, COYOYE_TIME)),
-        HeroState::WallDragRight => Some(CoyoteTime(HeroState::WallDragRight, COYOYE_TIME)),
-        HeroState::WallDragLeft => Some(CoyoteTime(HeroState::WallDragLeft, COYOYE_TIME)),
+        HeroState::Grounded => Some(CoyoteTime(HeroState::Grounded, COYOTE_TIME)),
+        HeroState::WallDragRight => Some(CoyoteTime(HeroState::WallDragRight, COYOTE_TIME)),
+        HeroState::WallDragLeft => Some(CoyoteTime(HeroState::WallDragLeft, COYOTE_TIME)),
         _ => {
             if let Some(CoyoteTime(current_state, ct)) = maybe_ct {
                 let new_ct = ct - dt.as_secs_f64();
@@ -442,7 +442,7 @@ fn clamp_to_screen(_: &AfterUpdate, world: &mut Entities, events: &mut Events) {
             events.fire(Failed());
         }
 
-        if x < 0.0 || x > 348.0 {
+        if !(0.0..=348.0).contains(&x) {
             (Position(x.clamp(0.0, 348.0), y), Velocity(0.0, dy))
         } else {
             (pos, vel)
