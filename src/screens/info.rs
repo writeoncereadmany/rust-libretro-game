@@ -16,6 +16,9 @@ impl Screen for InfoScreen {
         for tile in map.tiles.iter() {
             renderer.draw_background_tile(&tile.tile_set_name, tile.id, tile.x * map.tile_width, tile.y * map.tile_height);
         }
+        for object in map.objects.iter() {
+            renderer.draw_background_tile(&object.tile_set_name, object.id, object.x as i32, object.y as i32);
+        }
         renderer.clear_sprites();
     }
 }
