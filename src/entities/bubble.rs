@@ -4,7 +4,7 @@ use crate::component::graphics::{Animation, Sprite};
 use crate::component::lifecycle::Destroy;
 use crate::component::physics::Position;
 use crate::component::time::{Period, Phase};
-use crate::entities::hero::{Hero, Jump};
+use crate::entities::hero::{Hero};
 use derive::{Constant, Event, system, spawn};
 use engine::entities::entity::{entity, Entities, EntityId};
 use engine::events::event::Events;
@@ -23,6 +23,9 @@ pub struct SpawnBubbles(pub f64, pub f64);
 
 #[derive(Event)]
 pub struct SpawnBubblePop(f64, f64);
+
+#[derive(Event)]
+pub struct Bounce();
 
 #[spawn("Bubble")]
 fn spawn_bubble_from_map(spawn: Spawn, events: &mut Events) {
@@ -90,6 +93,6 @@ fn collide_with_bubble(second: &EntityId, events: &mut Events, x: f64, y: f64, &
     events.fire(Destroy(*second));
     events.fire(SpawnBubblePop(x, y));
     if py > 0.0 {
-        events.fire(Jump());
+        events.fire(Bounce());
     }
 }
