@@ -1,4 +1,4 @@
-use crate::app::pandamonium::StartGame;
+use crate::app::pandamonium::{StartGame, ToInfoscreen};
 use crate::game::game::Character;
 use crate::screens::screen::Screen;
 use engine::events::event::{Event, Events};
@@ -26,6 +26,9 @@ impl Screen for TitleScreen {
         event.apply(|ButtonPressed(button)| {
             if button == &JoypadState::START {
                 events.fire(StartGame(self.character.clone()))
+            }
+            if button == &JoypadState::SELECT {
+                events.fire(ToInfoscreen())
             }
             if button == &JoypadState::RIGHT {
                 self.character = Character::Redd;

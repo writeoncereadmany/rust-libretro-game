@@ -15,7 +15,9 @@ use rust_libretro::sys::{retro_input_descriptor, RETRO_DEVICE_ID_JOYPAD_A, RETRO
 use rust_libretro::types::JoypadState;
 use std::rc::Rc;
 use std::time::Duration;
+use engine::assets::map::Map;
 use tracing_appender::non_blocking::WorkerGuard;
+use crate::screens::info::InfoScreen;
 
 pub struct Pandamonium {
     assets: Rc<Assets>,
@@ -30,7 +32,10 @@ pub struct Pandamonium {
 pub struct StartGame(pub Character);
 
 #[derive(Event)]
-pub struct GameOver();
+pub struct ToTitlescreen();
+
+#[derive(Event)]
+pub struct ToInfoscreen();
 
 #[derive(Event)]
 pub struct BeforeUpdate();
@@ -112,8 +117,12 @@ impl Pandamonium {
             self.screen = Box::new(Game::new(character.clone(), &self.assets, self.dispatcher.clone(), self.spawner.clone()));
             events.fire(StartLevel(first_level));
         });
-        event.apply(|GameOver()| {
+        event.apply(|ToTitlescreen()| {
             self.screen = Box::new(TitleScreen::new())
+        });
+        event.apply(|ToInfoscreen()| {
+            let map: &Map = self.assets.maps.get("info").unwrap();
+            self.screen = Box::new(InfoScreen(Map::clone(map)));
         });
     }
 }

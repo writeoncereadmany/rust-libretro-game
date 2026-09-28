@@ -361,4 +361,9 @@
    <property name="Glyph" value="&gt;"/>
   </properties>
  </tile>
+ <tile id="72">
+  <properties>
+   <property name="glyph" value="'"/>
+  </properties>
+ </tile>
 </tileset>

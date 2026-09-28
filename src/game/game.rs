@@ -1,4 +1,4 @@
-use crate::app::pandamonium::GameOver;
+use crate::app::pandamonium::ToTitlescreen;
 use crate::component::graphics::Sprite;
 use crate::component::physics::Position;
 use crate::entities::failureballs::SpawnFailureBall;
@@ -149,7 +149,7 @@ impl Screen for Game {
             drop_miniballs(self.bonus, events);
 
             if self.bonus == 1 {
-                events.schedule("Game", Duration::from_secs_f64(1.5), GameOver());
+                events.schedule("Game", Duration::from_secs_f64(1.5), ToTitlescreen());
             } else {
                 self.set_bonus(1, events);
                 events.schedule("Game", Duration::from_secs_f64(1.5), StartLevel(self.current_level.clone()));
