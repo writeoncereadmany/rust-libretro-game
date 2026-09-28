@@ -1,8 +1,7 @@
 use crate::component::physics::{Position, Translation};
-use derive::{Constant, Event};
+use derive::{Constant, Event, system};
 use engine::assets::map::Map;
 use engine::entities::entity::{Entities, EntityId, Id, entity};
-use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use engine::events::spawner::Spawner;
 use engine::renderer::background_renderer::UpdateBackgroundTile;
@@ -24,10 +23,6 @@ pub struct Tilemap(i32, i32, HashMap<(i32, i32), CollisionType>);
 
 #[derive(Event, Clone)]
 struct SpawnTilemap(Tilemap);
-
-pub fn register(dispatcher: &mut Dispatcher, _spawner: &mut Spawner) {
-    dispatcher.register(spawn_map);
-}
 
 pub fn load_map(map: &Map, spawner: &Spawner, events: &mut Events) {
     let mut tile_map: HashMap<(i32, i32), CollisionType> = HashMap::new();
@@ -64,22 +59,22 @@ pub fn load_map(map: &Map, spawner: &Spawner, events: &mut Events) {
     }
 }
 
+#[system]
 fn spawn_map(SpawnTilemap(tilemap): &SpawnTilemap, world: &mut Entities, _events: &mut Events) {
     world.spawn(entity().with(tilemap.clone()));
 }
 
 pub fn overlapping(
-    tile_maps: &Vec<(Id, Tilemap)>,
+    tile_maps: &[(Id, Tilemap)],
     shape: &Shape,
     position: &Position,
     translation: &Translation,
 ) -> Vec<(EntityId, Shape, CollisionType)> {
     tile_maps
         .iter()
-        .map(|(Id(entity_id), tilemap)| {
+        .flat_map(|(Id(entity_id), tilemap)| {
             overlapping_map(*entity_id, tilemap, shape, position, translation)
         })
-        .flatten()
         .collect()
 }
 

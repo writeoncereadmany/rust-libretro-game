@@ -2,11 +2,10 @@ use crate::component::graphics::Sprite;
 use crate::component::lifecycle::Destroy;
 use crate::component::physics::{Acceleration, Gravity, Position, Velocity};
 use crate::entities::key::Unlock;
-use derive::{Constant, Event};
+use derive::{Constant, Event, system, spawn};
 use engine::entities::entity::{entity, Entities, EntityId, Id};
-use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
-use engine::events::spawner::Spawner;
+use engine::events::spawner::Spawn;
 use engine::shapes::shape::Shape;
 use crate::component::collisions::{Actor, Collided, Interactable};
 use crate::entities::hero::Hero;
@@ -31,19 +30,12 @@ pub struct Chest();
 #[derive(Constant, Clone)]
 pub struct Ruby();
 
-pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
-    dispatcher.register(spawn_chest);
-    dispatcher.register(spawn_open_chest);
-    dispatcher.register(spawn_ruby);
-    dispatcher.register(unlock);
-    dispatcher.register(pickup_ruby);
-    dispatcher.register(collect_ruby);
-
-    spawner.register("Chest", |spawn, events| {
-        events.fire(SpawnChest(spawn.x, spawn.y))
-    });
+#[spawn("Chest")]
+fn spawn_chest_from_map(spawn: Spawn, events: &mut Events) {
+    events.fire(SpawnChest(spawn.x, spawn.y));
 }
 
+#[system]
 pub fn spawn_chest(&SpawnChest(x, y): &SpawnChest, world: &mut Entities, _events: &mut Events) {
     world.spawn(entity()
         .with(Chest())
@@ -52,6 +44,7 @@ pub fn spawn_chest(&SpawnChest(x, y): &SpawnChest, world: &mut Entities, _events
     );
 }
 
+#[system]
 pub fn spawn_open_chest(&SpawnOpenChest(x, y): &SpawnOpenChest, world: &mut Entities, _events: &mut Events) {
     world.spawn(entity()
         .with(Sprite::sprite("chest_open", 3))
@@ -59,6 +52,7 @@ pub fn spawn_open_chest(&SpawnOpenChest(x, y): &SpawnOpenChest, world: &mut Enti
     );
 }
 
+#[system]
 pub fn spawn_ruby(&SpawnRuby(x, y): &SpawnRuby, world: &mut Entities, _events: &mut Events) {
     world.spawn(entity()
         .with(Ruby())
@@ -73,6 +67,7 @@ pub fn spawn_ruby(&SpawnRuby(x, y): &SpawnRuby, world: &mut Entities, _events: &
     );
 }
 
+#[system]
 pub fn unlock(_: &Unlock, world: &mut Entities, events: &mut Events) {
     world.apply(|(Chest(), Position(x, y), Id(id)) | {
         events.fire(Destroy(id));
@@ -81,11 +76,13 @@ pub fn unlock(_: &Unlock, world: &mut Entities, events: &mut Events) {
     });
 }
 
+#[system]
 fn pickup_ruby(Collided(first, second, _): &Collided, world: &mut Entities, events: &mut Events) {
     world.apply_to_pair(first, second, |Ruby(), Hero()| events.fire(PickupRuby(*first)));
     world.apply_to_pair(second, first, |Ruby(), Hero()| events.fire(PickupRuby(*second)));
 }
 
+#[system]
 fn collect_ruby(PickupRuby(ruby): &PickupRuby, world: &mut Entities, events: &mut Events) {
     if let Some(Position(x, y)) = world.delete(ruby) {
         events.fire(SpawnSparkle(x, y));

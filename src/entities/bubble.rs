@@ -5,11 +5,10 @@ use crate::component::lifecycle::Destroy;
 use crate::component::physics::Position;
 use crate::component::time::{Period, Phase};
 use crate::entities::hero::{Hero, Jump};
-use derive::{Constant, Event};
+use derive::{Constant, Event, system, spawn};
 use engine::entities::entity::{entity, Entities, EntityId};
-use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
-use engine::events::spawner::Spawner;
+use engine::events::spawner::Spawn;
 use engine::shapes::shape::Shape;
 use engine::shapes::vec2d::Vec2d;
 
@@ -25,16 +24,12 @@ pub struct SpawnBubbles(pub f64, pub f64);
 #[derive(Event)]
 pub struct SpawnBubblePop(f64, f64);
 
-pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
-    dispatcher.register(spawn_bubble);
-    dispatcher.register(spawn_bubbles);
-    dispatcher.register(spawn_pop);
-    dispatcher.register(collide_bubble);
-
-    spawner.register("Bubble", |spawn, events| events.fire(SpawnBubble(spawn.x, spawn.y)));
+#[spawn("Bubble")]
+fn spawn_bubble_from_map(spawn: Spawn, events: &mut Events) {
+    events.fire(SpawnBubble(spawn.x, spawn.y));
 }
 
-
+#[system]
 fn spawn_bubble(&SpawnBubble(x, y): &SpawnBubble, world: &mut Entities, _events: &mut Events) {
     world.spawn(entity()
         .with(Bubble())
@@ -51,6 +46,7 @@ fn spawn_bubble(&SpawnBubble(x, y): &SpawnBubble, world: &mut Entities, _events:
     );
 }
 
+#[system]
 fn spawn_pop(&SpawnBubblePop(x, y): &SpawnBubblePop, world: &mut Entities, events: &mut Events) {
     let pop_id = world.spawn(entity()
         .with(Position(x, y))
@@ -65,6 +61,7 @@ fn spawn_pop(&SpawnBubblePop(x, y): &SpawnBubblePop, world: &mut Entities, event
     events.schedule("Game", Duration::from_millis(500), Destroy(pop_id));
 }
 
+#[system]
 fn spawn_bubbles(&SpawnBubbles(x, y): &SpawnBubbles, world: &mut Entities, events: &mut Events) {
     let pop_id = world.spawn(entity()
         .with(Position(x, y))
@@ -79,6 +76,7 @@ fn spawn_bubbles(&SpawnBubbles(x, y): &SpawnBubbles, world: &mut Entities, event
     events.schedule("Game", Duration::from_millis(300), Destroy(pop_id));
 }
 
+#[system]
 fn collide_bubble(Collided(first, second, push): &Collided, world: &mut Entities, events: &mut Events) {
     world.apply_to_pair(first, second, |Hero(), (Bubble(), Position(x, y))| {
         collide_with_bubble(second, events, x, y, push);

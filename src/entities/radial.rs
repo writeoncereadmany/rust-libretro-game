@@ -3,11 +3,9 @@ use crate::component::graphics::Sprite;
 use crate::component::lifecycle::Destroy;
 use crate::component::physics::Position;
 use crate::component::time::{Age, Period, Phase};
-use derive::{Constant, Event, Variable};
+use derive::{Constant, Event, Variable, system};
 use engine::entities::entity::{entity, Entities};
-use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
-use engine::events::spawner::Spawner;
 use std::f64::consts::PI;
 use std::time::Duration;
 
@@ -36,12 +34,7 @@ enum RadialPattern {
 }
 
 
-pub fn register(dispatcher: &mut Dispatcher, _spawner: &mut Spawner) {
-    dispatcher.register(spawn_radials);
-    dispatcher.register(spawn_bonus_balls);
-    dispatcher.register(radial_events);
-}
-
+#[system]
 fn spawn_radials(SpawnRadials(x, y, sprites, elements): &SpawnRadials, entities: &mut Entities, events: &mut Events)
 {
     for i in 0..*elements {
@@ -49,6 +42,7 @@ fn spawn_radials(SpawnRadials(x, y, sprites, elements): &SpawnRadials, entities:
     }
 }
 
+#[system]
 pub fn spawn_bonus_balls(SpawnBonusBalls(x, y, sprites, elements): &SpawnBonusBalls, entities: &mut Entities, events: &mut Events)
 {
     for i in 0..*elements {
@@ -74,6 +68,7 @@ fn spawn_radial(x: f64, y: f64, sprite: &'static str, theta: f64, radial_pattern
     events.schedule(timer, Duration::from_millis(lifespan), Destroy(radial_id));
 }
 
+#[system]
 pub fn radial_events(_event: &AfterUpdate, entities: &mut Entities, _events: &mut Events)
 {
     entities.apply(|(Phase(phase), AngleOffset(theta))| Angle((phase * 2.0 * PI) + theta));

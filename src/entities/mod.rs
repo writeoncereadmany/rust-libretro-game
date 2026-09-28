@@ -1,5 +1,4 @@
 use engine::assets::map::Map;
-use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use engine::events::spawner::Spawner;
 
@@ -18,24 +17,6 @@ pub mod spring;
 pub mod bubble;
 mod splash;
 pub mod failureballs;
-
-pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
-    bubble::register(dispatcher, spawner);
-    chest::register(dispatcher, spawner);
-    coin::register(dispatcher, spawner);
-    crumbler::register(dispatcher, spawner);
-    failureballs::register(dispatcher);
-    flag::register(dispatcher, spawner);
-    fruit::register(dispatcher, spawner);
-    hero::register(dispatcher, spawner);
-    key::register(dispatcher, spawner);
-    lockbox::register(dispatcher, spawner);
-    map::register(dispatcher, spawner);
-    radial::register(dispatcher, spawner);
-    sparkle::register(dispatcher, spawner);
-    splash::register(dispatcher, spawner);
-    spring::register(dispatcher, spawner);
-}
 
 pub fn load_map(map: &Map, spawner: &Spawner, events: &mut Events) {
     map::load_map(map, spawner, events)

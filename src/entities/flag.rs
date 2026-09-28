@@ -5,11 +5,10 @@ use crate::component::time::{Period, Phase};
 use crate::entities::coin::Coin;
 use crate::entities::radial::SpawnRadials;
 use crate::game::game::{CompleteLevel, IncreaseMultiplier};
-use derive::{Constant, Event};
+use derive::{Constant, Event, system, spawn};
 use engine::entities::entity::{entity, Entities, EntityId};
-use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
-use engine::events::spawner::{Spawn, Spawner};
+use engine::events::spawner::Spawn;
 use engine::shapes::shape::Shape;
 use std::time::Duration;
 
@@ -28,17 +27,11 @@ pub struct Flag();
 #[derive(Constant, Clone)]
 pub struct NextLevel(String);
 
-pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
-    dispatcher.register(spawn_flag);
-    dispatcher.register(spawn_flagpole);
-    dispatcher.register(pickup_flag);
-    dispatcher.register(collect_flag);
-
-    spawner.register("Flag", |spawn, events| {
-        events.fire(SpawnRadials(spawn.x, spawn.y, vec!["ball_blue"], 8));
-        events.schedule("Game", Duration::from_secs_f64(2.4), SpawnFlag(spawn.x, spawn.y, destination(&spawn).unwrap_or("start".to_string())));
-        events.fire(SpawnFlagpole(spawn.x, spawn.y,));
-    });
+#[spawn("Flag")]
+fn spawn_flag_from_map(spawn: Spawn, events: &mut Events) {
+    events.fire(SpawnRadials(spawn.x, spawn.y, vec!["ball_blue"], 8));
+    events.schedule("Game", Duration::from_secs_f64(2.4), SpawnFlag(spawn.x, spawn.y, destination(&spawn).unwrap_or("start".to_string())));
+    events.fire(SpawnFlagpole(spawn.x, spawn.y,));
 }
 
 fn destination(spawn: &Spawn) -> Option<String> {
@@ -46,6 +39,7 @@ fn destination(spawn: &Spawn) -> Option<String> {
 }
 
 
+#[system]
 fn spawn_flag(SpawnFlag(x, y, dest): &SpawnFlag, world: &mut Entities, _events: &mut Events) {
     world.spawn(
         entity()
@@ -64,6 +58,7 @@ fn spawn_flag(SpawnFlag(x, y, dest): &SpawnFlag, world: &mut Entities, _events: 
     );
 }
 
+#[system]
 fn spawn_flagpole(SpawnFlagpole(x, y): &SpawnFlagpole, world: &mut Entities, _events: &mut Events) {
     world.spawn(
         entity()
@@ -72,11 +67,13 @@ fn spawn_flagpole(SpawnFlagpole(x, y): &SpawnFlagpole, world: &mut Entities, _ev
     );
 }
 
+#[system]
 fn pickup_flag(Collided(first, second, _): &Collided, world: &mut Entities, events: &mut Events) {
     world.apply_to(first, |Flag()| events.fire(PickupFlag(*first)));
     world.apply_to(second, |Flag()| events.fire(PickupFlag(*second)));
 }
 
+#[system]
 fn collect_flag(PickupFlag(flag): &PickupFlag, world: &mut Entities, events: &mut Events) {
     if let Some(NextLevel(destination)) = world.delete(flag) {
         if world.collect::<Coin>().is_empty()

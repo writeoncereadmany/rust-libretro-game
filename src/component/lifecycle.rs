@@ -1,15 +1,11 @@
-use derive::Event;
+use derive::{Event, system};
 use engine::entities::entity::{Entities, EntityId};
-use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 
 #[derive(Event)]
 pub struct Destroy(pub EntityId);
 
-pub fn register(dispatcher: &mut Dispatcher) {
-    dispatcher.register(destroy);
-}
-
+#[system]
 fn destroy(Destroy(id): &Destroy, world: &mut Entities, _events: &mut Events) {
     world.delete::<()>(id);
 }

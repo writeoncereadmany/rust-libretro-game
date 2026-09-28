@@ -2,20 +2,15 @@ use crate::component::graphics::{Animation, Sprite};
 use crate::component::lifecycle::Destroy;
 use crate::component::physics::Position;
 use crate::component::time::{Period, Phase};
-use derive::Event;
+use derive::{Event, system};
 use engine::entities::entity::{entity, Entities};
-use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
-use engine::events::spawner::Spawner;
 use std::time::Duration;
 
 #[derive(Event)]
 pub struct SpawnSparkle(pub f64, pub f64);
 
-pub fn register(dispatcher: &mut Dispatcher, _spawner: &mut Spawner) {
-    dispatcher.register(spawn_sparkle);
-}
-
+#[system]
 fn spawn_sparkle(&SpawnSparkle(x, y): &SpawnSparkle, world: &mut Entities, events: &mut Events) {
     let entity_id = world.spawn(
         entity()

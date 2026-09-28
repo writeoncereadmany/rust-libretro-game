@@ -1,9 +1,8 @@
 use CollisionType::WATER;
 use crate::component::physics::{Position, Translation, Velocity};
-use derive::{Constant, Event};
+use derive::{Constant, Event, system};
 use engine::entities::entity::{Entities, EntityId};
 use engine::entities::entity::Id;
-use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use engine::shapes::collision::Collision;
 use engine::shapes::shape::Shape;
@@ -39,11 +38,7 @@ pub struct Interactable();
 
 const EPSILON: f64 = 1e-8;
 
-pub fn register(dispatcher: &mut Dispatcher) {
-    dispatcher.register(handle_collisions);
-    dispatcher.register(handle_push);
-}
-
+#[system]
 pub fn handle_collisions(_ : &CheckCollisions, world: &mut Entities, events: &mut Events)
 {
     let tile_maps: Vec<(Id, Tilemap)> = world.collect();
@@ -178,6 +173,7 @@ fn is_impermeable(tile: &CollisionType, collision: &Collision) -> bool {
     tile == &WALL || (tile == &LEDGE && collision.push.dot(&UNIT_Y) > 0.0)
 }
 
+#[system]
 fn handle_push(Push(entity_id, (px, py)): &Push, world: &mut Entities, _events: &mut Events) {
     world.apply_to(entity_id, |Velocity(dx, dy)| Velocity(limit(&dx, px), limit(&dy, py)));
 }

@@ -4,11 +4,10 @@ use crate::component::physics::Position;
 use crate::component::time::{Period, Phase};
 use crate::entities::sparkle::SpawnSparkle;
 use crate::game::game::Score;
-use derive::{Constant, Event};
+use derive::{Constant, Event, system, spawn};
 use engine::entities::entity::{entity, Component, Entities, EntityId, Id};
-use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
-use engine::events::spawner::Spawner;
+use engine::events::spawner::Spawn;
 use engine::shapes::shape::Shape;
 use crate::component::lifecycle::Destroy;
 
@@ -42,19 +41,17 @@ pub struct GhostCoin();
 #[derive(Constant, Clone)]
 pub struct CoinRespawn();
 
-pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
-    dispatcher.register(spawn_coin);
-    dispatcher.register(spawn_bell);
-    dispatcher.register(spawn_coin_respawn);
-    dispatcher.register(respawn_ghost_coins);
-    dispatcher.register(pickup_coin);
-    dispatcher.register(collect_coin);
-    dispatcher.register(collect_ghost_coin);
-
-    spawner.register("Coin", |spawn, events| events.fire(SpawnCoin(spawn.x, spawn.y, false)));
-    spawner.register("Bell", |spawn, events| events.fire(SpawnBell(spawn.x, spawn.y)));
+#[spawn("Coin")]
+fn spawn_coin_from_map(spawn: Spawn, events: &mut Events) {
+    events.fire(SpawnCoin(spawn.x, spawn.y, false));
 }
 
+#[spawn("Bell")]
+fn spawn_bell_from_map(spawn: Spawn, events: &mut Events) {
+    events.fire(SpawnBell(spawn.x, spawn.y));
+}
+
+#[system]
 fn spawn_coin(&SpawnCoin(x, y, is_ghost): &SpawnCoin, world: &mut Entities, _events: &mut Events) {
     if is_ghost {
         spawn_coin_inner(world, x, y, GhostCoin(), vec!["silver_coin_1", "silver_coin_2", "silver_coin_3", "silver_coin_4"]);
@@ -63,6 +60,7 @@ fn spawn_coin(&SpawnCoin(x, y, is_ghost): &SpawnCoin, world: &mut Entities, _eve
     }
 }
 
+#[system]
 fn spawn_bell(&SpawnBell(x, y): &SpawnBell, world: &mut Entities, _events: &mut Events) {
     world.spawn(
         entity()
@@ -91,6 +89,7 @@ fn spawn_coin_inner<T: Component>(world: &mut Entities, x: f64, y: f64, marker: 
     );
 }
 
+#[system]
 fn spawn_coin_respawn(&SpawnCoinRespawn(x, y): &SpawnCoinRespawn, world: &mut Entities, _events: &mut Events) {
     world.spawn(
         entity()
@@ -99,6 +98,7 @@ fn spawn_coin_respawn(&SpawnCoinRespawn(x, y): &SpawnCoinRespawn, world: &mut En
     );
 }
 
+#[system]
 fn pickup_coin(Collided(first, second, _): &Collided, world: &mut Entities, events: &mut Events) {
     world.apply_to(first, |Coin()| events.fire(PickupCoin(*first)));
     world.apply_to(second, |Coin()| events.fire(PickupCoin(*second)));
@@ -116,6 +116,7 @@ fn pickup_coin(Collided(first, second, _): &Collided, world: &mut Entities, even
     });
 }
 
+#[system]
 fn collect_coin(PickupCoin(coin): &PickupCoin, world: &mut Entities, events: &mut Events) {
     if let Some(Position(x, y)) = world.delete(coin) {
         events.fire(SpawnSparkle(x, y));
@@ -124,6 +125,7 @@ fn collect_coin(PickupCoin(coin): &PickupCoin, world: &mut Entities, events: &mu
     }
 }
 
+#[system]
 fn collect_ghost_coin(PickupGhostCoin(coin): &PickupGhostCoin, world: &mut Entities, events: &mut Events) {
     if let Some(Position(x, y)) = world.delete(coin) {
         events.fire(SpawnSparkle(x, y));
@@ -132,6 +134,7 @@ fn collect_ghost_coin(PickupGhostCoin(coin): &PickupGhostCoin, world: &mut Entit
     }
 }
 
+#[system]
 fn respawn_ghost_coins(_: &RespawnGhostCoins, world: &mut Entities, events: &mut Events) {
     world.apply(|(CoinRespawn(), Id(id), Position(x, y))| {
         events.fire(Destroy(id));

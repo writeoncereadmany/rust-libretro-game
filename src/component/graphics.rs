@@ -1,6 +1,5 @@
-use derive::{Constant, Variable};
+use derive::{Constant, Variable, system};
 use engine::entities::entity::Entities;
-use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use std::time::Duration;
 use crate::component::time::Phase;
@@ -24,10 +23,7 @@ pub struct Animation {
     pub layer: u32,
 }
 
-pub fn register(dispatcher: &mut Dispatcher) {
-    dispatcher.register(update_sprite_from_phase);
-}
-
+#[system]
 fn update_sprite_from_phase(_dt: &Duration, world: &mut Entities, _events: &mut Events) {
     world.apply(|(Animation { sprites, layer }, Phase(phase))| {
         let new_sprite_index = (phase * sprites.len() as f64) as usize % sprites.len();

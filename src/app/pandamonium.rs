@@ -49,16 +49,10 @@ const INPUT_DESCRIPTORS: &[retro_input_descriptor] = &input_descriptors!(
 
 impl Application for Pandamonium {
     fn new(assets: Arc<Assets>, logger_worker: Option<WorkerGuard>) -> Self {
-        let mut dispatcher = Dispatcher::new();
-        let mut spawner = Spawner::new();
-
-        crate::component::register(&mut dispatcher);
-        crate::entities::register(&mut dispatcher, &mut spawner);
-
         Pandamonium {
             assets: assets.clone(),
-            dispatcher: Arc::new(dispatcher),
-            spawner: Arc::new(spawner),
+            dispatcher: Arc::new(Dispatcher::discover()),
+            spawner: Arc::new(Spawner::discover()),
             previous_joypad_state: JoypadState::empty(),
             screen: Box::new(TitleScreen::new()),
             _logger_worker: logger_worker

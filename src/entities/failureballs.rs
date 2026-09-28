@@ -1,8 +1,7 @@
 use crate::component::graphics::Sprite;
 use crate::component::physics::{Acceleration, Gravity, Position, Velocity};
-use derive::Event;
+use derive::{Event, system};
 use engine::entities::entity::{entity, Entities};
-use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 
 #[derive(Event)]
@@ -12,10 +11,7 @@ pub struct SpawnFailureBall {
     pub position: (f64, f64),
 }
 
-pub fn register(dispatcher: &mut Dispatcher) {
-    dispatcher.register(spawn_failure_ball);
-}
-
+#[system]
 fn spawn_failure_ball(SpawnFailureBall { sprite, dx, position: (x, y) }: &SpawnFailureBall, world: &mut Entities, _events: &mut Events) {
     world.spawn(entity()
             .with(Gravity())

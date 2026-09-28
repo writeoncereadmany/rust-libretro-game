@@ -1,11 +1,10 @@
 use crate::component::collisions::{Collided, Interactable};
 use crate::component::graphics::Sprite;
 use crate::component::physics::Position;
-use derive::{Constant, Event};
+use derive::{Constant, Event, system, spawn};
 use engine::entities::entity::{entity, Entities};
-use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
-use engine::events::spawner::Spawner;
+use engine::events::spawner::Spawn;
 use engine::shapes::shape::Shape;
 use crate::component::lifecycle::Destroy;
 
@@ -18,15 +17,12 @@ pub struct Key();
 #[derive(Event)]
 pub struct Unlock();
 
-pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
-    dispatcher.register(spawn_key);
-    dispatcher.register(pickup_key);
-
-    spawner.register("Key", |spawn, events| {
-        events.fire(SpawnKey(spawn.x, spawn.y))
-    });
+#[spawn("Key")]
+fn spawn_key_from_map(spawn: Spawn, events: &mut Events) {
+    events.fire(SpawnKey(spawn.x, spawn.y));
 }
 
+#[system]
 fn spawn_key(&SpawnKey(x, y): &SpawnKey, world: &mut Entities, _events: &mut Events) {
     world.spawn(
         entity()
@@ -39,6 +35,7 @@ fn spawn_key(&SpawnKey(x, y): &SpawnKey, world: &mut Entities, _events: &mut Eve
 }
 
 
+#[system]
 fn pickup_key(Collided(first, second, _): &Collided, world: &mut Entities, events: &mut Events) {
     world.apply_to(first, |Key()| {
         events.fire(Unlock());

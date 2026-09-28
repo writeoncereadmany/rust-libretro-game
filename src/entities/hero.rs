@@ -7,12 +7,11 @@ use crate::entities::bubble::SpawnBubbles;
 use crate::entities::radial::SpawnRadials;
 use crate::entities::spring::Sprung;
 use crate::game::game::{Character, CompleteLevel, Failed, Options};
-use derive::{Constant, Event, Variable};
+use derive::{Constant, Event, Variable, system, spawn};
 use engine::entities::entity::{entity, Entities, Id};
-use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use engine::events::input::{ButtonPressed, InputState};
-use engine::events::spawner::Spawner;
+use engine::events::spawner::Spawn;
 use engine::shapes::shape::Shape;
 use rust_libretro::types::JoypadState;
 use std::time::Duration;
@@ -83,35 +82,12 @@ pub struct Swim();
 #[derive(Event)]
 struct WallJump(DirectionFacing);
 
-pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
-    dispatcher.register(spawn_hero);
-    dispatcher.register(spawn_radial_and_delayed_hero);
-    dispatcher.register(listen_to_input_state);
-    dispatcher.register(listen_to_button_press);
-    dispatcher.register(coyote_time);
-    dispatcher.register(jump);
-    dispatcher.register(swim);
-    dispatcher.register(sprung);
-    dispatcher.register(wall_jump);
-    dispatcher.register(post_jump);
-    dispatcher.register(check_static_friction);
-    dispatcher.register(apply_movement);
-    dispatcher.register(on_push);
-    dispatcher.register(on_submerged);
-    dispatcher.register(buoyancy);
-    dispatcher.register(on_splash);
-    dispatcher.register(bubbles);
-    dispatcher.register(clamp_to_screen);
-    dispatcher.register(update_sprite);
-    dispatcher.register(create_shade_on_victory);
-    dispatcher.register(create_shade_on_failure);
-    dispatcher.register(spawn_shade);
-
-    spawner.register("Hero", |spawn, events| {
-        events.fire(SpawnRadialAndDelayedHero(spawn.x, spawn.y))
-    });
+#[spawn("Hero")]
+fn spawn_hero_from_map(spawn: Spawn, events: &mut Events) {
+    events.fire(SpawnRadialAndDelayedHero(spawn.x, spawn.y));
 }
 
+#[system]
 fn spawn_radial_and_delayed_hero(
     &SpawnRadialAndDelayedHero(x, y): &SpawnRadialAndDelayedHero,
     world: &mut Entities,
@@ -130,6 +106,7 @@ fn spawn_radial_and_delayed_hero(
     events.schedule("Game", Duration::from_secs_f64(2.4), SpawnHero(x, y));
 }
 
+#[system]
 fn spawn_hero(&SpawnHero(x, y): &SpawnHero, world: &mut Entities, _events: &mut Events) {
     let options: Vec<Options> = world.collect();
 
@@ -156,6 +133,7 @@ fn spawn_hero(&SpawnHero(x, y): &SpawnHero, world: &mut Entities, _events: &mut 
     );
 }
 
+#[system]
 fn listen_to_input_state(
     &InputState(joypad): &InputState,
     world: &mut Entities,
@@ -180,6 +158,7 @@ fn listen_to_input_state(
     });
 }
 
+#[system]
 fn listen_to_button_press(
     &ButtonPressed(button): &ButtonPressed,
     world: &mut Entities,
@@ -203,6 +182,7 @@ fn listen_to_button_press(
     })
 }
 
+#[system]
 fn jump(_: &Jump, world: &mut Entities, _events: &mut Events) {
     world.apply(|(Hero(), Velocity(dx, _dy))| {
         (
@@ -215,6 +195,7 @@ fn jump(_: &Jump, world: &mut Entities, _events: &mut Events) {
     })
 }
 
+#[system]
 fn swim(_: &Swim, world: &mut Entities, _events: &mut Events) {
     world.apply(|(Hero(), Velocity(dx, dy))| {
         (
@@ -225,6 +206,7 @@ fn swim(_: &Swim, world: &mut Entities, _events: &mut Events) {
     })
 }
 
+#[system]
 fn sprung(Sprung(id): &Sprung, world: &mut Entities, _events: &mut Events) {
     world.apply_to(id, |(Hero(), Velocity(dx, _dy))| {
         (
@@ -236,6 +218,7 @@ fn sprung(Sprung(id): &Sprung, world: &mut Entities, _events: &mut Events) {
     })
 }
 
+#[system]
 fn create_shade_on_victory(_: &CompleteLevel, world: &mut Entities, events: &mut Events) {
     world.apply(|(Hero(), Id(id), sprite, pos)| {
         events.fire(SpawnShade(sprite, pos));
@@ -243,6 +226,7 @@ fn create_shade_on_victory(_: &CompleteLevel, world: &mut Entities, events: &mut
     })
 }
 
+#[system]
 fn create_shade_on_failure(_: &Failed, world: &mut Entities, events: &mut Events) {
     world.apply(|(Hero(), Id(id), sprite, pos)| {
         events.fire(SpawnShade(sprite, pos));
@@ -250,10 +234,12 @@ fn create_shade_on_failure(_: &Failed, world: &mut Entities, events: &mut Events
     })
 }
 
+#[system]
 fn spawn_shade(SpawnShade(sprite, pos): &SpawnShade, world: &mut Entities, _events: &mut Events) {
     world.spawn(entity().with(sprite.clone()).with(pos.clone()));
 }
 
+#[system]
 fn wall_jump(WallJump(facing): &WallJump, world: &mut Entities, _events: &mut Events) {
     world.apply(|(Hero(), Velocity(_dx, _dy))| match facing {
         DirectionFacing::LEFT => (
@@ -273,6 +259,7 @@ fn wall_jump(WallJump(facing): &WallJump, world: &mut Entities, _events: &mut Ev
     })
 }
 
+#[system]
 fn post_jump(dt: &Duration, world: &mut Entities, _events: &mut Events) {
     world.apply(
         |(Hero(), AscentRemaining(at), PostJump(pddx, pddy), acc @ Acceleration(ddx, ddy))| {
@@ -288,6 +275,7 @@ fn post_jump(dt: &Duration, world: &mut Entities, _events: &mut Events) {
     )
 }
 
+#[system]
 fn coyote_time(dt: &Duration, world: &mut Entities, _events: &mut Events) {
     world.apply(|(hero_state, maybe_ct)| match hero_state {
         HeroState::Grounded => Some(CoyoteTime(HeroState::Grounded, COYOTE_TIME)),
@@ -308,6 +296,7 @@ fn coyote_time(dt: &Duration, world: &mut Entities, _events: &mut Events) {
     });
 }
 
+#[system]
 fn check_static_friction(_: &BeforeUpdate, world: &mut Entities, _events: &mut Events) {
     world.apply(
         |(Hero(), movement_intent, Velocity(dx, dy))| match movement_intent {
@@ -323,6 +312,7 @@ fn check_static_friction(_: &BeforeUpdate, world: &mut Entities, _events: &mut E
     );
 }
 
+#[system]
 fn apply_movement(_: &BeforeUpdate, world: &mut Entities, _events: &mut Events) {
     world.apply(
         |(Hero(), movement_intent, hero_state, Acceleration(ddx, ddy), Velocity(dx, dy))| {
@@ -369,6 +359,7 @@ fn apply_movement(_: &BeforeUpdate, world: &mut Entities, _events: &mut Events) 
     );
 }
 
+#[system]
 fn on_push(Push(entity_id, (px, py)): &Push, world: &mut Entities, _events: &mut Events) {
     world.apply_to(entity_id, |Hero()| {
         if py > &0.0 {
@@ -383,6 +374,7 @@ fn on_push(Push(entity_id, (px, py)): &Push, world: &mut Entities, _events: &mut
     });
 }
 
+#[system]
 fn on_submerged(
     Submerged(entity_id, submerged): &Submerged,
     world: &mut Entities,
@@ -397,6 +389,7 @@ fn on_submerged(
     });
 }
 
+#[system]
 fn on_splash(&Splash { id, dy, .. }: &Splash, world: &mut Entities, _events: &mut Events) {
     world.apply_to(&id, |Hero()| {
         if dy < -150.0 {
@@ -407,6 +400,7 @@ fn on_splash(&Splash { id, dy, .. }: &Splash, world: &mut Entities, _events: &mu
     });
 }
 
+#[system]
 fn buoyancy(_: &BeforeUpdate, world: &mut Entities, _events: &mut Events) {
     world.apply(
         |(Hero(), hero_state, Acceleration(ddx, ddy))| match hero_state {
@@ -416,6 +410,7 @@ fn buoyancy(_: &BeforeUpdate, world: &mut Entities, _events: &mut Events) {
     );
 }
 
+#[system]
 fn bubbles(dt: &Duration, world: &mut Entities, events: &mut Events) {
     world.apply(|(Bubbles(before), Position(x, y))| {
         let after = before - dt.as_secs_f64();
@@ -436,6 +431,7 @@ fn bubbles(dt: &Duration, world: &mut Entities, events: &mut Events) {
     });
 }
 
+#[system]
 fn clamp_to_screen(_: &AfterUpdate, world: &mut Entities, events: &mut Events) {
     world.apply(|(Hero(), pos @ Position(x, y), vel @ Velocity(_, dy))| {
         if y < -12.0 {
@@ -450,6 +446,7 @@ fn clamp_to_screen(_: &AfterUpdate, world: &mut Entities, events: &mut Events) {
     })
 }
 
+#[system]
 fn update_sprite(_update: &AfterUpdate, world: &mut Entities, _events: &mut Events) {
     world.apply(|(Hero(), status, facing, Velocity(dx, _))| match status {
         HeroState::WallDragLeft => DirectionFacing::RIGHT,

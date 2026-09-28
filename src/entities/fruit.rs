@@ -4,11 +4,10 @@ use crate::component::physics::Position;
 use crate::entities::coin::RespawnGhostCoins;
 use crate::entities::key::Unlock;
 use crate::game::game::{BuyBonus, BuyMetamultiplier, IncreaseMultiplier, Score};
-use derive::{Constant, Event};
+use derive::{Constant, Event, system, spawn};
 use engine::entities::entity::{entity, Entities, EntityId};
-use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
-use engine::events::spawner::Spawner;
+use engine::events::spawner::Spawn;
 use engine::shapes::shape::Shape;
 // Fruit score increasingly for each piece eaten,
 // (10, 20, 30, 40)
@@ -44,21 +43,47 @@ struct SpawnFruit(f64, f64, FruitType);
 #[derive(Event)]
 struct PickupFruit(EntityId);
 
-pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
-    dispatcher.register(spawn_fruit);
-    dispatcher.register(pickup_fruit);
-    dispatcher.register(collect_fruit);
-
-    spawner.register("Apple", |spawn, events| events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Apple)));
-    spawner.register("Banana", |spawn, events| events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Banana)));
-    spawner.register("Cherry", |spawn, events| events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Cherry)));
-    spawner.register("Watermelon", |spawn, events| events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Watermelon)));
-    spawner.register("Grapes", |spawn, events| events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Grapes)));
-    spawner.register("Strawberry", |spawn, events| events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Strawberry)));
-    spawner.register("Kiwi", |spawn, events| events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Kiwi)));
-    spawner.register("Orange", |spawn, events| events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Orange)));
+#[spawn("Apple")]
+fn spawn_apple_from_map(spawn: Spawn, events: &mut Events) {
+    events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Apple));
 }
 
+#[spawn("Banana")]
+fn spawn_banana_from_map(spawn: Spawn, events: &mut Events) {
+    events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Banana));
+}
+
+#[spawn("Cherry")]
+fn spawn_cherry_from_map(spawn: Spawn, events: &mut Events) {
+    events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Cherry));
+}
+
+#[spawn("Watermelon")]
+fn spawn_watermelon_from_map(spawn: Spawn, events: &mut Events) {
+    events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Watermelon));
+}
+
+#[spawn("Grapes")]
+fn spawn_grapes_from_map(spawn: Spawn, events: &mut Events) {
+    events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Grapes));
+}
+
+#[spawn("Strawberry")]
+fn spawn_strawberry_from_map(spawn: Spawn, events: &mut Events) {
+    events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Strawberry));
+}
+
+#[spawn("Kiwi")]
+fn spawn_kiwi_from_map(spawn: Spawn, events: &mut Events) {
+    events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Kiwi));
+}
+
+#[spawn("Orange")]
+fn spawn_orange_from_map(spawn: Spawn, events: &mut Events) {
+    events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Orange));
+}
+
+#[system]
 fn spawn_fruit(&SpawnFruit(x, y, fruit): &SpawnFruit, world: &mut Entities, _events: &mut Events) {
     world.spawn(
         entity()
@@ -71,11 +96,13 @@ fn spawn_fruit(&SpawnFruit(x, y, fruit): &SpawnFruit, world: &mut Entities, _eve
     );
 }
 
+#[system]
 fn pickup_fruit(Collided(first, second, _): &Collided, world: &mut Entities, events: &mut Events) {
     world.apply_to(first, |Fruit()| events.fire(PickupFruit(*first)));
     world.apply_to(second, |Fruit()| events.fire(PickupFruit(*second)));
 }
 
+#[system]
 fn collect_fruit(PickupFruit(id): &PickupFruit, world: &mut Entities, events: &mut Events) {
     if let Some(fruit_type) = world.delete(id) {
         match world.collect::<Fruit>().len() {

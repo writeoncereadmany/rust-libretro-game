@@ -1,18 +1,14 @@
 use std::time::Duration;
+use derive::system;
 use engine::entities::entity::{entity, Entities};
-use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
-use engine::events::spawner::Spawner;
 use crate::component::collisions::Splash;
 use crate::component::graphics::{Animation, Sprite};
 use crate::component::lifecycle::Destroy;
 use crate::component::physics::Position;
 use crate::component::time::{Period, Phase};
 
-pub fn register(dispatcher: &mut Dispatcher, _spawner: &mut Spawner) {
-    dispatcher.register(spawn_splash);
-}
-
+#[system]
 pub fn spawn_splash(&Splash {x, y, ..}: &Splash, world: &mut Entities, events: &mut Events) {
     let splash_id = world.spawn(entity()
         .with(Sprite::sprite("splash_1", 4))

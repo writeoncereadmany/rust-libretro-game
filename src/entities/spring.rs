@@ -3,11 +3,10 @@ use crate::component::collisions::{Collided, Interactable};
 use crate::component::graphics::{Animation, Sprite};
 use crate::component::physics::Position;
 use crate::entities::hero::Hero;
-use derive::{Constant, Event};
+use derive::{Constant, Event, system, spawn};
 use engine::entities::entity::{entity, Entities, EntityId};
-use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
-use engine::events::spawner::Spawner;
+use engine::events::spawner::Spawn;
 use engine::shapes::shape::Shape;
 use crate::component::lifecycle::Destroy;
 use crate::component::time::{Period, Phase};
@@ -24,14 +23,12 @@ pub struct SpawnSpring(f64, f64);
 #[derive(Event)]
 pub struct SpawnStretchySpring(f64, f64);
 
-pub fn register(dispatcher: &mut Dispatcher, spawner: &mut Spawner) {
-    dispatcher.register(spawn_spring);
-    dispatcher.register(spawn_stretchy_spring);
-    dispatcher.register(collide_spring);
-
-    spawner.register("Spring", |spawn, events| events.fire(SpawnSpring(spawn.x, spawn.y)));
+#[spawn("Spring")]
+fn spawn_spring_from_map(spawn: Spawn, events: &mut Events) {
+    events.fire(SpawnSpring(spawn.x, spawn.y));
 }
 
+#[system]
 fn spawn_spring(&SpawnSpring(x, y): &SpawnSpring, world: &mut Entities, _events: &mut Events) {
     world.spawn(entity()
         .with(Spring())
@@ -42,6 +39,7 @@ fn spawn_spring(&SpawnSpring(x, y): &SpawnSpring, world: &mut Entities, _events:
     );
 }
 
+#[system]
 fn spawn_stretchy_spring(&SpawnStretchySpring(x, y): &SpawnStretchySpring, world: &mut Entities, events: &mut Events) {
     let stretch_id = world.spawn(entity()
         .with(Sprite::sprite("spring_up", 3))
@@ -66,6 +64,7 @@ fn spawn_stretchy_spring(&SpawnStretchySpring(x, y): &SpawnStretchySpring, world
     events.schedule("Game", Duration::from_millis(700), SpawnSpring(x, y));
 }
 
+#[system]
 fn collide_spring(Collided(first, second, _): &Collided, world: &mut Entities, events: &mut Events) {
     world.apply_to_pair(first, second, |Hero(), (Spring(), Position(x, y))| {
         activate_spring(first, second, events, x, y);

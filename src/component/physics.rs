@@ -1,7 +1,6 @@
 use crate::component::collisions::{CheckCollisions, ResolveCollisions};
-use derive::{Constant, Variable};
+use derive::{Constant, Variable, system};
 use engine::entities::entity::Entities;
-use engine::events::dispatcher::Dispatcher;
 use engine::events::event::Events;
 use std::time::Duration;
 
@@ -25,11 +24,7 @@ pub struct Translation(pub f64, pub f64);
 #[derive(Clone, Constant)]
 pub struct VelocityCap(pub f64, pub f64);
 
-pub fn register(dispatcher: &mut Dispatcher) {
-    dispatcher.register(integrate);
-    dispatcher.register(resolve_collisions);
-}
-
+#[system]
 fn integrate(dt: &Duration, world: &mut Entities, events: &mut Events) {
     let dt = dt.as_secs_f64();
     world.apply(|(Gravity(), Acceleration(ddx, ddy))| Acceleration(ddx, ddy - GRAVITY));
@@ -39,6 +34,7 @@ fn integrate(dt: &Duration, world: &mut Entities, events: &mut Events) {
     events.fire(CheckCollisions);
 }
 
+#[system]
 fn resolve_collisions(_ : &ResolveCollisions, world: &mut Entities, _events: &mut Events) {
     world.apply(|(Position(x, y), Translation(tx, ty))| { Position(x + tx, y + ty)});
 }
