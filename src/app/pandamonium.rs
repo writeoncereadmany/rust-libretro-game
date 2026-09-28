@@ -13,15 +13,15 @@ use rust_libretro::contexts::AudioContext;
 use rust_libretro::input_descriptors;
 use rust_libretro::sys::{retro_input_descriptor, RETRO_DEVICE_ID_JOYPAD_A, RETRO_DEVICE_ID_JOYPAD_DOWN, RETRO_DEVICE_ID_JOYPAD_LEFT, RETRO_DEVICE_ID_JOYPAD_RIGHT, RETRO_DEVICE_ID_JOYPAD_START, RETRO_DEVICE_ID_JOYPAD_UP, RETRO_DEVICE_JOYPAD};
 use rust_libretro::types::JoypadState;
-use std::sync::Arc;
+use std::rc::Rc;
 use std::time::Duration;
 use tracing_appender::non_blocking::WorkerGuard;
 
 pub struct Pandamonium {
-    assets: Arc<Assets>,
+    assets: Rc<Assets>,
     previous_joypad_state: JoypadState,
-    dispatcher: Arc<Dispatcher>,
-    spawner: Arc<Spawner>,
+    dispatcher: Rc<Dispatcher>,
+    spawner: Rc<Spawner>,
     screen: Box<dyn Screen>,
     _logger_worker: Option<WorkerGuard>
 }
@@ -48,11 +48,11 @@ const INPUT_DESCRIPTORS: &[retro_input_descriptor] = &input_descriptors!(
 );
 
 impl Application for Pandamonium {
-    fn new(assets: Arc<Assets>, logger_worker: Option<WorkerGuard>) -> Self {
+    fn new(assets: Rc<Assets>, logger_worker: Option<WorkerGuard>) -> Self {
         Pandamonium {
             assets: assets.clone(),
-            dispatcher: Arc::new(Dispatcher::discover()),
-            spawner: Arc::new(Spawner::discover()),
+            dispatcher: Rc::new(Dispatcher::discover()),
+            spawner: Rc::new(Spawner::discover()),
             previous_joypad_state: JoypadState::empty(),
             screen: Box::new(TitleScreen::new()),
             _logger_worker: logger_worker

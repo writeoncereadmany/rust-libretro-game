@@ -2,8 +2,8 @@ use crate::app::pandamonium::GameOver;
 use crate::component::graphics::Sprite;
 use crate::component::physics::Position;
 use crate::entities::failureballs::SpawnFailureBall;
-use crate::entities::radial::SpawnBonusBalls;
 use crate::entities::load_map;
+use crate::entities::radial::SpawnBonusBalls;
 use crate::game::flashlamps::setup_flashlamps;
 use crate::game::hud;
 use crate::game::hud::{setup_hud, update_bonus, update_metamultiplier};
@@ -18,7 +18,7 @@ use engine::events::spawner::Spawner;
 use engine::events::timer::TimerId;
 use engine::renderer::asset_renderer::AssetRenderer;
 use rust_libretro::types::JoypadState;
-use std::sync::Arc;
+use std::rc::Rc;
 use std::time::Duration;
 
 const GAME_WINDOW_START_X: i32 = 12;
@@ -66,10 +66,10 @@ pub struct Options {
 }
 
 pub struct Game {
-    assets: Arc<Assets>,
+    assets: Rc<Assets>,
     world: Entities,
-    dispatcher: Arc<Dispatcher>,
-    spawner: Arc<Spawner>,
+    dispatcher: Rc<Dispatcher>,
+    spawner: Rc<Spawner>,
     bonus: u32,
     metamultiplier: u32,
     score: u32,
@@ -81,7 +81,7 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new(character: Character, assets: &Arc<Assets>, dispatcher: Arc<Dispatcher>, spawner: Arc<Spawner>) -> Self {
+    pub fn new(character: Character, assets: &Rc<Assets>, dispatcher: Rc<Dispatcher>, spawner: Rc<Spawner>) -> Self {
         Game {
             assets: assets.clone(),
             world: Entities::new(),
