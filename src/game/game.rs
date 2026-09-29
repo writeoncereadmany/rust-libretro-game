@@ -224,7 +224,8 @@ fn draw_sprites(sprites: &Vec<(Sprite, Position)>, renderer: &mut AssetRenderer)
             let y = y.round() as i32 + GAME_WINDOW_TOP_Y;
             match sprite {
                 Sprite::NamedSprite(sprite, _, flip) => renderer.draw_sprite(sprite, x, y, *flip),
-                Sprite::TileSprite(tileset, id, _) => renderer.draw_tile(tileset, *id, x, y)
+                Sprite::TileSprite(tileset, id, _) => renderer.draw_tile(tileset, *id, x, y),
+                Sprite::Text(text, spritefont, alignment, _) => renderer.draw_text(text, spritefont, x, y, *alignment),
             }
         });
 }

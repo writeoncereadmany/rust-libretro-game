@@ -101,7 +101,7 @@
   <object id="53" gid="55" x="324" y="132" width="12" height="12"/>
   <object id="54" gid="55" x="300" y="132" width="12" height="12"/>
   <object id="55" gid="54" x="288" y="132" width="12" height="12"/>
-  <object id="56" gid="66" x="288" y="144" width="12" height="12"/>
+  <object id="56" type="Tollsign" gid="66" x="288" y="144" width="12" height="12"/>
   <object id="57" gid="66" x="288" y="156" width="12" height="12"/>
   <object id="58" gid="66" x="288" y="168" width="12" height="12"/>
   <object id="59" gid="78" x="288" y="180" width="12" height="12"/>

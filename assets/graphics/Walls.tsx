@@ -66,9 +66,9 @@
  <tile id="80" type="Wall"/>
  <tile id="81" type="Wall"/>
  <tile id="82" type="Wall"/>
- <tile id="89" type="Gate"/>
- <tile id="90" type="Gate"/>
- <tile id="91" type="Gate"/>
+ <tile id="89" type="Tollsign"/>
+ <tile id="90" type="Tollsign"/>
+ <tile id="91" type="Tollsign"/>
  <wangsets>
   <wangset name="Walls" type="edge" tile="47">
    <wangcolor name="Wall" color="#ff0000" tile="13" probability="1"/>
