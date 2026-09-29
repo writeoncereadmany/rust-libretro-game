@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.2" name="Walls" class="Tile" tilewidth="12" tileheight="12" tilecount="120" columns="12">
- <image source="../graphics/tilesheet.png" width="144" height="120"/>
+<tileset version="1.10" tiledversion="1.11.0" name="Walls" class="Tile" tilewidth="12" tileheight="12" tilecount="120" columns="12">
+ <image source="tilesheet.png" width="144" height="120"/>
  <tile id="0" type="Wall"/>
  <tile id="1" type="Wall"/>
  <tile id="2" type="Wall"/>
@@ -45,9 +45,9 @@
  <tile id="49" type="Ledge"/>
  <tile id="50" type="Ledge"/>
  <tile id="51" type="Ledge"/>
- <tile id="53" type="Wall"/>
- <tile id="54" type="Wall"/>
- <tile id="55" type="Wall"/>
+ <tile id="53" type="Gate"/>
+ <tile id="54" type="Gate"/>
+ <tile id="55" type="Gate"/>
  <tile id="56" type="Ledge"/>
  <tile id="57" type="Ledge"/>
  <tile id="58" type="Ledge"/>
@@ -57,15 +57,18 @@
  <tile id="62" type="Ledge"/>
  <tile id="63" type="Ledge"/>
  <tile id="64" type="Water"/>
- <tile id="65" type="Wall"/>
- <tile id="67" type="Wall"/>
+ <tile id="65" type="Gate"/>
+ <tile id="67" type="Gate"/>
  <tile id="76" type="Water"/>
- <tile id="77" type="Wall"/>
- <tile id="78" type="Wall"/>
- <tile id="79" type="Wall"/>
+ <tile id="77" type="Gate"/>
+ <tile id="78" type="Gate"/>
+ <tile id="79" type="Gate"/>
  <tile id="80" type="Wall"/>
  <tile id="81" type="Wall"/>
  <tile id="82" type="Wall"/>
+ <tile id="89" type="Gate"/>
+ <tile id="90" type="Gate"/>
+ <tile id="91" type="Gate"/>
  <wangsets>
   <wangset name="Walls" type="edge" tile="47">
    <wangcolor name="Wall" color="#ff0000" tile="13" probability="1"/>

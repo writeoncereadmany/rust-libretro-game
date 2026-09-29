@@ -1,5 +1,5 @@
 use crate::app::pandamonium::ToTitlescreen;
-use crate::component::graphics::Sprite;
+use crate::component::graphics::{Sprite};
 use crate::component::physics::Position;
 use crate::entities::failureballs::SpawnFailureBall;
 use crate::entities::load_map;
@@ -207,9 +207,9 @@ impl Screen for Game {
     fn draw(&mut self, renderer: &mut AssetRenderer) {
         renderer.clear_sprites();
         let mut sprites: Vec<(Sprite, Position)> = self.world.collect();
-        sprites.sort_by(|(Sprite(_, l1, _), _), (Sprite(_, l2, _), _)| l1.cmp(l2));
+        sprites.sort_by_key(|(sprite, _)| sprite.layer());
         let (below_hud, above_hud): (Vec<(Sprite, Position)>, Vec<(Sprite, Position)>) =
-            sprites.into_iter().partition(|&(Sprite(_, l, _), _)| l <= 100);
+            sprites.into_iter().partition(|(sprite, _)| sprite.layer() <= 100);
         draw_sprites(&below_hud, renderer);
         renderer.draw_hud();
         draw_sprites(&above_hud, renderer);
@@ -219,8 +219,13 @@ impl Screen for Game {
 
 fn draw_sprites(sprites: &Vec<(Sprite, Position)>, renderer: &mut AssetRenderer) {
     sprites.iter()
-        .for_each(|(Sprite(sprite, _, flip_x), Position(x, y))| {
-            renderer.draw_sprite(sprite, x.round() as i32 + GAME_WINDOW_START_X, y.round() as i32 + GAME_WINDOW_TOP_Y, *flip_x)
+        .for_each(|(sprite, Position(x, y))| {
+            let x = x.round() as i32 + GAME_WINDOW_START_X;
+            let y = y.round() as i32 + GAME_WINDOW_TOP_Y;
+            match sprite {
+                Sprite::NamedSprite(sprite, _, flip) => renderer.draw_sprite(sprite, x, y, *flip),
+                Sprite::TileSprite(tileset, id, _) => renderer.draw_tile(tileset, *id, x, y)
+            }
         });
 }
 
