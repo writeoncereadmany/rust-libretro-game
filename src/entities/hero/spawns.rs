@@ -14,7 +14,7 @@ use crate::entities::radial::SpawnRadials;
 use crate::game::game::{Character, CompleteLevel, Failed, Options};
 
 #[spawn("Hero")]
-fn spawn_hero_from_map(spawn: Spawn, events: &mut Events) {
+fn hero(spawn: Spawn, events: &mut Events) {
     events.fire(SpawnRadialAndDelayedHero(spawn.x, spawn.y));
 }
 

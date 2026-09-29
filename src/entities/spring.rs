@@ -24,7 +24,7 @@ pub struct SpawnSpring(f64, f64);
 pub struct SpawnStretchySpring(f64, f64);
 
 #[spawn("Spring")]
-fn spawn_spring_from_map(spawn: Spawn, events: &mut Events) {
+fn spring(spawn: Spawn, events: &mut Events) {
     events.fire(SpawnSpring(spawn.x, spawn.y));
 }
 

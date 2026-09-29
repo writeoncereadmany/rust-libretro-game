@@ -16,7 +16,7 @@ pub struct SpawnLockbox(f64, f64);
 pub struct Lockbox();
 
 #[spawn("Lockbox")]
-fn spawn_lockbox_from_map(spawn: Spawn, events: &mut Events) {
+fn lockbox(spawn: Spawn, events: &mut Events) {
     events.fire(SpawnLockbox(spawn.x, spawn.y));
 }
 

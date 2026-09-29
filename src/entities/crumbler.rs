@@ -23,7 +23,7 @@ pub struct SpawnCrumbling(f64, f64);
 pub struct Crumbler();
 
 #[spawn("Crumbler")]
-fn spawn_crumbler_from_map(spawn: Spawn, events: &mut Events) {
+fn crumbler(spawn: Spawn, events: &mut Events) {
     events.fire(SpawnCrumbler(spawn.x, spawn.y));
 }
 

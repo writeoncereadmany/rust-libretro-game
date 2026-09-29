@@ -28,7 +28,7 @@ pub struct SpawnBubblePop(f64, f64);
 pub struct Bounce();
 
 #[spawn("Bubble")]
-fn spawn_bubble_from_map(spawn: Spawn, events: &mut Events) {
+fn bubble(spawn: Spawn, events: &mut Events) {
     events.fire(SpawnBubble(spawn.x, spawn.y));
 }
 

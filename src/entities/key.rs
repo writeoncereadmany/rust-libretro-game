@@ -18,7 +18,7 @@ pub struct Key();
 pub struct Unlock();
 
 #[spawn("Key")]
-fn spawn_key_from_map(spawn: Spawn, events: &mut Events) {
+fn key(spawn: Spawn, events: &mut Events) {
     events.fire(SpawnKey(spawn.x, spawn.y));
 }
 

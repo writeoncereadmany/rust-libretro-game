@@ -42,12 +42,12 @@ pub struct GhostCoin();
 pub struct CoinRespawn();
 
 #[spawn("Coin")]
-fn spawn_coin_from_map(spawn: Spawn, events: &mut Events) {
+fn coin(spawn: Spawn, events: &mut Events) {
     events.fire(SpawnCoin(spawn.x, spawn.y, false));
 }
 
 #[spawn("Bell")]
-fn spawn_bell_from_map(spawn: Spawn, events: &mut Events) {
+fn bell(spawn: Spawn, events: &mut Events) {
     events.fire(SpawnBell(spawn.x, spawn.y));
 }
 

@@ -31,7 +31,7 @@ pub struct Chest();
 pub struct Ruby();
 
 #[spawn("Chest")]
-fn spawn_chest_from_map(spawn: Spawn, events: &mut Events) {
+fn chest(spawn: Spawn, events: &mut Events) {
     events.fire(SpawnChest(spawn.x, spawn.y));
 }
 

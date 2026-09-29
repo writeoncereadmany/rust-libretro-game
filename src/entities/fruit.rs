@@ -44,42 +44,42 @@ struct SpawnFruit(f64, f64, FruitType);
 struct PickupFruit(EntityId);
 
 #[spawn("Apple")]
-fn spawn_apple_from_map(spawn: Spawn, events: &mut Events) {
+fn apple(spawn: Spawn, events: &mut Events) {
     events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Apple));
 }
 
 #[spawn("Banana")]
-fn spawn_banana_from_map(spawn: Spawn, events: &mut Events) {
+fn banana(spawn: Spawn, events: &mut Events) {
     events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Banana));
 }
 
 #[spawn("Cherry")]
-fn spawn_cherry_from_map(spawn: Spawn, events: &mut Events) {
+fn cherry(spawn: Spawn, events: &mut Events) {
     events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Cherry));
 }
 
 #[spawn("Watermelon")]
-fn spawn_watermelon_from_map(spawn: Spawn, events: &mut Events) {
+fn watermelon(spawn: Spawn, events: &mut Events) {
     events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Watermelon));
 }
 
 #[spawn("Grapes")]
-fn spawn_grapes_from_map(spawn: Spawn, events: &mut Events) {
+fn grapes(spawn: Spawn, events: &mut Events) {
     events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Grapes));
 }
 
 #[spawn("Strawberry")]
-fn spawn_strawberry_from_map(spawn: Spawn, events: &mut Events) {
+fn strawberry(spawn: Spawn, events: &mut Events) {
     events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Strawberry));
 }
 
 #[spawn("Kiwi")]
-fn spawn_kiwi_from_map(spawn: Spawn, events: &mut Events) {
+fn kiwi(spawn: Spawn, events: &mut Events) {
     events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Kiwi));
 }
 
 #[spawn("Orange")]
-fn spawn_orange_from_map(spawn: Spawn, events: &mut Events) {
+fn orange(spawn: Spawn, events: &mut Events) {
     events.fire(SpawnFruit(spawn.x, spawn.y, FruitType::Orange));
 }
 
