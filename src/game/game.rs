@@ -49,6 +49,9 @@ pub struct Failed();
 pub struct Score(pub u32);
 
 #[derive(Event)]
+pub struct SetTotalScore(pub u32);
+
+#[derive(Event)]
 pub struct Pause();
 
 #[derive(Event)]
@@ -112,6 +115,8 @@ impl Game {
             None => panic!("Map {map} could not be found")
         };
 
+        events.fire(SetTotalScore(self.score));
+
         self.current_level = map.clone();
 
         self.flashlamp_timers = setup_flashlamps(events);
@@ -139,7 +144,11 @@ impl Screen for Game {
 
         event.apply(|Score(score)| {
             self.score += score * self.bonus * self.metamultiplier;
-            hud::update_score(&self.score, events);
+            events.fire(SetTotalScore(self.score));
+        });
+
+        event.apply(|SetTotalScore(score)| {
+            hud::update_score(score, events);
         });
 
         event.apply(|Failed()| {
