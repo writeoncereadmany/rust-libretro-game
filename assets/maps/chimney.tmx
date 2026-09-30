@@ -54,7 +54,6 @@
   </object>
   <object id="6" gid="137" x="156" y="96" width="12" height="12"/>
   <object id="7" gid="137" x="156" y="120" width="12" height="12"/>
-  <object id="8" gid="137" x="156" y="120" width="12" height="12"/>
   <object id="9" gid="137" x="156" y="108" width="12" height="12"/>
   <object id="10" gid="137" x="156" y="132" width="12" height="12"/>
   <object id="11" gid="137" x="156" y="84" width="12" height="12"/>
@@ -110,7 +109,7 @@
   <object id="67" gid="56" x="336" y="132" width="12" height="12"/>
   <object id="68" gid="90" x="306" y="132" width="12" height="12">
    <properties>
-    <property name="toll" value="100"/>
+    <property name="toll" value="20"/>
    </properties>
   </object>
   <object id="72" gid="92" x="318" y="132" width="12" height="12"/>

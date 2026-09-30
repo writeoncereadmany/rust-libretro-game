@@ -2,14 +2,20 @@ use crate::component::graphics::Sprite;
 use crate::component::physics::Position;
 use crate::entities::map::CollisionType;
 use derive::{Constant, Event, spawn, system};
-use engine::entities::entity::{Entities, entity};
+use engine::entities::entity::{Entities, entity, EntityId, Id, Not, not};
 use engine::events::event::Events;
 use engine::events::spawner::Spawn;
 use engine::renderer::spritefont::{Alignment, HorizontalAlignment, VerticalAlignment};
 use engine::shapes::shape::Shape;
+use crate::component::collisions::{Collided, Interactable};
+use crate::component::lifecycle::Destroy;
+use crate::entities::chest::{PickupRuby, Ruby};
+use crate::entities::failureballs::SpawnFailureBall;
+use crate::entities::hero::Hero;
+use crate::game::game::{Pay, SetTotalScore};
 
 #[derive(Constant, Clone)]
-struct Toll(i32);
+struct Toll(u32);
 
 #[derive(Constant, Clone)]
 struct Gate();
@@ -29,10 +35,16 @@ struct SpawnGate {
 struct SpawnTollsign {
     x: f64,
     y: f64,
-    toll: Option<i32>,
+    toll: Option<u32>,
     tileset: String,
     tile: u32,
 }
+
+#[derive(Event, Clone)]
+struct OpenTollgate();
+
+#[derive(Event, Clone)]
+struct DestroyGate();
 
 #[spawn("Gate")]
 fn gate(spawn: Spawn, events: &mut Events) {
@@ -46,7 +58,7 @@ fn gate(spawn: Spawn, events: &mut Events) {
 
 #[spawn("Tollsign")]
 fn tollsign(spawn: Spawn, events: &mut Events) {
-    let toll: Option<i32> = spawn
+    let toll: Option<u32> = spawn
         .object
         .properties
         .get("toll")
@@ -95,4 +107,40 @@ fn spawn_tollsign(tollsign: &SpawnTollsign, world: &mut Entities, events: &mut E
                 )),
         );
     }
+}
+
+#[system]
+fn toll_afforded(&SetTotalScore(score): &SetTotalScore, world: &mut Entities, events: &mut Events) {
+    world.apply(|Toll(toll)| {
+        if score >= toll {
+            events.fire(OpenTollgate())
+        }
+    })
+}
+
+#[system]
+fn open_tollgate(_: &OpenTollgate, world: &mut Entities, events: &mut Events) {
+    world.apply(|(Gate())| { (not::<CollisionType>(), Interactable()) });
+}
+
+#[system]
+fn destroy_gate(Collided(first, second, _): &Collided, world: &mut Entities, events: &mut Events) {
+    world.apply_to_pair(first, second, |(Interactable(), Gate()), Hero()| events.fire(DestroyGate()));
+    world.apply_to_pair(second, first, |(Interactable(), Gate()), Hero()| events.fire(DestroyGate()));
+}
+
+#[system]
+fn explode_gate(_: &DestroyGate, world: &mut Entities, events: &mut Events) {
+    world.apply(|(Id(id), Gate(), Position(x, y))| {
+        events.fire(Destroy(id));
+        events.fire(SpawnFailureBall { sprite: "small_ball_yellow".to_string(), dx: rand::random_range(-200.0..200.0), dy: rand::random_range(0.0 .. 200.0), position: (x + 4.0, y + 4.0) });
+        events.fire(SpawnFailureBall { sprite: "small_ball_red".to_string(), dx: rand::random_range(-200.0..200.0), dy: rand::random_range(0.0 .. 200.0), position: (x + 4.0, y + 8.0) });
+        events.fire(SpawnFailureBall { sprite: "small_ball_green".to_string(), dx: rand::random_range(-200.0..200.0), dy: rand::random_range(0.0 .. 200.0), position: (x + 8.0, y + 4.0) });
+        events.fire(SpawnFailureBall { sprite: "small_ball_blue".to_string(), dx: rand::random_range(-200.0..200.0), dy: rand::random_range(0.0 .. 200.0), position: (x + 8.0, y + 8.0) });
+    });
+    world.apply(|(Id(id), Tollsign())| { events.fire(Destroy(id))});
+    world.apply(|(Id(id), Toll(toll))| {
+        events.fire(Destroy(id));
+        events.fire(Pay(toll));
+    });
 }

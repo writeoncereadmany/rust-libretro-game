@@ -52,6 +52,9 @@ pub struct Score(pub u32);
 pub struct SetTotalScore(pub u32);
 
 #[derive(Event)]
+pub struct Pay(pub u32);
+
+#[derive(Event)]
 pub struct Pause();
 
 #[derive(Event)]
@@ -151,6 +154,11 @@ impl Screen for Game {
             hud::update_score(score, events);
         });
 
+        event.apply(|Pay(cost)| {
+            self.score -= cost;
+            events.fire(SetTotalScore(self.score));
+        });
+
         event.apply(|Failed()| {
             events.cancel("Game", &self.game_over_timer);
             self.flashlamp_timers.iter().for_each(|timer_id| events.cancel("Game", timer_id));
@@ -242,22 +250,22 @@ fn draw_sprites(sprites: &Vec<(Sprite, Position)>, renderer: &mut AssetRenderer)
 fn drop_miniballs(bonus: u32, events: &mut Events) {
     if bonus > 1 {
         for _ in 0..3 {
-            events.fire(SpawnFailureBall { sprite: "small_ball_red".to_string(), dx: rand::random_range(-200.0..200.0), position: (140.0, 188.0) });
+            events.fire(SpawnFailureBall { sprite: "small_ball_red".to_string(), dx: rand::random_range(-200.0..200.0), dy: 0.0, position: (140.0, 188.0) });
         }
     }
     if bonus > 2 {
         for _ in 0..3 {
-            events.fire(SpawnFailureBall { sprite: "small_ball_orange".to_string(), dx: rand::random_range(-200.0..200.0), position: (142.0, 191.0) });
+            events.fire(SpawnFailureBall { sprite: "small_ball_orange".to_string(), dx: rand::random_range(-200.0..200.0), dy: 0.0, position: (142.0, 191.0) });
         }
     }
     if bonus > 3 {
         for _ in 0..3 {
-            events.fire(SpawnFailureBall { sprite: "small_ball_yellow".to_string(), dx: rand::random_range(-200.0..200.0), position: (140.0, 194.0) });
+            events.fire(SpawnFailureBall { sprite: "small_ball_yellow".to_string(), dx: rand::random_range(-200.0..200.0), dy: 0.0, position: (140.0, 194.0) });
         }
     }
     if bonus > 4 {
         for _ in 0..3 {
-            events.fire(SpawnFailureBall { sprite: "small_ball_green".to_string(), dx: rand::random_range(-200.0..200.0), position: (140.0, 197.0) });
+            events.fire(SpawnFailureBall { sprite: "small_ball_green".to_string(), dx: rand::random_range(-200.0..200.0), dy: 0.0, position: (140.0, 197.0) });
         }
     }
 }

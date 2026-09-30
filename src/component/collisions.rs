@@ -1,6 +1,6 @@
 use CollisionType::WATER;
 use crate::component::physics::{Position, Translation, Velocity};
-use derive::{Constant, Event, system};
+use derive::{Constant, Event, system, Variable};
 use engine::entities::entity::{Entities, EntityId};
 use engine::entities::entity::Id;
 use engine::events::event::Events;
@@ -33,7 +33,7 @@ pub struct Splash{
 #[derive(Constant, Clone)]
 pub struct Actor();
 
-#[derive(Constant, Clone)]
+#[derive(Variable, Clone)]
 pub struct Interactable();
 
 const EPSILON: f64 = 1e-8;

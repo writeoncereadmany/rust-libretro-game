@@ -1,5 +1,5 @@
 use crate::component::physics::{Position, Translation};
-use derive::{Constant, Event, system};
+use derive::{Constant, Event, system, Variable};
 use engine::assets::map::Map;
 use engine::entities::entity::{Entities, EntityId, Id, entity};
 use engine::events::event::Events;
@@ -10,7 +10,7 @@ use engine::shapes::shape::Shape;
 use engine::shapes::vec2d::{UNIT_X, UNIT_Y};
 use std::collections::HashMap;
 
-#[derive(Constant, Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Variable, Clone, Copy, PartialEq, Eq, Debug)]
 pub enum CollisionType {
     WALL,
     LEDGE,
