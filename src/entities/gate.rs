@@ -1,18 +1,17 @@
+use crate::component::collisions::{Collided, Interactable};
 use crate::component::graphics::Sprite;
+use crate::component::lifecycle::Destroy;
 use crate::component::physics::Position;
+use crate::entities::failureballs::SpawnFailureBall;
+use crate::entities::hero::Hero;
 use crate::entities::map::CollisionType;
-use derive::{Constant, Event, spawn, system};
-use engine::entities::entity::{Entities, entity, EntityId, Id, Not, not};
+use crate::game::game::{Pay, SetTotalScore};
+use derive::{spawn, system, Constant, Event};
+use engine::entities::entity::{entity, not, Entities, Id};
 use engine::events::event::Events;
 use engine::events::spawner::Spawn;
 use engine::renderer::spritefont::{Alignment, HorizontalAlignment, VerticalAlignment};
 use engine::shapes::shape::Shape;
-use crate::component::collisions::{Collided, Interactable};
-use crate::component::lifecycle::Destroy;
-use crate::entities::chest::{PickupRuby, Ruby};
-use crate::entities::failureballs::SpawnFailureBall;
-use crate::entities::hero::Hero;
-use crate::game::game::{Pay, SetTotalScore};
 
 #[derive(Constant, Clone)]
 struct Toll(u32);
@@ -74,7 +73,7 @@ fn tollsign(spawn: Spawn, events: &mut Events) {
 }
 
 #[system]
-fn spawn_gate(gate: &SpawnGate, world: &mut Entities, events: &mut Events) {
+fn spawn_gate(gate: &SpawnGate, world: &mut Entities, _events: &mut Events) {
     world.spawn(
         entity()
             .with(Gate())
@@ -86,7 +85,7 @@ fn spawn_gate(gate: &SpawnGate, world: &mut Entities, events: &mut Events) {
 }
 
 #[system]
-fn spawn_tollsign(tollsign: &SpawnTollsign, world: &mut Entities, events: &mut Events) {
+fn spawn_tollsign(tollsign: &SpawnTollsign, world: &mut Entities, _events: &mut Events) {
     world.spawn(
         entity()
             .with(Tollsign())
@@ -119,8 +118,8 @@ fn toll_afforded(&SetTotalScore(score): &SetTotalScore, world: &mut Entities, ev
 }
 
 #[system]
-fn open_tollgate(_: &OpenTollgate, world: &mut Entities, events: &mut Events) {
-    world.apply(|(Gate())| { (not::<CollisionType>(), Interactable()) });
+fn open_tollgate(_: &OpenTollgate, world: &mut Entities, _events: &mut Events) {
+    world.apply(|Gate()| { (not::<CollisionType>(), Interactable()) });
 }
 
 #[system]

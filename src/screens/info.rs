@@ -7,7 +7,7 @@ pub struct InfoScreen(pub Map);
 
 
 impl Screen for InfoScreen {
-    fn on_event(&mut self, event: &Event, events: &mut Events) {
+    fn on_event(&mut self, _event: &Event, _events: &mut Events) {
     }
 
     fn draw(&mut self, renderer: &mut AssetRenderer) {
