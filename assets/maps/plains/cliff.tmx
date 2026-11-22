@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="16" tilewidth="12" tileheight="12" infinite="0" nextlayerid="4" nextobjectid="90">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="30" height="16" tilewidth="12" tileheight="12" infinite="0" nextlayerid="4" nextobjectid="90">
  <tileset firstgid="1" source="../../graphics/Walls.tsx"/>
  <tileset firstgid="121" source="../../graphics/Objects.tsx"/>
  <layer id="1" name="Background" width="30" height="16">
@@ -44,7 +44,11 @@
  </layer>
  <objectgroup id="3" name="Objects">
   <object id="23" gid="121" x="12" y="156" width="12" height="12"/>
-  <object id="24" gid="128" x="324" y="36" width="12" height="12"/>
+  <object id="24" gid="128" x="324" y="36" width="12" height="12">
+   <properties>
+    <property name="destination" value="valley"/>
+   </properties>
+  </object>
   <object id="65" gid="122" x="36" y="120" width="12" height="12"/>
   <object id="66" gid="122" x="36" y="108" width="12" height="12"/>
   <object id="67" gid="122" x="48" y="108" width="12" height="12"/>
