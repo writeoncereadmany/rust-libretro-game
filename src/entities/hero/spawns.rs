@@ -9,7 +9,7 @@ use crate::component::graphics::Sprite;
 use crate::component::lifecycle::Destroy;
 use crate::component::physics::{Acceleration, Gravity, Position, Velocity, VelocityCap};
 use crate::entities::bubble::SpawnBubbles;
-use crate::entities::hero::{Bubbles, DirectionFacing, Hero, HeroState, MovementIntent, SpawnHero, SpawnRadialAndDelayedHero, SpawnShade};
+use crate::entities::hero::{movement, Bubbles, DirectionFacing, Hero, HeroState, MovementIntent, SpawnHero, SpawnRadialAndDelayedHero, SpawnShade};
 use crate::entities::radial::SpawnRadials;
 use crate::game::game::{Character, CompleteLevel, Failed, Options};
 
@@ -59,7 +59,7 @@ fn spawn_hero(&SpawnHero(x, y): &SpawnHero, world: &mut Entities, _events: &mut 
             .with(Shape::bbox(0.0, 0.0, 12.0, 11.75))
             .with(Acceleration(0.0, 0.0))
             .with(Velocity(0.0, 0.0))
-            .with(VelocityCap(200.0, f64::INFINITY))
+            .with(VelocityCap(movement::MAX_SPEED, f64::INFINITY))
             .with(Position(x, y)),
     );
 }
