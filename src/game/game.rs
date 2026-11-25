@@ -20,6 +20,7 @@ use engine::renderer::asset_renderer::AssetRenderer;
 use rust_libretro::types::JoypadState;
 use std::rc::Rc;
 use std::time::Duration;
+use crate::entities::timebonus::SpawnTimeBonus;
 
 const GAME_WINDOW_START_X: i32 = 12;
 const GAME_WINDOW_TOP_Y: i32 = 12;
@@ -120,11 +121,13 @@ impl Game {
 
         events.fire(SetTotalScore(self.score));
 
+
         self.current_level = map.clone();
 
         self.flashlamp_timers = setup_flashlamps(events);
         setup_hud(events, &self.score, &self.bonus, &self.metamultiplier);
         self.game_over_timer = events.schedule("Game", Duration::from_secs_f64(12.4), Failed());
+        events.fire(SpawnTimeBonus(12.4));
     }
 
     fn set_bonus(&mut self, bonus: u32, events: &mut Events) {
