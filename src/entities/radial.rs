@@ -91,7 +91,7 @@ fn update_radius(Age(age): Age, pattern: RadialPattern) -> Radius {
                 Radius(36.0 * through_phase)
             }
         }
-        RadialPattern::Bonus => Radius(30.0 * (1.0 - age)),
+        RadialPattern::Bonus => Radius(50.0 * (1.0 - age)),
     }
 }
 
