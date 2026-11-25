@@ -11,7 +11,7 @@ use crate::component::physics::{Position, Velocity};
 pub struct DisplayMessage(pub String);
 
 #[system]
-fn spawn_display_time_bonus(DisplayMessage(message): &DisplayMessage, world: &mut Entities, events: &mut Events) {
+fn display_message(DisplayMessage(message): &DisplayMessage, world: &mut Entities, _events: &mut Events) {
     world.spawn(entity()
         .with(Text(
             message.clone(),
