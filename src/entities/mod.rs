@@ -19,6 +19,7 @@ mod splash;
 pub mod failureballs;
 pub mod gate;
 pub mod timebonus;
+pub mod message;
 
 pub fn load_map(map: &Map, spawner: &Spawner, events: &mut Events) {
     map::load_map(map, spawner, events)
