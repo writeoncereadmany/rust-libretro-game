@@ -20,6 +20,7 @@ use engine::renderer::asset_renderer::AssetRenderer;
 use rust_libretro::types::JoypadState;
 use std::rc::Rc;
 use std::time::Duration;
+use crate::entities::message::DisplayMessage;
 use crate::entities::timebonus::SpawnTimeBonus;
 
 const GAME_WINDOW_START_X: i32 = 12;
@@ -169,8 +170,10 @@ impl Screen for Game {
             drop_miniballs(self.bonus, events);
 
             if self.bonus == 1 {
+                events.fire(DisplayMessage("Game over!".to_string()));
                 events.schedule("Game", Duration::from_secs_f64(1.5), ToTitlescreen());
             } else {
+                events.fire(DisplayMessage("Too bad!".to_string()));
                 self.set_bonus(1, events);
                 events.schedule("Game", Duration::from_secs_f64(1.5), StartLevel(self.current_level.clone()));
             }
