@@ -10,8 +10,8 @@ use engine::events::event::Events;
 #[system]
 fn update_sprite(_update: &AfterUpdate, world: &mut Entities, _events: &mut Events) {
     world.apply(|(Hero(), status, facing, Velocity(dx, _))| match status {
-        HeroState::WallDragLeft => DirectionFacing::RIGHT,
-        HeroState::WallDragRight => DirectionFacing::LEFT,
+        HeroState::WallDragLeft => DirectionFacing::LEFT,
+        HeroState::WallDragRight => DirectionFacing::RIGHT,
         HeroState::Airborne => facing,
         _otherwise => {
             if dx > 0.0 {
